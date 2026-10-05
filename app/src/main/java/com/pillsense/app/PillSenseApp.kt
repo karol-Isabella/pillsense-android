@@ -9,6 +9,7 @@ class PillSenseApp : Application() {
     override fun onCreate() {
         super.onCreate()
         
+        // Inicializar Timber para logging
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

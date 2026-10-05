@@ -83,3 +83,7 @@ val DarkColorScheme = darkColorScheme(
     onError = Color.Black,
     outline = BorderDark,
 )
+
+
+// Export for convenience
+val PillSenseColor = LightColorScheme

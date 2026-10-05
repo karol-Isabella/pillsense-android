@@ -3,64 +3,30 @@ package com.pillsense.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.pillsense.app.core.designsystem.PillSenseTheme
+import com.pillsense.app.core.designsystem.PillSenseTypography
+import com.pillsense.app.core.designsystem.PillSenseColor
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            PillSenseTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    PillSenseNavHost()
+            MaterialTheme(
+                colorScheme = PillSenseColor,
+                typography = PillSenseTypography
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    // NavHost irá aquí
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PillSenseNavHost(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-
-    NavHost(
-        navController = navController,
-        startDestination = "auth",
-        modifier = modifier,
-    ) {
-        composable("auth") {
-            // TODO: Implement auth screen
-        }
-        composable("medication/scan") {
-            // TODO: Implement medication scan screen
-        }
-        composable("medication/confirm") {
-            // TODO: Implement medication confirm screen
-        }
-        composable("medication/list") {
-            // TODO: Implement medication list screen
-        }
-        composable("reminders") {
-            // TODO: Implement reminders screen
-        }
-        composable("intake/history") {
-            // TODO: Implement intake history screen
-        }
-        composable("adherence/insights") {
-            // TODO: Implement adherence insights screen
-        }
-        composable("emergency") {
-            // TODO: Implement emergency screen
         }
     }
 }

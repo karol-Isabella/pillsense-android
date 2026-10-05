@@ -43,4 +43,5 @@
 - Al terminar cualquier tarea, márcala como completada en `docs/TASKS.md`.
 - No inventes datos: integración real y configurable por entorno.
 - Usa versiones estables fijadas en `build.gradle.kts`.
-- Kumandos de git: NO. El usuario maneja control de versiones.
+- Desarrollo 100% local, sin CI/CD.
+- Comandos de git: NO. El usuario maneja control de versiones.
