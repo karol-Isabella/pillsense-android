@@ -4,7 +4,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
 
-// Light mode colors
+// Light mode colors (from design/app/globals.css)
 val PrimaryLight = Color(0xFF007AFF)
 val PrimaryForegroundLight = Color(0xFFFFFFFF)
 val SecondaryLight = Color(0xFFE9E9EE)
@@ -28,7 +28,7 @@ val BorderLight = Color(0x1F3C3C43)
 val InputLight = Color(0x1F3C3C43)
 val RingLight = Color(0xFF007AFF)
 
-// Dark mode colors
+// Dark mode colors (from design/app/globals.css)
 val PrimaryDark = Color(0xFF0A84FF)
 val PrimaryForegroundDark = Color(0xFFFFFFFF)
 val SecondaryDark = Color(0xFF2C2C2E)
@@ -84,6 +84,6 @@ val DarkColorScheme = darkColorScheme(
     outline = BorderDark,
 )
 
-
-// Export for convenience
-val PillSenseColor = LightColorScheme
+// Alias para fácil acceso
+val PillSenseColorLight = LightColorScheme
+val PillSenseColorDark = DarkColorScheme

@@ -71,3 +71,6 @@ keystore.properties
 .kiro/
 
 design/
+
+design/node_modules/
+design/.next/
