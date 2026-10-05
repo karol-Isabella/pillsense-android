@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PillSense</string>
+
+    <!-- Tabs & Navigation -->
+    <string name="tab_today">Today</string>
+    <string name="tab_history">History</string>
+    <string name="tab_insights">Progress</string>
+    <string name="tab_profile">Profile</string>
+    <string name="nav_main">Main navigation</string>
+
+    <!-- Actions & Buttons -->
+    <string name="scan_aria">Scan prescription or medicine box</string>
+    <string name="theme_to_light">Switch to light mode</string>
+    <string name="theme_to_dark">Switch to dark mode</string>
+    <string name="language_toggle">Switch language to Spanish</string>
+
+    <!-- Status -->
+    <string name="status_taken">Taken</string>
+    <string name="status_postponed">Snoozed</string>
+    <string name="status_skipped">Skipped</string>
+
+    <!-- Notifications -->
+    <string name="notification_dismiss">Dismiss notification</string>
+    <string name="notification_now">now</string>
+    <string name="notification_taken">Taken</string>
+    <string name="notification_postpone">Snooze</string>
+    <string name="notification_skip">Skip</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_taken">Dose logged as taken</string>
+    <string name="toast_postponed">We\'ll remind you in 10 min</string>
+    <string name="toast_skipped">Dose marked as skipped</string>
+    <string name="toast_updated">Schedule updated</string>
+    <string name="toast_contact_added">Emergency contact added</string>
+
+    <!-- Login Screen -->
+    <string name="login_tagline">Your treatment, on time. Scan, remember and improve every day.</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_show">Show password</string>
+    <string name="login_hide">Hide password</string>
+    <string name="login_invalid_email">Enter a valid email address.</string>
+    <string name="login_short_password">Password must be at least 8 characters.</string>
+    <string name="login_no_errors">No errors</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_sign_up">Create account</string>
+    <string name="login_to_sign_up">Don\'t have an account? Sign up</string>
+    <string name="login_to_sign_in">Already have an account? Sign in</string>
+
+    <!-- Today Screen -->
+    <string name="today_date">Wednesday, September 30</string>
+    <string name="today_hello">Hi, %1$s</string>
+    <string name="today_open_profile">Open profile</string>
+    <string name="today_word">today</string>
+    <string name="today_daily_progress">Daily progress</string>
+    <string name="today_doses_of">%1$d of %2$d doses</string>
+    <string name="today_offline">Works offline</string>
+    <string name="today_view_alert">View alert</string>
+    <string name="today_next_dose">Next dose</string>
+    <string name="today_postponed_at">Snoozed · %1$s</string>
+    <string name="today_now">Now</string>
+    <string name="today_at">At %1$s</string>
+    <string name="today_mark_taken">Mark as taken</string>
+    <string name="today_skip_dose">Skip dose</string>
+    <string name="today_all_done">All done for today</string>
+    <string name="today_all_done_body">You completed your medication schedule.</string>
+    <string name="today_schedule">Today\'s schedule</string>
+    <string name="today_scan">Scan prescription</string>
+    <string name="today_scan_sub">Add with AI</string>
+    <string name="today_week">Week %1$d%%</string>
+    <string name="today_suggestions">2 suggestions</string>
+
+    <!-- Scan Screen -->
+    <string name="scan_detecting">Detecting text with OCR</string>
+    <string name="scan_identifying">Identifying medication</string>
+    <string name="scan_interpreting">Reading dose and frequency</string>
+    <string name="scan_camera_alt">Camera view pointing at a box of medicine</string>
+    <string name="scan_close">Close scanner</string>
+    <string name="scan_doc_type">Document type</string>
+    <string name="scan_mode_caja">Box</string>
+    <string name="scan_mode_receta">Prescription</string>
+    <string name="scan_flash_on">Turn flash on</string>
+    <string name="scan_flash_off">Turn flash off</string>
+    <string name="scan_analyzing">Analyzing with AI</string>
+    <string name="scan_hint_box">Center the name and dose of the box inside the frame</string>
+    <string name="scan_hint_rx">Place the whole prescription inside the frame in good light</string>
+    <string name="scan_gallery">Choose from gallery</string>
+    <string name="scan_capture">Take photo</string>
+
+    <!-- Confirm Screen -->
+    <string name="confirm_cancel">Cancel</string>
+    <string name="confirm_title">Review details</string>
+    <string name="confirm_save">Save</string>
+    <string name="confirm_fallback">Medication</string>
+    <string name="confirm_extracted">Extracted by AI · %1$d%% confidence</string>
+    <string name="confirm_verify">Check that the information matches your prescription before saving.</string>
+    <string name="confirm_med_section">Medication</string>
+    <string name="confirm_name">Name</string>
+    <string name="confirm_dose">Dose</string>
+    <string name="confirm_form">Form</string>
+    <string name="confirm_schedule_section">Schedule</string>
+    <string name="confirm_frequency">Frequency</string>
+    <string name="confirm_first_dose">First dose</string>
+    <string name="confirm_duration">Duration</string>
+    <string name="confirm_instructions">Instructions</string>
+    <string name="confirm_will_schedule">%1$d daily reminders will be scheduled</string>
+    <string name="confirm_offline_note">They work offline and even when the app is closed.</string>
+    <string name="confirm_save_schedule">Save and schedule</string>
+    <string name="confirm_default_instructions">Take with water</string>
+    <string name="confirm_no_instructions">No instructions</string>
+
+    <!-- History Screen -->
+    <string name="history_eyebrow">Dose log</string>
+    <string name="history_title">History</string>
+    <string name="history_all">All</string>
+    <string name="history_taken">Taken</string>
+    <string name="history_postponed">Snoozed</string>
+    <string name="history_skipped">Skipped</string>
+    <string name="history_filter">Filter history</string>
+    <string name="history_empty">No records match this filter.</string>
+
+    <!-- Insights Screen -->
+    <string name="insights_eyebrow">Week of Sep 24 – 30</string>
+    <string name="insights_title">Progress</string>
+    <string name="insights_adherence">adherence</string>
+    <string name="insights_vs_last">+6%% vs. last week</string>
+    <string name="insights_on_track">You\'re on track. The recommended goal is to stay above 80%%.</string>
+    <string name="insights_daily_aria">Daily adherence</string>
+    <string name="insights_ai">AI</string>
+    <string name="insights_recommendations">Recommendations</string>
+    <string name="insights_applied">Applied</string>
+    <string name="insights_per_med">By medication</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_my_meds">My medications</string>
+    <string name="profile_units">%1$d left</string>
+    <string name="profile_emergency">Emergency contacts</string>
+    <string name="profile_call">Call %1$s</string>
+    <string name="profile_remove">Remove %1$s</string>
+    <string name="profile_name_label">Name</string>
+    <string name="profile_name_ph">Full name</string>
+    <string name="profile_relation_label">Relationship</string>
+    <string name="profile_relation_ph">Relationship (e.g. Brother)</string>
+    <string name="profile_phone_label">Phone</string>
+    <string name="profile_phone_ph">Phone</string>
+    <string name="profile_contact_fallback">Contact</string>
+    <string name="profile_cancel">Cancel</string>
+    <string name="profile_add">Add</string>
+    <string name="profile_add_contact">Add contact</string>
+    <string name="profile_appearance">Appearance &amp; language</string>
+    <string name="profile_theme">Theme</string>
+    <string name="profile_light">Light</string>
+    <string name="profile_dark">Dark</string>
+    <string name="profile_language">Language</string>
+    <string name="profile_privacy">Privacy &amp; alarms</string>
+    <string name="profile_offline_alarms">Offline alarms</string>
+    <string name="profile_encrypted">Encrypted data on device</string>
+    <string name="profile_active">On</string>
+    <string name="profile_refill">Refill reminder</string>
+    <string name="profile_logout">Sign out</string>
+
+    <!-- Medication Data -->
+    <string name="med_form_tablet">Tablet</string>
+    <string name="med_form_capsule">Capsule</string>
+    <string name="med_form_syrup">Syrup</string>
+    <string name="med_form_drops">Drops</string>
+    <string name="med_form_injection">Injection</string>
+
+    <string name="freq_once_daily">Once a day</string>
+    <string name="freq_every_12h">Every 12 hours</string>
+    <string name="freq_every_8h">Every 8 hours</string>
+    <string name="freq_every_6h">Every 6 hours</string>
+
+    <string name="instr_with_food">Take with food</string>
+    <string name="instr_with_breakfast">With breakfast</string>
+    <string name="instr_same_time">Same time every day</string>
+    <string name="instr_before_bed">Before bed</string>
+    <string name="instr_with_water">Take with water</string>
+
+    <string name="med_metformin">Metformin</string>
+    <string name="med_vitamin_d3">Vitamin D3</string>
+    <string name="med_losartan">Losartan</string>
+    <string name="med_atorvastatin">Atorvastatin</string>
+    <string name="med_amoxicillin">Amoxicillin</string>
+
+    <string name="duration_7_days">7 days</string>
+    <string name="date_yesterday">Yesterday</string>
+    <string name="date_monday_28">Monday 28</string>
+
+    <string name="relation_daughter">Daughter</string>
+    <string name="relation_doctor">Primary care doctor</string>
+
+    <!-- Recommendations -->
+    <string name="rec_missed_22">You often miss the 22:00 dose</string>
+    <string name="rec_atorvastatin_skipped">You skipped Atorvastatin on 3 of the last 7 days. Moving the reminder to 21:00, when you are usually active, could help.</string>
+    <string name="rec_move_to_21">Move to 21:00</string>
+    <string name="rec_vitamin_d3_snoozed">You keep snoozing Vitamin D3</string>
+    <string name="rec_vitamin_d3_adjustment">You usually take it 25 min after the alert. Scheduling it at 10:00 fits your breakfast routine better.</string>
+    <string name="rec_adjust_to_10">Adjust to 10:00</string>
+</resources>
