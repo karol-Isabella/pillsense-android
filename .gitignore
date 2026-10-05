@@ -1,0 +1,66 @@
+# Gradle
+.gradle/
+build/
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+*.aar
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+*.apk
+*.aar
+.DS_Store
+captures/
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android
+bin/
+gen/
+out/
+lint-results*.xml
+
+# IDE
+.vscode/
+.classpath
+.project
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Build and runtime
+*.log
+*.trace
+*.lock
+*.bak
+~*
+
+# Environment
+.env
+.env.local
+.env.*.local
+gradle.properties.local
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+
+# Secrets
+secrets/
+*.key
+*.pem
+*.jks
+keystore.properties
