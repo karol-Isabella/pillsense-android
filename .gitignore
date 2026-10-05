@@ -64,3 +64,6 @@ secrets/
 *.pem
 *.jks
 keystore.properties
+
+# Exception: allow gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
