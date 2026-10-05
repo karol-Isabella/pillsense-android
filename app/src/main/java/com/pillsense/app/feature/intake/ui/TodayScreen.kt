@@ -3,19 +3,13 @@ package com.pillsense.app.feature.intake.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,9 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pillsense.app.R
-import com.pillsense.app.core.designsystem.PillSenseSpacing
-import com.pillsense.app.core.designsystem.PillSenseRadius
-import com.pillsense.app.core.designsystem.PillSenseTheme
+import com.pillsense.app.core.designsystem.*
 
 data class DoseItem(
     val id: String,
@@ -41,12 +33,9 @@ data class DoseItem(
     val dose: String,
     val instructions: String,
     val status: DoseStatus,
-    val medTone: String = "blue",
 )
 
-enum class DoseStatus {
-    PENDING, TAKEN, POSTPONED, SKIPPED
-}
+enum class DoseStatus { PENDING, TAKEN, POSTPONED, SKIPPED }
 
 @Composable
 fun TodayScreen(
@@ -74,614 +63,396 @@ fun TodayScreen(
     val percent = if (todayProgress.value.second > 0) {
         (todayProgress.value.first * 100) / todayProgress.value.second
     } else 0
-    val initials = userName.take(1).uppercase()
 
-    LazyColumn(
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        item {
-            // Header with date and user
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PillSenseSpacing.spacing_24, vertical = PillSenseSpacing.spacing_16)
-            ) {
-                Text(
-                    text = stringResource(R.string.today_date),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
+        // Header
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+        ) {
+            item {
+                // Greeting
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = PillSenseSpacing.spacing_8),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.today_hello, userName),
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontSize = 28.sp
-                    )
+                    Column {
+                        Text(
+                            text = stringResource(R.string.today_date),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.today_hello, userName),
+                            style = MaterialTheme.typography.displayMedium
+                        )
+                    }
 
-                    // Theme + Profile buttons
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_8)
-                    ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IconButton(
                             onClick = { isDarkTheme = !isDarkTheme },
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.secondary)
+                            modifier = Modifier.size(44.dp)
                         ) {
                             Icon(
                                 painter = painterResource(
-                                    id = if (isDarkTheme) R.drawable.ic_lucide_sun else R.drawable.ic_lucide_moon
+                                    if (isDarkTheme) R.drawable.ic_lucide_sun else R.drawable.ic_lucide_moon
                                 ),
-                                contentDescription = stringResource(
-                                    if (isDarkTheme) R.string.theme_to_light else R.string.theme_to_dark
-                                ),
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.onSecondary
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
-                        Button(
-                            onClick = onProfileClick,
+                        Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape),
-                            shape = CircleShape
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = initials,
-                                fontSize = 18.sp,
-                                style = MaterialTheme.typography.titleLarge
+                                text = userName.take(1).uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White
                             )
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
-        }
 
-        // Adherence card
-        item {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = PillSenseSpacing.spacing_16, vertical = PillSenseSpacing.spacing_12)
-                    .clip(RoundedCornerShape(PillSenseRadius.xLarge)),
-                color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(PillSenseRadius.xLarge)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(PillSenseSpacing.spacing_20),
-                    horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_20),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Progress circle
-                    Box(
-                        modifier = Modifier
-                            .size(112.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE9F3FF)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "$percent%",
-                                fontSize = 26.sp,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Text(
-                                text = stringResource(R.string.today_word),
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.labelSmall
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_8)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.today_daily_progress),
-                            fontSize = 15.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelMedium
-                        )
-
-                        Text(
-                            text = stringResource(
-                                R.string.today_doses_of,
-                                todayProgress.value.first,
-                                todayProgress.value.second
-                            ),
-                            fontSize = 22.sp,
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-
-                        Surface(
-                            modifier = Modifier
-                                .clip(CircleShape),
-                            color = MaterialTheme.colorScheme.secondary
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(
-                                    horizontal = 10.dp,
-                                    vertical = 4.dp
-                                ),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_lucide_wifi_off),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.onSecondary
-                                )
-                                Text(
-                                    text = stringResource(R.string.today_offline),
-                                    fontSize = 12.sp,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSecondary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Next dose section
-        if (nextDose != null) {
+            // Adherence card
             item {
-                Row(
+                PsCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = PillSenseSpacing.spacing_24, vertical = PillSenseSpacing.spacing_12),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(bottom = 20.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.today_next_dose),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-
-                    Button(onClick = {}) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_lucide_bell_ring),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(PillSenseSpacing.spacing_8))
-                        Text(text = stringResource(R.string.today_view_alert))
-                    }
-                }
-            }
-
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PillSenseSpacing.spacing_16, vertical = PillSenseSpacing.spacing_8)
-                        .clip(RoundedCornerShape(PillSenseRadius.twoXL)),
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(PillSenseRadius.twoXL)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(PillSenseSpacing.spacing_20),
-                        verticalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_20)
-                    ) {
-                        // Dose info
+                    Column(modifier = Modifier.padding(20.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
                                 Text(
-                                    text = stringResource(R.string.today_at, nextDose.time),
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                                    text = stringResource(R.string.today_daily_progress),
                                     style = MaterialTheme.typography.labelSmall,
-                                    letterSpacing = 0.5.sp
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-
                                 Text(
-                                    text = nextDose.medName,
-                                    fontSize = 28.sp,
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-
-                                Text(
-                                    text = "${nextDose.dose} · ${nextDose.instructions}",
-                                    fontSize = 15.sp,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                                    style = MaterialTheme.typography.bodyMedium
+                                    text = stringResource(R.string.today_doses_of, todayProgress.value.first, todayProgress.value.second),
+                                    style = MaterialTheme.typography.headlineSmall
                                 )
                             }
 
-                            Surface(
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f),
-                                modifier = Modifier.clip(RoundedCornerShape(PillSenseRadius.large))
-                            ) {
-                                Text(
-                                    text = nextDose.time,
-                                    modifier = Modifier.padding(
-                                        horizontal = PillSenseSpacing.spacing_12,
-                                        vertical = 6.dp
-                                    ),
-                                    fontSize = 15.sp,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-
-                        // Action buttons
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_8)
-                        ) {
-                            Button(
-                                onClick = {
-                                    onDoseStatusChange(nextDose.id, DoseStatus.TAKEN)
-                                    todayProgress.value = Pair(todayProgress.value.first + 1, todayProgress.value.second)
-                                },
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                shape = RoundedCornerShape(PillSenseRadius.xLarge)
+                                    .size(60.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_lucide_check),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
+                                Text(
+                                    text = "$percent%",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
-                                Spacer(modifier = Modifier.width(PillSenseSpacing.spacing_8))
-                                Text(text = stringResource(R.string.today_mark_taken))
-                            }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_8)
-                            ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(48.dp)
-                                        .clip(RoundedCornerShape(PillSenseRadius.xLarge))
-                                        .clickable { onDoseStatusChange(nextDose.id, DoseStatus.POSTPONED) },
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(PillSenseSpacing.spacing_12),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_lucide_clock),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                        Spacer(modifier = Modifier.width(PillSenseSpacing.spacing_8))
-                                        Text(
-                                            text = "10 min",
-                                            fontSize = 15.sp,
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                }
-
-                                Surface(
-                                    modifier = Modifier
-                                        .weight(1.5f)
-                                        .height(48.dp)
-                                        .clip(RoundedCornerShape(PillSenseRadius.xLarge))
-                                        .clickable { onDoseStatusChange(nextDose.id, DoseStatus.SKIPPED) },
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(PillSenseSpacing.spacing_12),
-                                        horizontalArrangement = Arrangement.Center,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_lucide_x),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                        Spacer(modifier = Modifier.width(PillSenseSpacing.spacing_8))
-                                        Text(
-                                            text = stringResource(R.string.today_skip_dose),
-                                            fontSize = 15.sp,
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                }
                             }
                         }
-                    }
-                }
-            }
-        } else {
-            // All done message
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = PillSenseSpacing.spacing_16, vertical = PillSenseSpacing.spacing_12)
-                        .clip(RoundedCornerShape(PillSenseRadius.xLarge)),
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(PillSenseSpacing.spacing_20),
-                        horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_16)
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape),
-                            color = Color(0xFF34C759).copy(alpha = 0.1f)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_lucide_check),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(PillSenseSpacing.spacing_12),
-                                tint = Color(0xFF34C759)
-                            )
-                        }
 
-                        Column {
-                            Text(
-                                text = stringResource(R.string.today_all_done),
-                                fontSize = 17.sp,
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                            Text(
-                                text = stringResource(R.string.today_all_done_body),
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-                }
-            }
-        }
+                        Spacer(modifier = Modifier.height(12.dp))
 
-        // Doses list
-        item {
-            Text(
-                text = stringResource(R.string.today_schedule),
-                modifier = Modifier.padding(
-                    horizontal = PillSenseSpacing.spacing_24,
-                    vertical = PillSenseSpacing.spacing_16
-                ),
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
-
-        items(doses) { dose ->
-            DoseListItem(
-                dose = dose,
-                onStatusChange = { onDoseStatusChange(dose.id, it) }
-            )
-        }
-
-        // Quick action cards
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(PillSenseSpacing.spacing_16)
-                    .padding(top = PillSenseSpacing.spacing_8),
-                horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_12)
-            ) {
-                QuickActionCard(
-                    icon = R.drawable.ic_lucide_scan_line,
-                    title = stringResource(R.string.today_scan),
-                    subtitle = stringResource(R.string.today_scan_sub),
-                    onClick = onScanClick,
-                    modifier = Modifier.weight(1f)
-                )
-
-                QuickActionCard(
-                    icon = R.drawable.ic_lucide_sparkles,
-                    title = stringResource(R.string.today_week, weeklyAverage),
-                    subtitle = stringResource(R.string.today_suggestions),
-                    onClick = onInsightsClick,
-                    modifier = Modifier.weight(1f),
-                    showChevron = true
-                )
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(PillSenseSpacing.spacing_24))
-        }
-    }
-}
-
-@Composable
-private fun DoseListItem(dose: DoseItem, onStatusChange: (DoseStatus) -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = PillSenseSpacing.spacing_16, vertical = 2.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = PillSenseSpacing.spacing_16, vertical = PillSenseSpacing.spacing_12),
-            horizontalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_12),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = dose.time,
-                modifier = Modifier.widthIn(min = 44.dp),
-                fontSize = 15.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelLarge
-            )
-
-            Icon(
-                painter = painterResource(id = R.drawable.ic_lucide_pill),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = dose.medName,
-                    fontSize = 17.sp,
-                    style = MaterialTheme.typography.titleMedium,
-                    textDecoration = if (dose.status == DoseStatus.SKIPPED) TextDecoration.LineThrough else TextDecoration.None
-                )
-
-                Text(
-                    text = "${dose.dose} · ${dose.instructions}",
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-
-            when (dose.status) {
-                DoseStatus.PENDING -> {
-                    Surface(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { onStatusChange(DoseStatus.TAKEN) },
-                        color = Color.Transparent
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(2.dp, Color(0xFFC7C7CC), CircleShape)
+                        PsBadge(
+                            text = stringResource(R.string.today_offline),
+                            backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
+                            textColor = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
-                DoseStatus.TAKEN -> {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_lucide_check),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = Color(0xFF34C759)
-                    )
-                }
-                DoseStatus.SKIPPED -> {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_lucide_x),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-                DoseStatus.POSTPONED -> {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_lucide_clock),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = Color(0xFFFF9500)
-                    )
+            }
+
+            // Next dose card
+            if (nextDose != null) {
+                item {
+                    PsCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp),
+                        backgroundColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.today_next_dose),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = stringResource(R.string.today_view_alert),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.7f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Text(
+                                text = stringResource(R.string.today_at, nextDose.time),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+
+                            Text(
+                                text = nextDose.medName,
+                                style = MaterialTheme.typography.displaySmall,
+                                color = Color.White
+                            )
+
+                            Text(
+                                text = "${nextDose.dose} · ${nextDose.instructions}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            PsButton(
+                                onClick = { onDoseStatusChange(nextDose.id, DoseStatus.TAKEN) },
+                                text = stringResource(R.string.today_mark_taken),
+                                style = PsButtonStyle.Primary,
+                                modifier = Modifier.fillMaxWidth(),
+                                height = 48
+                            )
+                        }
+                    }
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun QuickActionCard(
-    icon: Int,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    showChevron: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .clip(RoundedCornerShape(PillSenseRadius.large))
-            .clickable { onClick() },
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(PillSenseRadius.large)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(PillSenseSpacing.spacing_16),
-            verticalArrangement = Arrangement.spacedBy(PillSenseSpacing.spacing_12)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(PillSenseRadius.large))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
+            // Schedule title
+            item {
+                Text(
+                    text = stringResource(R.string.today_schedule),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = title,
-                        fontSize = 17.sp,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = subtitle,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+            // Dose list
+            items(doses) { dose ->
+                PsListRow(
+                    leadingContent = {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    when (dose.status) {
+                                        DoseStatus.TAKEN -> MaterialTheme.colorScheme.tertiary
+                                        DoseStatus.SKIPPED -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.surfaceVariant
+                                    }.copy(alpha = 0.2f)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = dose.time.substringBefore(":"),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = when (dose.status) {
+                                    DoseStatus.TAKEN -> MaterialTheme.colorScheme.tertiary
+                                    DoseStatus.SKIPPED -> MaterialTheme.colorScheme.error
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                    },
+                    trailingContent = {
+                        PsBadge(
+                            text = when (dose.status) {
+                                DoseStatus.TAKEN -> stringResource(R.string.status_taken)
+                                DoseStatus.SKIPPED -> stringResource(R.string.status_skipped)
+                                DoseStatus.POSTPONED -> stringResource(R.string.status_postponed)
+                                else -> ""
+                            },
+                            backgroundColor = when (dose.status) {
+                                DoseStatus.TAKEN -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                                DoseStatus.SKIPPED -> MaterialTheme.colorScheme.error.copy(alpha = 0.15f)
+                                else -> Color.Transparent
+                            },
+                            textColor = when (dose.status) {
+                                DoseStatus.TAKEN -> MaterialTheme.colorScheme.tertiary
+                                DoseStatus.SKIPPED -> MaterialTheme.colorScheme.error
+                                else -> MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+                    }
+                ) {
+                    Column {
+                        Text(
+                            text = dose.medName,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = dose.dose,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
+            }
 
-                if (showChevron) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_lucide_chevron_right),
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = Color(0xFFC7C7CC)
-                    )
+            // Quick action cards
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    PsCard(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(PillSenseShape.large),
+                        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_lucide_scan_line),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.today_scan),
+                                style = MaterialTheme.typography.labelMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+
+                    PsCard(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(PillSenseShape.large),
+                        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_lucide_sparkles),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.today_week, weeklyAverage),
+                                style = MaterialTheme.typography.labelMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }
+
+        // Bottom bar
+        PsBottomBar(
+            items = listOf(
+                PsBottomBarItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lucide_clock),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = stringResource(R.string.tab_today)
+                ),
+                PsBottomBarItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lucide_history),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = stringResource(R.string.tab_history)
+                ),
+                PsBottomBarItem(
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_lucide_zap),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    label = ""
+                ),
+                PsBottomBarItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lucide_chart_bars),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = stringResource(R.string.tab_insights)
+                ),
+                PsBottomBarItem(
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_lucide_user_round),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = stringResource(R.string.tab_profile)
+                ),
+            ),
+            selectedIndex = 0,
+            onItemSelected = { index ->
+                when (index) {
+                    1 -> {}
+                    2 -> onScanClick()
+                    3 -> onInsightsClick()
+                    4 -> onProfileClick()
+                }
+            }
+        )
     }
 }
 
@@ -689,6 +460,14 @@ private fun QuickActionCard(
 @Composable
 private fun TodayScreenPreview() {
     PillSenseTheme {
+        TodayScreen()
+    }
+}
+
+@Preview(device = Devices.PIXEL_7, showSystemUi = true)
+@Composable
+private fun TodayScreenDarkPreview() {
+    PillSenseTheme(darkTheme = true) {
         TodayScreen()
     }
 }
