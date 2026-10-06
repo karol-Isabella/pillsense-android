@@ -20,6 +20,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") as? String ?: ""}\"")
     }
 
     buildTypes {
@@ -88,8 +90,8 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // ML Kit
-    implementation(libs.mlkit.text.recognition)
+    // Google Generative AI (Gemini)
+    implementation(libs.generativeai)
 
     // Retrofit & OkHttp
     implementation(libs.retrofit)
