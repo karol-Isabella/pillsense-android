@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.secrets)
 }
 
 android {
@@ -21,7 +20,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "GEMINI_API_KEY", "\"${project.findProperty("GEMINI_API_KEY") as? String ?: ""}\"")
     }
 
     buildTypes {
@@ -34,11 +32,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -90,8 +88,9 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // Google Generative AI (Gemini)
-    implementation(libs.generativeai)
+    // Bundled on-device OCR (works from first launch without network)
+    implementation(libs.mlkit.text.recognition)
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     // Retrofit & OkHttp
     implementation(libs.retrofit)
@@ -124,7 +123,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
 
-secrets {
-    propertiesFileName = "local.properties"
-    defaultPropertiesFileName = "local.defaults.properties"
-}
+
+ksp { arg("room.schemaLocation", "$projectDir/schemas") }
