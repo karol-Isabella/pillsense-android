@@ -41,7 +41,7 @@ class ResultTest {
     @Test
     fun testErrorMap() {
         val exception = Exception("test error")
-        val result = Result.Error(exception)
+        val result: Result<Int> = Result.Error(exception)
         val mapped = result.map { it * 2 }
         assertEquals(exception, (mapped as Result.Error).exception)
     }

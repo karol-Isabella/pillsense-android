@@ -74,7 +74,7 @@ fun PsButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .height(height.dp)
+            .heightIn(min = height.coerceAtLeast(48).dp)
             .scale(scale),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
@@ -87,6 +87,7 @@ fun PsButton(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
+                color = textColor,
                 strokeWidth = 2.dp
             )
         } else {
@@ -226,7 +227,7 @@ fun PsListRow(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .heightIn(min = 56.dp)
                 .clickable(enabled = onClick != null, onClick = onClick ?: {})
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -242,7 +243,7 @@ fun PsListRow(
                 trailingContent()
             }
         }
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 56.dp),
@@ -266,7 +267,7 @@ fun PsSegmentedControl(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(32.dp)
+            .heightIn(min = 48.dp)
             .clip(PillSenseShape.large)
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
             .border(
@@ -398,7 +399,8 @@ fun PsBottomBar(
 
 data class PsBottomBarItem(
     val icon: @Composable () -> Unit,
-    val label: String
+    val label: String,
+    val prominent: Boolean = false,
 )
 
 @Composable
@@ -410,12 +412,13 @@ private fun PsBottomBarItemContent(
     Column(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .width(60.dp),
+            .width(64.dp)
+            .heightIn(min = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(28.dp),
+                .size(if (item.prominent) 48.dp else 28.dp),
             contentAlignment = Alignment.Center
         ) {
             CompositionLocalProvider(
