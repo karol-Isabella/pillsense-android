@@ -30,6 +30,9 @@ enum class AppPermission(val manifestPermission: String) {
 object PermissionManager {
 
     fun isGranted(context: Context, permission: AppPermission): Boolean {
+        if (permission == AppPermission.EXACT_ALARM && Build.VERSION.SDK_INT >= 31) {
+            return context.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()
+        }
         if (permission.manifestPermission.isBlank()) return true
         return ContextCompat.checkSelfPermission(
             context, permission.manifestPermission
@@ -55,6 +58,9 @@ object PermissionManager {
             .toTypedArray()
         if (toRequest.isNotEmpty()) launcher.launch(toRequest)
     }
+
+    fun exactAlarmIntent(context: Context) = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+        Uri.parse("package:${context.packageName}"))
 
     fun isBatteryOptimizationIgnored(context: Context): Boolean {
         val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
