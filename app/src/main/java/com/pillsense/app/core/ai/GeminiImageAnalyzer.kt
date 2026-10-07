@@ -1,25 +1,18 @@
 package com.pillsense.app.core.ai
 
-import android.graphics.BitmapFactory
-import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
-data class MedicationExtractResult(
-    val nombre: String,
-    val dosis: String,
-    val frecuencia: String,
-    val indicaciones: String,
-    val esExitoso: Boolean,
-    val error: String? = null
-)
-
-interface ImageAnalyzer {
-    suspend fun analyzeImage(imageBitmapBytes: ByteArray): MedicationExtractResult
-}
-
-class GeminiImageAnalyzer(
+/**
+ * Implementación de ImageAnalyzer usando Google Gemini API para análisis visual de medicamentos.
+ * Requiere GEMINI_API_KEY en BuildConfig (via local.properties).
+ * Devuelve mock cuando la API key no está disponible.
+ */
+@Singleton
+class GeminiImageAnalyzer @Inject constructor(
     private val apiKey: String? = null
 ) : ImageAnalyzer {
 
