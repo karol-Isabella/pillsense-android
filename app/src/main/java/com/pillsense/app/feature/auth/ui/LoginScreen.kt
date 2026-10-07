@@ -8,7 +8,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,24 +39,31 @@ enum class LoginError { INVALID_EMAIL, SHORT_PASSWORD }
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (email: String) -> Unit = {},
+    onLoginSuccess: (email: String, password: String, register: Boolean) -> Unit = { _, _, _ -> },
+    busy: Boolean = false,
+    authError: String? = null,
+    dark: Boolean = false,
+    onThemeChange: () -> Unit = {},
+    language: String = "es",
+    onLanguageChange: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var mode by remember { mutableStateOf(LoginMode.LOGIN) }
-    var email by remember { mutableStateOf("sofia@pillsense.app") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<LoginError?>(null) }
-    var isDarkTheme by remember { mutableStateOf(false) }
-    var currentLang by remember { mutableStateOf("es") }
+    val isDarkTheme = dark
+    val currentLang = language
 
     val onSubmit = {
+        val normalizedEmail = email.trim().lowercase()
         val emailRegex = """^\S+@\S+\.\S+$""".toRegex()
         error = when {
-            !emailRegex.matches(email) -> LoginError.INVALID_EMAIL
+            !emailRegex.matches(normalizedEmail) -> LoginError.INVALID_EMAIL
             password.length < 8 -> LoginError.SHORT_PASSWORD
             else -> {
-                onLoginSuccess(email.trim().lowercase())
+                onLoginSuccess(normalizedEmail, password, mode == LoginMode.SIGNUP)
                 null
             }
         }
@@ -83,11 +93,11 @@ fun LoginScreen(
         ) {
             LoginCircleButton(
                 label = currentLang.uppercase(),
-                onClick = { currentLang = if (currentLang == "es") "en" else "es" }
+                onClick = onLanguageChange
             )
             LoginCircleButton(
                 label = if (isDarkTheme) "☀" else "☾",
-                onClick = { isDarkTheme = !isDarkTheme }
+                onClick = onThemeChange
             )
         }
 
@@ -106,19 +116,13 @@ fun LoginScreen(
                 .clip(RoundedCornerShape(26.dp))
                 .background(
                     Brush.linearGradient(
-                        listOf(lerp(primary, Color.White, 0.18f), primary)
+                        listOf(primary, Color(0xFF1E90FF), SecondaryLight)
                     )
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "S",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold
-                ),
-                color = Color.White
-            )
+            Icon(painterResource(R.drawable.ic_lucide_pill), contentDescription = null,
+                tint = Color.White, modifier = Modifier.size(44.dp))
         }
 
         Spacer(Modifier.height(24.dp))
@@ -174,7 +178,10 @@ fun LoginScreen(
         ) {
             PsTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = {
+                    email = it
+                    if (error == LoginError.INVALID_EMAIL) error = null
+                },
                 label = stringResource(R.string.login_email),
                 placeholder = "user@example.com",
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -182,7 +189,10 @@ fun LoginScreen(
             )
             PsTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = {
+                    password = it
+                    if (error == LoginError.SHORT_PASSWORD) error = null
+                },
                 label = stringResource(R.string.login_password),
                 placeholder = "••••••••",
                 visualTransformation = if (showPassword) VisualTransformation.None
@@ -190,6 +200,7 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
             )
+            TextButton(onClick = { showPassword = !showPassword }) { Text(if (showPassword) "Ocultar contraseña" else "Mostrar contraseña") }
             if (error != null) {
                 Text(
                     text = when (error) {
@@ -205,8 +216,13 @@ fun LoginScreen(
 
         Spacer(Modifier.height(24.dp))
 
+        authError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        Text("Cuenta local: tus datos permanecen en este teléfono.", style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(12.dp))
         PsButton(
             onClick = onSubmit,
+            enabled = !busy,
+            isLoading = busy,
             text = if (mode == LoginMode.LOGIN)
                 stringResource(R.string.login_sign_in)
             else
@@ -240,7 +256,7 @@ fun LoginScreen(
 private fun LoginCircleButton(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(44.dp)
+            .size(48.dp)
             .shadow(
                 elevation = 8.dp,
                 shape = CircleShape,

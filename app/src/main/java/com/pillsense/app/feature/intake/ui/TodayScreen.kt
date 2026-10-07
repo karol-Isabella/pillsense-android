@@ -2,11 +2,14 @@ package com.pillsense.app.feature.intake.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,32 +36,38 @@ data class DoseItem(
     val dose: String,
     val instructions: String,
     val status: DoseStatus,
+    val canAct: Boolean = true,
 )
 
 enum class DoseStatus { PENDING, TAKEN, POSTPONED, SKIPPED }
 
 @Composable
 fun TodayScreen(
-    userName: String = "Karol",
+    userName: String = "",
+    doses: List<DoseItem> = emptyList(),
+    weeklyAverage: Int = 0,
+    dark: Boolean = false,
+    onThemeChange: () -> Unit = {},
+    onHistoryClick: () -> Unit = {},
+    showBottomBar: Boolean = true,
     onScanClick: () -> Unit = {},
     onInsightsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onDoseStatusChange: (doseId: String, status: DoseStatus) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
-    var isDarkTheme by remember { mutableStateOf(false) }
-
-    // Sample data
-    val todayProgress = remember { mutableStateOf(Pair(1, 5)) } // (taken, total)
-    val weeklyAverage = 76
-    val doses = listOf(
-        DoseItem("1", "08:00", "Metformina", "850 mg", "Tomar con alimentos", DoseStatus.TAKEN),
-        DoseItem("2", "09:30", "Vitamina D3", "1000 UI", "Con el desayuno", DoseStatus.SKIPPED),
-        DoseItem("3", "14:00", "Losartán", "50 mg", "A la misma hora cada día", DoseStatus.PENDING),
-        DoseItem("4", "20:00", "Metformina", "850 mg", "Tomar con alimentos", DoseStatus.PENDING),
-        DoseItem("5", "22:00", "Atorvastatina", "20 mg", "Antes de dormir", DoseStatus.PENDING),
-    )
-
+    val isDarkTheme = dark
+    val todayProgress = remember(doses) { mutableStateOf(doses.count { it.status == DoseStatus.TAKEN } to doses.size) }
+    var selectedDose by remember { mutableStateOf<DoseItem?>(null) }
+    selectedDose?.let { selected ->
+        AlertDialog(onDismissRequest = { selectedDose = null }, title = { Text(selected.medName) },
+            text = { Column {
+                Text("${selected.dose} · ${selected.time}")
+                listOf(DoseStatus.TAKEN to "Tomada", DoseStatus.POSTPONED to "Posponer 15 min", DoseStatus.SKIPPED to "Omitida").forEach { (status, label) ->
+                    TextButton(onClick = { onDoseStatusChange(selected.id, status); selectedDose = null }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(label) }
+                }
+            } }, confirmButton = {}, dismissButton = { TextButton(onClick = { selectedDose = null }) { Text("Cancelar") } })
+    }
     val nextDose = doses.firstOrNull { it.status == DoseStatus.PENDING || it.status == DoseStatus.POSTPONED }
     val percent = if (todayProgress.value.second > 0) {
         (todayProgress.value.first * 100) / todayProgress.value.second
@@ -83,7 +92,7 @@ fun TodayScreen(
                 ) {
                     Column {
                         Text(
-                            text = stringResource(R.string.today_date),
+                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM", java.util.Locale.getDefault())),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -95,8 +104,8 @@ fun TodayScreen(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IconButton(
-                            onClick = { isDarkTheme = !isDarkTheme },
-                            modifier = Modifier.size(44.dp)
+                            onClick = onThemeChange,
+                            modifier = Modifier.size(48.dp)
                         ) {
                             Icon(
                                 painter = painterResource(
@@ -110,7 +119,7 @@ fun TodayScreen(
 
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
+                                .size(48.dp)
                                 .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary),
                             contentAlignment = Alignment.Center
@@ -199,7 +208,8 @@ fun TodayScreen(
                                     color = Color.White
                                 )
                                 Text(
-                                    text = stringResource(R.string.today_view_alert),
+                                    text = if (nextDose.canAct) "Gestionar toma" else "Programada",
+                                    modifier = Modifier.clickable(enabled = nextDose.canAct) { selectedDose = nextDose },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color.White.copy(alpha = 0.7f)
                                 )
@@ -230,6 +240,7 @@ fun TodayScreen(
                             PsButton(
                                 onClick = { onDoseStatusChange(nextDose.id, DoseStatus.TAKEN) },
                                 text = stringResource(R.string.today_mark_taken),
+                                enabled = nextDose.canAct,
                                 style = PsButtonStyle.Primary,
                                 modifier = Modifier.fillMaxWidth(),
                                 height = 48
@@ -249,8 +260,17 @@ fun TodayScreen(
             }
 
             // Dose list
-            items(doses) { dose ->
+            if (doses.isEmpty()) item {
+                PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp)) {
+                    Text("Tu tratamiento empieza aquí", style = MaterialTheme.typography.titleLarge)
+                    Text("Escanea una receta o añade tu primer medicamento.")
+                    Spacer(Modifier.height(12.dp))
+                    PsButton(onScanClick, "Añadir medicamento", Modifier.fillMaxWidth())
+                } }
+            }
+            items(doses, key = { it.id }) { dose ->
                 PsListRow(
+                    onClick = if (dose.canAct && dose.status in listOf(DoseStatus.PENDING, DoseStatus.POSTPONED)) ({ selectedDose = dose }) else null,
                     leadingContent = {
                         Box(
                             modifier = Modifier
@@ -303,7 +323,7 @@ fun TodayScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = dose.dose,
+                            text = "${dose.time} · ${dose.dose}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -326,7 +346,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(PillSenseShape.large),
+                            .clip(PillSenseShape.large).clickable(onClick = onScanClick),
                         backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                     ) {
                         Column(
@@ -353,7 +373,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(PillSenseShape.large),
+                            .clip(PillSenseShape.large).clickable(onClick = onInsightsClick),
                         backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                     ) {
                         Column(
@@ -381,7 +401,7 @@ fun TodayScreen(
         }
 
         // Bottom bar
-        PsBottomBar(
+        if (showBottomBar) PsBottomBar(
             items = listOf(
                 PsBottomBarItem(
                     icon = {
@@ -446,7 +466,7 @@ fun TodayScreen(
             selectedIndex = 0,
             onItemSelected = { index ->
                 when (index) {
-                    1 -> {}
+                    1 -> onHistoryClick()
                     2 -> onScanClick()
                     3 -> onInsightsClick()
                     4 -> onProfileClick()

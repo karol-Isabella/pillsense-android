@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.feature.medication.ui.scan.ScannedMedication
+import com.pillsense.app.core.model.Schedule
 
 data class ConfirmMedicationData(
     val name: String,
@@ -35,6 +37,9 @@ data class ConfirmMedicationData(
     val frequency: String,
     val times: List<String>,
     val instructions: String,
+    val intervalHours: Int,
+    val firstTime: String,
+    val durationDays: Int?,
 )
 
 @Composable
@@ -43,9 +48,9 @@ fun ConfirmScreen(
     onCancel: () -> Unit = {},
     onSave: (ConfirmMedicationData) -> Unit = {},
     modifier: Modifier = Modifier,
+    saving: Boolean = false,
 ) {
     // Pre-evaluate string resources at Composable scope
-    val defaultInstructions = stringResource(R.string.confirm_default_instructions)
     val cancelText = stringResource(R.string.confirm_cancel)
     val titleText = stringResource(R.string.confirm_title)
     val saveText = stringResource(R.string.confirm_save)
@@ -56,21 +61,19 @@ fun ConfirmScreen(
     val scheduleSectionText = stringResource(R.string.confirm_schedule_section)
     val frequencyLabel = stringResource(R.string.confirm_frequency)
     val firstDoseLabel = stringResource(R.string.confirm_first_dose)
-    val durationLabel = stringResource(R.string.confirm_duration)
     val instructionsLabel = stringResource(R.string.confirm_instructions)
-    val willScheduleText = stringResource(R.string.confirm_will_schedule, 1) // placeholder
     val offlineNoteText = stringResource(R.string.confirm_offline_note)
     val saveScheduleText = stringResource(R.string.confirm_save_schedule)
     val defaultFormText = stringResource(R.string.med_form_capsule)
     val defaultFrequencyText = stringResource(R.string.freq_once_daily)
 
-    var name by remember { mutableStateOf(scannedMed?.name ?: "") }
-    var dose by remember { mutableStateOf(scannedMed?.dose ?: "") }
-    var form by remember { mutableStateOf(scannedMed?.form ?: defaultFormText) }
-    var frequency by remember { mutableStateOf(scannedMed?.frequency ?: defaultFrequencyText) }
-    var duration by remember { mutableStateOf(scannedMed?.duration ?: "") }
-    var startTime by remember { mutableStateOf("08:00") }
-    var instructions by remember { mutableStateOf(defaultInstructions) }
+    var name by rememberSaveable { mutableStateOf(scannedMed?.name ?: "") }
+    var dose by rememberSaveable { mutableStateOf(scannedMed?.dose ?: "") }
+    var form by rememberSaveable { mutableStateOf(scannedMed?.form ?: defaultFormText) }
+    var frequency by rememberSaveable { mutableStateOf(scannedMed?.frequency ?: defaultFrequencyText) }
+    var duration by rememberSaveable { mutableStateOf(scannedMed?.duration ?: "") }
+    var startTime by rememberSaveable { mutableStateOf("08:00") }
+    var instructions by rememberSaveable { mutableStateOf(scannedMed?.instructions.orEmpty()) }
 
     val frequencies = listOf(
         stringResource(R.string.freq_once_daily),
@@ -87,8 +90,12 @@ fun ConfirmScreen(
         stringResource(R.string.med_form_injection),
     )
 
-    val times = generateTimes(frequency, startTime)
-    val isValid = name.isNotBlank() && dose.isNotBlank()
+    val interval = listOf(24, 12, 8, 6).getOrElse(frequencies.indexOf(frequency)) { 24 }
+    val times = runCatching { Schedule.times(startTime, interval) }.getOrDefault(emptyList())
+    val durationDays = duration.toIntOrNull()
+    var reviewed by rememberSaveable { mutableStateOf(false) }
+    val isValid = name.isNotBlank() && dose.isNotBlank() && form.isNotBlank() && frequency in frequencies && times.isNotEmpty() &&
+        (duration.isBlank() || (durationDays != null && durationDays in 1..3650)) && !saving && (scannedMed == null || reviewed)
 
     Column(
         modifier = modifier
@@ -126,7 +133,8 @@ fun ConfirmScreen(
                                 form = form,
                                 frequency = frequency,
                                 times = times,
-                                instructions = instructions.trim()
+                                instructions = instructions.trim(),
+                                intervalHours = interval, firstTime = startTime, durationDays = durationDays
                             )
                         )
                     }
@@ -141,7 +149,7 @@ fun ConfirmScreen(
             }
         }
 
-        Divider(
+        HorizontalDivider(
             thickness = 0.5.dp,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)
         )
@@ -187,7 +195,7 @@ fun ConfirmScreen(
                     if (scannedMed != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         PsBadge(
-                            text = stringResource(R.string.confirm_extracted, scannedMed.confidence),
+                            text = "Texto reconocido · confirma cada dato",
                             backgroundColor = Color(0xFF5856D6).copy(alpha = 0.1f),
                             textColor = Color(0xFF5856D6)
                         )
@@ -195,6 +203,18 @@ fun ConfirmScreen(
                 }
             }
 
+            if (scannedMed != null) item {
+                PsCard(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("Texto de la foto", style = MaterialTheme.typography.titleMedium)
+                        Text(scannedMed.originalText.take(4000), style = MaterialTheme.typography.bodySmall)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(checked = reviewed, onCheckedChange = { reviewed = it })
+                            Text("He comparado nombre, dosis y frecuencia con mi receta.", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
             // Medication Section
             item {
                 PsSectionHeader(title = medSectionText)
@@ -261,9 +281,9 @@ fun ConfirmScreen(
                         PsTextField(
                             value = startTime,
                             onValueChange = { startTime = it },
-                            label = firstDoseLabel,
+                            label = "$firstDoseLabel (HH:mm)",
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                keyboardType = KeyboardType.Number
+                                keyboardType = KeyboardType.Text
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -273,7 +293,7 @@ fun ConfirmScreen(
                         PsTextField(
                             value = duration,
                             onValueChange = { duration = it },
-                            label = durationLabel,
+                            label = "Duración en días (vacío = continuo)",
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -318,6 +338,9 @@ fun ConfirmScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
+                        if (times.isEmpty()) Text("Introduce una hora válida en formato HH:mm (por ejemplo, 08:30).", color = MaterialTheme.colorScheme.error)
+                        if (duration.isNotBlank() && (durationDays == null || durationDays !in 1..3650)) Text("La duración debe ser un número entre 1 y 3650 días.", color = MaterialTheme.colorScheme.error)
+                        if (frequency !in frequencies) Text("Selecciona y confirma la frecuencia indicada en tu receta.", color = MaterialTheme.colorScheme.error)
                         // Time pills
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
@@ -361,13 +384,15 @@ fun ConfirmScreen(
                                 form = form,
                                 frequency = frequency,
                                 times = times,
-                                instructions = instructions.trim()
+                                instructions = instructions.trim(),
+                                intervalHours = interval, firstTime = startTime, durationDays = durationDays
                             )
                         )
                     }
                 },
                 text = saveScheduleText,
                 enabled = isValid,
+                isLoading = saving,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -381,7 +406,7 @@ private fun PsDropdownField(
     options: List<String>,
     onValueChange: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -442,26 +467,6 @@ private fun PsDropdownField(
     }
 }
 
-private fun generateTimes(frequency: String, startTime: String): List<String> {
-    val hour = startTime.substringBefore(":").toIntOrNull() ?: 8
-    return when (frequency) {
-        "Una vez al día" -> listOf(String.format("%02d:00", hour))
-        "Cada 12 horas" -> listOf(String.format("%02d:00", hour), String.format("%02d:00", (hour + 12) % 24))
-        "Cada 8 horas" -> listOf(
-            String.format("%02d:00", hour),
-            String.format("%02d:00", (hour + 8) % 24),
-            String.format("%02d:00", (hour + 16) % 24)
-        )
-        "Cada 6 horas" -> listOf(
-            String.format("%02d:00", hour),
-            String.format("%02d:00", (hour + 6) % 24),
-            String.format("%02d:00", (hour + 12) % 24),
-            String.format("%02d:00", (hour + 18) % 24)
-        )
-        else -> listOf(String.format("%02d:00", hour))
-    }
-}
-
 @Preview(device = Devices.PIXEL_7, showSystemUi = true)
 @Composable
 private fun ConfirmScreenPreview() {
@@ -472,8 +477,7 @@ private fun ConfirmScreenPreview() {
                 dose = "500 mg",
                 form = "Cápsula",
                 frequency = "Cada 8 horas",
-                duration = "7 días",
-                confidence = 96
+                duration = "7",
             )
         )
     }
@@ -489,8 +493,7 @@ private fun ConfirmScreenDarkPreview() {
                 dose = "500 mg",
                 form = "Cápsula",
                 frequency = "Cada 8 horas",
-                duration = "7 días",
-                confidence = 96
+                duration = "7",
             )
         )
     }
