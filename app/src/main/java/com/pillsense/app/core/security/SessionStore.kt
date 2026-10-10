@@ -31,7 +31,7 @@ class SessionStore @Inject constructor(private val secure: SecureStore) {
             require(existing == null) { "Ya existe una cuenta con ese correo en este teléfono." }
             val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
             secure.put(accountKey, encode(salt) + ":" + encode(derive(password, salt)))
-            secure.put("profile-$normalized", name.take(50)) // Guardar nombre
+            secure.put("profile-$normalized", name.take(50))
         } else {
             require(existing != null) { "Correo o contraseña incorrectos." }
             val parts = existing.split(":")
@@ -45,7 +45,7 @@ class SessionStore @Inject constructor(private val secure: SecureStore) {
     
     fun getUserName(): String? {
         val email = current.value ?: return null
-        return secure.get("profile-$email")
+        return secure.get("profile-$email")?.takeIf { it.isNotBlank() }
     }
     
     fun logout() { secure.put("session", null); current.value = null }

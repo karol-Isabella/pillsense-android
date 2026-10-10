@@ -51,6 +51,7 @@
     <!-- Today Screen -->
     <string name="today_date">Miércoles, 30 de septiembre</string>
     <string name="today_hello">Hola, %1$s</string>
+    <string name="today_hello_no_name">Hola</string>
     <string name="today_open_profile">Abrir perfil</string>
     <string name="today_word">hoy</string>
     <string name="today_daily_progress">Progreso diario</string>

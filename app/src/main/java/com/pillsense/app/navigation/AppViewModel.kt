@@ -24,6 +24,7 @@ class AppViewModel @Inject constructor(
     val user = session.user
     val dark = preferences.dark.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val language = preferences.language.stateIn(viewModelScope, SharingStarted.Eagerly, "es")
+    fun getUserName(): String? = session.getUserName()
     val health = user.flatMapLatest { owner ->
         if (owner == null) flowOf(HealthState()) else combine(
             repository.dao.observeMedications(owner), repository.dao.observeIntakes(owner), repository.dao.observeContacts(owner),

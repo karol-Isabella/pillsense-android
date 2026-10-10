@@ -97,7 +97,10 @@ fun TodayScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = stringResource(R.string.today_hello, userName),
+                            text = if (userName.isNotBlank()) 
+                                stringResource(R.string.today_hello, userName) 
+                            else 
+                                stringResource(R.string.today_hello_no_name),
                             style = MaterialTheme.typography.displayMedium
                         )
                     }

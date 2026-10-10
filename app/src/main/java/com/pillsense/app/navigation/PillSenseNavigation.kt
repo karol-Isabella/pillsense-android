@@ -155,7 +155,9 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                             med.name, med.dose, med.instructions, DoseStatus.valueOf(intake.status), intake.scheduledAt <= now)
                                     }
                                 val recent = health.intakes.filter { it.scheduledAt >= today.minusDays(6).atStartOfDay(zone).toInstant().toEpochMilli() }
-                                TodayScreen(userName = user!!.substringBefore('@').replaceFirstChar { it.uppercase() }, doses = doses,
+                                val userName = (viewModel.getUserName()?.takeIf { it.isNotBlank() }?.split(" ")?.get(0) ?: "").replaceFirstChar { it.uppercase() }
+                                val greeting = if (userName.isBlank()) "" else userName
+                                TodayScreen(userName = greeting, doses = doses,
                                     weeklyAverage = Schedule.adherence(recent, now) ?: 0, dark = dark, onThemeChange = viewModel::toggleTheme,
                                     onScanClick = { nav.navigate("scan") }, onInsightsClick = { nav.navigate("insights") },
                                     onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, showBottomBar = false)
