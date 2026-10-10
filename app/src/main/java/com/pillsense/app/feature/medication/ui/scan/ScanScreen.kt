@@ -75,6 +75,12 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
                 if (state.busy) { Spacer(Modifier.height(20.dp)); CircularProgressIndicator() }
             }
         }
+        if (selectedUri != null && !state.busy && state.result == null) {
+            LaunchedEffect(selectedUri) {
+                viewModel.analyze(Uri.parse(selectedUri))
+            }
+        }
+        
         Text("La lectura se realiza en tu teléfono, sin claves ni internet. Revisa cada dato con la receta antes de guardar.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         (cameraError ?: state.error)?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -85,8 +91,6 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
                 Text("Verifica los datos y completa los campos que no aparecen en la foto.")
             } }
             PsButton({ onScanComplete(state.result!!) }, "Revisar datos", Modifier.fillMaxWidth())
-        } else if (selectedUri != null) {
-            PsButton({ viewModel.analyze(Uri.parse(selectedUri)) }, "Leer foto", Modifier.fillMaxWidth(), enabled = !state.busy)
         }
         PsButton({ cameraError = null; if (PermissionManager.isGranted(context, AppPermission.CAMERA)) takePhoto()
             else PermissionManager.requestPermission(permission, AppPermission.CAMERA) }, "Tomar foto", Modifier.fillMaxWidth(), enabled = !state.busy)
