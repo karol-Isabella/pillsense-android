@@ -61,10 +61,17 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
         PsCard(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().heightIn(min = 230.dp).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
-                Icon(painterResource(R.drawable.ic_lucide_scan_line), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
-                Spacer(Modifier.height(20.dp))
-                Text(if (state.busy) "Leyendo el texto de tu foto…" else if (selectedUri != null) "Foto seleccionada" else "Encuadra el nombre y la dosis con buena luz.",
-                    style = MaterialTheme.typography.bodyLarge)
+                if (selectedUri != null) {
+                    Icon(painterResource(R.drawable.ic_lucide_images), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
+                    Spacer(Modifier.height(20.dp))
+                    Text("Foto seleccionada",
+                        style = MaterialTheme.typography.bodyLarge)
+                } else {
+                    Icon(painterResource(R.drawable.ic_lucide_scan_line), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
+                    Spacer(Modifier.height(20.dp))
+                    Text(if (state.busy) "Leyendo el texto de tu foto…" else "Encuadra el nombre y la dosis con buena luz.",
+                        style = MaterialTheme.typography.bodyLarge)
+                }
                 if (state.busy) { Spacer(Modifier.height(20.dp)); CircularProgressIndicator() }
             }
         }
