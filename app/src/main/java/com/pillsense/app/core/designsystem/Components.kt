@@ -374,7 +374,7 @@ fun PsBottomBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(96.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         shadowElevation = 8.dp
