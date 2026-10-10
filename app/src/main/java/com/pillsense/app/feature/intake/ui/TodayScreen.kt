@@ -433,14 +433,14 @@ fun TodayScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_lucide_zap),
+                                painter = painterResource(R.drawable.ic_lucide_scan_line),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
                                 tint = Color.White
                             )
                         }
                     },
-                    label = ""
+                    label = "Escanear"
                 ),
                 PsBottomBarItem(
                     icon = {
