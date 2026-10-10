@@ -60,6 +60,7 @@ fun ConfirmScreen(
     val formLabel = stringResource(R.string.confirm_form)
     val scheduleSectionText = stringResource(R.string.confirm_schedule_section)
     val frequencyLabel = stringResource(R.string.confirm_frequency)
+    val frequencyPlaceholder = stringResource(R.string.confirm_frequency_placeholder)
     val firstDoseLabel = stringResource(R.string.confirm_first_dose)
     val instructionsLabel = stringResource(R.string.confirm_instructions)
     val offlineNoteText = stringResource(R.string.confirm_offline_note)
@@ -273,7 +274,8 @@ fun ConfirmScreen(
                             label = frequencyLabel,
                             value = frequency,
                             options = frequencies,
-                            onValueChange = { frequency = it }
+                            onValueChange = { frequency = it },
+                            placeholder = frequencyPlaceholder
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -404,7 +406,8 @@ private fun PsDropdownField(
     label: String,
     value: String,
     options: List<String>,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    placeholder: String? = null
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
@@ -434,9 +437,9 @@ private fun PsDropdownField(
             contentAlignment = Alignment.CenterStart
         ) {
             Text(
-                text = value,
+                text = if (value.isNotBlank()) value else (placeholder ?: ""),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = if (value.isNotBlank()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Icon(

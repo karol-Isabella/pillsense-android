@@ -7,11 +7,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -20,6 +23,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.util.permissions.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import android.graphics.BitmapFactory
 import java.io.File
 
 data class ScannedMedication(
@@ -62,10 +68,7 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
             Column(Modifier.fillMaxWidth().heightIn(min = 230.dp).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
                 if (selectedUri != null) {
-                    Icon(painterResource(R.drawable.ic_lucide_images), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
-                    Spacer(Modifier.height(20.dp))
-                    Text("Foto seleccionada",
-                        style = MaterialTheme.typography.bodyLarge)
+                    ThumbnailImage(selectedUri)
                 } else {
                     Icon(painterResource(R.drawable.ic_lucide_scan_line), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
                     Spacer(Modifier.height(20.dp))
@@ -96,5 +99,57 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
             else PermissionManager.requestPermission(permission, AppPermission.CAMERA) }, "Tomar foto", Modifier.fillMaxWidth(), enabled = !state.busy)
         PsButton({ gallery.launch("image/*") }, "Seleccionar de la galería", Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Secondary)
         PsButton(onManual, "Registrar manualmente", Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Text)
+    }
+}
+
+@Composable
+fun ThumbnailImage(selectedUri: String?) {
+    val context = LocalContext.current
+    var bitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+    var loadError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(selectedUri) {
+        if (selectedUri != null) {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    try {
+                        val uri = Uri.parse(selectedUri)
+                        val stream = context.contentResolver.openInputStream(uri)
+                            ?: throw Exception("No se pudo abrir el archivo")
+                        
+                        // Decodificar con inSampleSize para miniatura
+                        val options = BitmapFactory.Options()
+                        options.inSampleSize = 4 // Reduce tamaño
+                        val decodedBitmap = BitmapFactory.decodeStream(stream, null, options)
+                        stream.close()
+                        
+                        decodedBitmap?.asImageBitmap()
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                bitmap = result
+                loadError = result == null && selectedUri != null
+            } catch (e: Exception) {
+                loadError = true
+            }
+        }
+    }
+
+    if (bitmap != null) {
+        Image(
+            bitmap = bitmap!!,
+            contentDescription = "Foto seleccionada",
+            modifier = Modifier.size(160.dp),
+            contentScale = ContentScale.Crop
+        )
+    } else if (loadError) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(painterResource(R.drawable.ic_lucide_images), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
+            Spacer(Modifier.height(20.dp))
+            Text("Foto seleccionada", style = MaterialTheme.typography.bodyLarge)
+        }
+    } else {
+        CircularProgressIndicator()
     }
 }

@@ -106,6 +106,7 @@
     <string name="confirm_form">Form</string>
     <string name="confirm_schedule_section">Schedule</string>
     <string name="confirm_frequency">Frequency</string>
+    <string name="confirm_frequency_placeholder">Select frequency</string>
     <string name="confirm_first_dose">First dose</string>
     <string name="confirm_duration">Duration</string>
     <string name="confirm_instructions">Instructions</string>

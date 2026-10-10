@@ -106,6 +106,7 @@
     <string name="confirm_form">Presentación</string>
     <string name="confirm_schedule_section">Horario</string>
     <string name="confirm_frequency">Frecuencia</string>
+    <string name="confirm_frequency_placeholder">Selecciona la frecuencia</string>
     <string name="confirm_first_dose">Primera toma</string>
     <string name="confirm_duration">Duración</string>
     <string name="confirm_instructions">Indicaciones</string>
