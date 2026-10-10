@@ -39,7 +39,7 @@ enum class LoginError { INVALID_EMAIL, SHORT_PASSWORD }
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (email: String, password: String, register: Boolean) -> Unit = { _, _, _ -> },
+    onLoginSuccess: (email: String, password: String, register: Boolean, name: String) -> Unit = { _, _, _, _ -> },
     busy: Boolean = false,
     authError: String? = null,
     dark: Boolean = false,
@@ -51,6 +51,7 @@ fun LoginScreen(
     var mode by remember { mutableStateOf(LoginMode.LOGIN) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<LoginError?>(null) }
     val isDarkTheme = dark
@@ -63,7 +64,7 @@ fun LoginScreen(
             !emailRegex.matches(normalizedEmail) -> LoginError.INVALID_EMAIL
             password.length < 8 -> LoginError.SHORT_PASSWORD
             else -> {
-                onLoginSuccess(normalizedEmail, password, mode == LoginMode.SIGNUP)
+                onLoginSuccess(normalizedEmail, password, mode == LoginMode.SIGNUP, if (mode == LoginMode.SIGNUP) name else "")
                 null
             }
         }
@@ -200,6 +201,16 @@ fun LoginScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
             )
+            if (mode == LoginMode.SIGNUP) {
+                PsTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = "Nombre",
+                    placeholder = "Tu nombre",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             TextButton(onClick = { showPassword = !showPassword }) { Text(if (showPassword) "Ocultar contraseña" else "Mostrar contraseña") }
             if (error != null) {
                 Text(

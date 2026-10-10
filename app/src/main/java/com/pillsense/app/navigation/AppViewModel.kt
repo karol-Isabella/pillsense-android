@@ -41,10 +41,10 @@ class AppViewModel @Inject constructor(
         catch (e: Exception) { error.value = e.message ?: "No se pudo completar la acción. Intenta de nuevo." }
     }
     private fun action(block: suspend () -> Unit) { viewModelScope.launch { safely(block) } }
-    fun authenticate(email: String, password: String, register: Boolean) {
+    fun authenticate(email: String, password: String, register: Boolean, name: String = "") {
         if (busy.value) return
         busy.value = true; error.value = null
-        viewModelScope.launch { try { safely { session.authenticate(email, password, register) } } finally { busy.value = false } }
+        viewModelScope.launch { try { safely { session.authenticate(email, password, name, register) } } finally { busy.value = false } }
     }
     fun save(data: ConfirmMedicationData, onSaved: () -> Unit) {
         if (busy.value) return

@@ -13,11 +13,14 @@ import javax.crypto.spec.PBEKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
+data class UserProfile(val email: String, val name: String = "")
+
 @Singleton
 class SessionStore @Inject constructor(private val secure: SecureStore) {
     private val current = MutableStateFlow(secure.get("session"))
     val user = current.asStateFlow()
-    suspend fun authenticate(email: String, password: String, register: Boolean) = withContext(Dispatchers.IO) {
+    
+    suspend fun authenticate(email: String, password: String, name: String = "", register: Boolean) = withContext(Dispatchers.IO) {
         val normalized = email.trim().lowercase(Locale.ROOT)
         require(normalized.matches(Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"))) { "Introduce un correo válido." }
         require(password.length in 8..128) { "La contraseña debe tener entre 8 y 128 caracteres." }
@@ -28,6 +31,7 @@ class SessionStore @Inject constructor(private val secure: SecureStore) {
             require(existing == null) { "Ya existe una cuenta con ese correo en este teléfono." }
             val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
             secure.put(accountKey, encode(salt) + ":" + encode(derive(password, salt)))
+            secure.put("profile-$normalized", name.take(50)) // Guardar nombre
         } else {
             require(existing != null) { "Correo o contraseña incorrectos." }
             val parts = existing.split(":")
@@ -38,7 +42,14 @@ class SessionStore @Inject constructor(private val secure: SecureStore) {
         secure.put("session", normalized)
         current.value = normalized
     }
+    
+    fun getUserName(): String? {
+        val email = current.value ?: return null
+        return secure.get("profile-$email")
+    }
+    
     fun logout() { secure.put("session", null); current.value = null }
+    
     private fun derive(password: String, salt: ByteArray): ByteArray {
         val spec = PBEKeySpec(password.toCharArray(), salt, 210_000, 256)
         return try { SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded }
