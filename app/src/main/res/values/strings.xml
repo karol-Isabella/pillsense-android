@@ -50,8 +50,12 @@
 
     <!-- Today Screen -->
     <string name="today_date">Miércoles, 30 de septiembre</string>
-    <string name="today_hello">Hola, %1$s</string>
-    <string name="today_hello_no_name">Hola</string>
+    <string name="today_good_morning">Buenos días, %1$s</string>
+    <string name="today_good_afternoon">Buenas tardes, %1$s</string>
+    <string name="today_good_evening">Buenas noches, %1$s</string>
+    <string name="today_good_morning_no_name">Buenos días</string>
+    <string name="today_good_afternoon_no_name">Buenas tardes</string>
+    <string name="today_good_evening_no_name">Buenas noches</string>
     <string name="today_open_profile">Abrir perfil</string>
     <string name="today_word">hoy</string>
     <string name="today_daily_progress">Progreso diario</string>

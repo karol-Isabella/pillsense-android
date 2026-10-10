@@ -42,6 +42,31 @@ data class DoseItem(
 enum class DoseStatus { PENDING, TAKEN, POSTPONED, SKIPPED }
 
 @Composable
+fun getTimeBasedGreeting(userName: String): String {
+    val hour = java.time.LocalTime.now().hour
+    return when {
+        hour in 5..11 -> {
+            if (userName.isNotBlank()) 
+                stringResource(R.string.today_good_morning, userName)
+            else
+                stringResource(R.string.today_good_morning_no_name)
+        }
+        hour in 12..18 -> {
+            if (userName.isNotBlank()) 
+                stringResource(R.string.today_good_afternoon, userName)
+            else
+                stringResource(R.string.today_good_afternoon_no_name)
+        }
+        else -> {
+            if (userName.isNotBlank()) 
+                stringResource(R.string.today_good_evening, userName)
+            else
+                stringResource(R.string.today_good_evening_no_name)
+        }
+    }
+}
+
+@Composable
 fun TodayScreen(
     userName: String = "",
     doses: List<DoseItem> = emptyList(),
@@ -97,10 +122,7 @@ fun TodayScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = if (userName.isNotBlank()) 
-                                stringResource(R.string.today_hello, userName) 
-                            else 
-                                stringResource(R.string.today_hello_no_name),
+                            text = getTimeBasedGreeting(userName),
                             style = MaterialTheme.typography.displayMedium
                         )
                     }
