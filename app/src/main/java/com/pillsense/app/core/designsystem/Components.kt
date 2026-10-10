@@ -412,7 +412,8 @@ private fun PsBottomBarItemContent(
     Column(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .width(64.dp)
+            .wrapContentWidth()
+            .widthIn(min = 48.dp, max = 72.dp)
             .heightIn(min = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -438,7 +439,8 @@ private fun PsBottomBarItemContent(
                 MaterialTheme.colorScheme.primary
             else
                 MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 11.sp
+            fontSize = 11.sp,
+            maxLines = 1
         )
     }
 }
