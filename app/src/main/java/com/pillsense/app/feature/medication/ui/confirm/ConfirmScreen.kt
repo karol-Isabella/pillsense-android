@@ -75,6 +75,7 @@ fun ConfirmScreen(
     var duration by rememberSaveable { mutableStateOf(scannedMed?.duration ?: "") }
     var startTime by rememberSaveable { mutableStateOf("08:00") }
     var instructions by rememberSaveable { mutableStateOf(scannedMed?.instructions.orEmpty()) }
+    var showFullText by rememberSaveable { mutableStateOf(false) }
 
     val frequencies = listOf(
         stringResource(R.string.freq_once_daily),
@@ -207,8 +208,36 @@ fun ConfirmScreen(
             if (scannedMed != null) item {
                 PsCard(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
                     Column(Modifier.padding(16.dp)) {
-                        Text("Texto de la foto", style = MaterialTheme.typography.titleMedium)
-                        Text(scannedMed.originalText.take(4000), style = MaterialTheme.typography.bodySmall)
+                        // Summary of scanned data
+                        Text("Detectado", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        if (scannedMed.name.isNotBlank()) {
+                            Text("Nombre: ${scannedMed.name}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        if (scannedMed.dose.isNotBlank()) {
+                            Text("Dosis: ${scannedMed.dose}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        if (scannedMed.form.isNotBlank()) {
+                            Text("Presentación: ${scannedMed.form}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        // Button to show full OCR text
+                        TextButton(onClick = { showFullText = !showFullText }) {
+                            Text(if (showFullText) "Ocultar texto leído" else "Ver texto leído")
+                        }
+                        
+                        // Full OCR text (hidden by default)
+                        AnimatedVisibility(visible = showFullText, enter = fadeIn(), exit = androidx.compose.animation.fadeOut()) {
+                            Column {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text("Texto completo:", style = MaterialTheme.typography.labelSmall)
+                                Text(scannedMed.originalText.take(4000), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = reviewed, onCheckedChange = { reviewed = it })
                             Text("He comparado nombre, dosis y frecuencia con mi receta.", style = MaterialTheme.typography.bodySmall)
