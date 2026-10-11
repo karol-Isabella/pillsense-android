@@ -33,7 +33,7 @@ fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>) {
                 } }
             }
         } }
-        item { PsSegmentedControl(listOf("Todas", "Tomadas", "Posp.", "Omitidas"), filter, { filter = it }) }
+        item { PsSegmentedControl(listOf("Todas", "Tomadas", "Posterg.", "Omitidas"), filter, { filter = it }) }
         if (visible.isEmpty()) item { PsCard(Modifier.fillMaxWidth()) { Text("Todavía no hay tomas en este filtro.", Modifier.padding(24.dp)) } }
         val grouped = visible.groupBy { Instant.ofEpochMilli(it.scheduledAt).atZone(ZoneId.systemDefault()).toLocalDate() }
         grouped.forEach { (day, entries) ->
