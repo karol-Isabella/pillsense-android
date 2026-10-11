@@ -18,7 +18,7 @@ data class MedicationExtractResult(
 
 /**
  * Interfaz común para analizadores de imágenes.
- * Implementaciones: GeminiImageAnalyzer (IA), LocalImageAnalyzer (OCR local).
+ * Implementaciones: LocalImageAnalyzer (OCR local con ML Kit).
  */
 interface ImageAnalyzer {
     suspend fun analyzeImage(imageBitmapBytes: ByteArray): MedicationExtractResult
