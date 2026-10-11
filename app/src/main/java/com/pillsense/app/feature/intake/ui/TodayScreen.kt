@@ -372,8 +372,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable(onClick = onScanClick),
-                        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                            .clickable(onClick = onScanClick)
                     ) {
                         Column(
                             modifier = Modifier
@@ -399,8 +398,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable(onClick = onInsightsClick),
-                        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                            .clickable(onClick = onInsightsClick)
                     ) {
                         Column(
                             modifier = Modifier
