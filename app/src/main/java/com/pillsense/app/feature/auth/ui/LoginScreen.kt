@@ -131,11 +131,7 @@ fun LoginScreen(
         // Título grande y subtítulo centrados
         Text(
             text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.8).sp
-            ),
+            style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
