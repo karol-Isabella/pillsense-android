@@ -21,9 +21,26 @@ object AuthenticationLogic {
         return password.length in 8..128
     }
 
-    fun generateAccountKey(email: String): String {
-        return "account-" + MessageDigest.getInstance("SHA-256")
+    fun hashEmail(email: String): String {
+        return MessageDigest.getInstance("SHA-256")
             .digest(email.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+
+    fun createCredentials(password: String): Pair<String, String> {
+        val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
+        val hash = derivePassword(password, salt)
+        return encode(salt) to encode(hash)
+    }
+
+    fun verifyPassword(password: String, saltEncoded: String, hashEncoded: String): Boolean {
+        val salt = decode(saltEncoded)
+        val derived = derivePassword(password, salt)
+        val storedHash = decode(hashEncoded)
+        return MessageDigest.isEqual(storedHash, derived)
+    }
+
+    fun generateAccountKey(email: String): String {
+        return "account-" + hashEmail(email)
     }
 
     fun generateSalt(): ByteArray {
@@ -45,10 +62,5 @@ object AuthenticationLogic {
 
     fun decode(value: String): ByteArray {
         return Base64.getDecoder().decode(value)
-    }
-
-    fun verifyPassword(storedHash: String, password: String, salt: ByteArray): Boolean {
-        val derived = derivePassword(password, salt)
-        return MessageDigest.isEqual(decode(storedHash), derived)
     }
 }
