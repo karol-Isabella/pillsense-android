@@ -372,7 +372,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(PillSenseShape.large).clickable(onClick = onScanClick),
+                            .clickable(onClick = onScanClick),
                         backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                     ) {
                         Column(
@@ -399,7 +399,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clip(PillSenseShape.large).clickable(onClick = onInsightsClick),
+                            .clickable(onClick = onInsightsClick),
                         backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
                     ) {
                         Column(
