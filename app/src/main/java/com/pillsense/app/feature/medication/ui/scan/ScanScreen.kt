@@ -87,7 +87,7 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
         
         Text("La lectura se realiza en tu teléfono, sin claves ni internet. Revisa cada dato con la receta antes de guardar.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        (cameraError ?: state.error)?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        cameraError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         if (state.result != null) {
             PsCard { Column(Modifier.padding(20.dp)) {
                 Text(state.result!!.name.ifBlank { "Texto reconocido" }, style = MaterialTheme.typography.headlineSmall)
