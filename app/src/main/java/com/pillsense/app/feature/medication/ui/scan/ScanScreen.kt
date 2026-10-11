@@ -27,6 +27,8 @@ import com.pillsense.app.core.util.permissions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.graphics.BitmapFactory
+import androidx.exifinterface.media.ExifInterface
+import com.pillsense.app.core.util.ExifRotation
 import java.io.File
 
 data class ScannedMedication(
@@ -116,11 +118,27 @@ fun ThumbnailImage(selectedUri: String?) {
                         val stream = context.contentResolver.openInputStream(uri)
                             ?: throw Exception("No se pudo abrir el archivo")
                         
+                        // Leer EXIF y obtener rotación
+                        val exif = try {
+                            ExifInterface(stream)
+                        } catch (e: Exception) {
+                            null
+                        }
+                        stream.close()
+                        
                         // Decodificar con inSampleSize para miniatura
+                        val stream2 = context.contentResolver.openInputStream(uri)
+                            ?: throw Exception("No se pudo abrir el archivo")
                         val options = BitmapFactory.Options()
                         options.inSampleSize = 4 // Reduce tamaño
-                        val decodedBitmap = BitmapFactory.decodeStream(stream, null, options)
-                        stream.close()
+                        var decodedBitmap = BitmapFactory.decodeStream(stream2, null, options)
+                        stream2.close()
+                        
+                        // Aplicar rotación EXIF
+                        if (decodedBitmap != null && exif != null) {
+                            val degrees = ExifRotation.getRotationDegrees(exif)
+                            decodedBitmap = ExifRotation.rotateBitmap(decodedBitmap, degrees)
+                        }
                         
                         decodedBitmap?.asImageBitmap()
                     } catch (e: Exception) {

@@ -39,9 +39,10 @@ class LocalImageAnalyzer @Inject constructor() : ImageAnalyzer {
             val rotation = runCatching {
                 ExifInterface(ByteArrayInputStream(imageBitmapBytes)).rotationDegrees
             }.getOrDefault(0)
+            val rotatedBitmap = com.pillsense.app.core.util.ExifRotation.rotateBitmap(bitmap, rotation)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             val result = suspendCancellableCoroutine<Pair<String, List<OcrLine>>> { continuation ->
-                recognizer.process(InputImage.fromBitmap(bitmap, rotation))
+                recognizer.process(InputImage.fromBitmap(rotatedBitmap, 0))  // 0 porque ya está rotado
                     .addOnSuccessListener { visionText ->
                         if (continuation.isActive) {
                             val ocrLines = visionText.textBlocks.flatMap { block ->
@@ -56,7 +57,7 @@ class LocalImageAnalyzer @Inject constructor() : ImageAnalyzer {
                         }
                     }
                     .addOnFailureListener { if (continuation.isActive) continuation.resumeWithException(it) }
-                    .addOnCompleteListener { bitmap.recycle(); recognizer.close() }
+                    .addOnCompleteListener { bitmap.recycle(); rotatedBitmap.recycle(); recognizer.close() }
             }
             MedicationTextParser.parse(result.first, result.second)
         } catch (e: CancellationException) { throw e }
