@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
+import com.pillsense.app.core.security.AuthenticationLogic
 
 enum class LoginMode { LOGIN, SIGNUP }
 enum class LoginError { INVALID_EMAIL, SHORT_PASSWORD }
@@ -54,21 +55,44 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<LoginError?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var nameError by remember { mutableStateOf<String?>(null) }
     val isDarkTheme = dark
     val currentLang = language
 
     val onSubmit = {
-        val normalizedEmail = email.trim().lowercase()
-        val emailRegex = """^\S+@\S+\.\S+$""".toRegex()
-        error = when {
-            !emailRegex.matches(normalizedEmail) -> LoginError.INVALID_EMAIL
-            password.length < 8 -> LoginError.SHORT_PASSWORD
-            else -> {
-                onLoginSuccess(normalizedEmail, password, mode == LoginMode.SIGNUP, if (mode == LoginMode.SIGNUP) name else "")
-                null
+        emailError = null
+        passwordError = null
+        nameError = null
+        
+        val emailValidation = AuthenticationLogic.validateEmail(email.trim(), mode == LoginMode.SIGNUP)
+        if (!emailValidation.isValid) { 
+            emailError = emailValidation.errorReason
+        } else {
+            val passwordValidation = AuthenticationLogic.validatePassword(password, mode == LoginMode.SIGNUP)
+            if (!passwordValidation.isValid) { 
+                passwordError = passwordValidation.errorReason
+            } else {
+                if (mode == LoginMode.SIGNUP) {
+                    val nameValidation = AuthenticationLogic.validateName(name)
+                    if (!nameValidation.isValid) { 
+                        nameError = nameValidation.errorReason
+                    } else {
+                        onLoginSuccess(email.trim(), password, mode == LoginMode.SIGNUP, name.trim())
+                    }
+                } else {
+                    onLoginSuccess(email.trim(), password, false, "")
+                }
             }
         }
+    }
+
+    val isFormValid = run {
+        val emailOk = AuthenticationLogic.validateEmail(email.trim(), mode == LoginMode.SIGNUP).isValid
+        val passwordOk = AuthenticationLogic.validatePassword(password, mode == LoginMode.SIGNUP).isValid
+        val nameOk = if (mode == LoginMode.SIGNUP) AuthenticationLogic.validateName(name).isValid else true
+        emailOk && passwordOk && nameOk && !busy
     }
 
     val primary = MaterialTheme.colorScheme.primary
@@ -179,37 +203,32 @@ fun LoginScreen(
                 PsTextField(
                     value = email,
                     onValueChange = {
-                        email = it
-                        if (error == LoginError.INVALID_EMAIL) error = null
+                        email = it.take(254)
+                        if (emailError != null) emailError = null
                     },
                     label = stringResource(R.string.login_email),
                     placeholder = "user@example.com",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (emailError != null) {
+                    Text(emailError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                }
                 PsTextField(
                     value = password,
                     onValueChange = {
-                        password = it
-                        if (error == LoginError.SHORT_PASSWORD) error = null
+                        password = it.take(64)
+                        if (passwordError != null) passwordError = null
                     },
                     label = stringResource(R.string.login_password),
                     placeholder = "••••••••",
-                    visualTransformation = if (showPassword) VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        IconButton(
-                            onClick = { showPassword = !showPassword },
-                            modifier = Modifier.size(48.dp)
-                        ) {
+                        IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(48.dp)) {
                             Icon(
-                                painter = painterResource(
-                                    if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye
-                                ),
-                                contentDescription = stringResource(
-                                    if (showPassword) R.string.login_hide else R.string.login_show
-                                ),
+                                painter = painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye),
+                                contentDescription = stringResource(if (showPassword) R.string.login_hide else R.string.login_show),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -217,50 +236,54 @@ fun LoginScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (passwordError != null) {
+                    Text(passwordError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                }
             } else {
                 // Signup mode: Name, Email, Password
                 PsTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it.take(40)
+                        if (nameError != null) nameError = null
+                    },
                     label = "Nombre",
                     placeholder = "Tu nombre",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (nameError != null) {
+                    Text(nameError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                }
                 PsTextField(
                     value = email,
                     onValueChange = {
-                        email = it
-                        if (error == LoginError.INVALID_EMAIL) error = null
+                        email = it.take(254)
+                        if (emailError != null) emailError = null
                     },
                     label = stringResource(R.string.login_email),
                     placeholder = "user@example.com",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (emailError != null) {
+                    Text(emailError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                }
                 PsTextField(
                     value = password,
                     onValueChange = {
-                        password = it
-                        if (error == LoginError.SHORT_PASSWORD) error = null
+                        password = it.take(64)
+                        if (passwordError != null) passwordError = null
                     },
                     label = stringResource(R.string.login_password),
                     placeholder = "••••••••",
-                    visualTransformation = if (showPassword) VisualTransformation.None
-                    else PasswordVisualTransformation(),
+                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     trailingIcon = {
-                        IconButton(
-                            onClick = { showPassword = !showPassword },
-                            modifier = Modifier.size(48.dp)
-                        ) {
+                        IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(48.dp)) {
                             Icon(
-                                painter = painterResource(
-                                    if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye
-                                ),
-                                contentDescription = stringResource(
-                                    if (showPassword) R.string.login_hide else R.string.login_show
-                                ),
+                                painter = painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye),
+                                contentDescription = stringResource(if (showPassword) R.string.login_hide else R.string.login_show),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -268,17 +291,9 @@ fun LoginScreen(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
-            }
-            if (error != null) {
-                Text(
-                    text = when (error) {
-                        LoginError.INVALID_EMAIL -> stringResource(R.string.login_invalid_email)
-                        LoginError.SHORT_PASSWORD -> stringResource(R.string.login_short_password)
-                        else -> stringResource(R.string.login_no_errors)
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
-                )
+                if (passwordError != null) {
+                    Text(passwordError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
 
@@ -289,30 +304,22 @@ fun LoginScreen(
         Spacer(Modifier.height(12.dp))
         PsButton(
             onClick = onSubmit,
-            enabled = !busy,
+            enabled = isFormValid,
             isLoading = busy,
-            text = if (mode == LoginMode.LOGIN)
-                stringResource(R.string.login_sign_in)
-            else
-                stringResource(R.string.login_sign_up),
+            text = if (mode == LoginMode.LOGIN) stringResource(R.string.login_sign_in) else stringResource(R.string.login_sign_up),
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(20.dp))
 
         Text(
-            text = if (mode == LoginMode.LOGIN)
-                stringResource(R.string.login_to_sign_up)
-            else
-                stringResource(R.string.login_to_sign_in),
+            text = if (mode == LoginMode.LOGIN) stringResource(R.string.login_to_sign_up) else stringResource(R.string.login_to_sign_in),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
             color = primary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
-                .clickable {
-                    mode = if (mode == LoginMode.LOGIN) LoginMode.SIGNUP else LoginMode.LOGIN
-                }
+                .clickable { mode = if (mode == LoginMode.LOGIN) LoginMode.SIGNUP else LoginMode.LOGIN }
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         )
 
