@@ -146,7 +146,8 @@ fun TodayScreen(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable { onProfileClick() },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(

@@ -160,6 +160,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 TodayScreen(userName = greeting, doses = doses,
                                     weeklyAverage = Schedule.adherence(recent, now) ?: 0, dark = dark, onThemeChange = viewModel::toggleTheme,
                                     onScanClick = { nav.navigate("scan") }, onInsightsClick = { nav.navigate("insights") },
+                                    onProfileClick = { nav.navigate("profile") },
                                     onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, showBottomBar = false)
                             }
                             composable("history") { HistoryScreen(health.intakes, health.medications) }
