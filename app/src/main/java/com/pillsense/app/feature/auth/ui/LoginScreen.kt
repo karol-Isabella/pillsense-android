@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +59,30 @@ fun LoginScreen(
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var nameError by remember { mutableStateOf<String?>(null) }
+    var failedAttempts by remember { mutableStateOf(0) }
+    var lockoutUntil by remember { mutableStateOf(0L) }
+    var secondsRemaining by remember { mutableStateOf(0) }
+    
+    LaunchedEffect(authError) {
+        if (authError != null && mode == LoginMode.LOGIN && !busy) {
+            failedAttempts += 1
+            if (failedAttempts >= 5) {
+                lockoutUntil = System.currentTimeMillis() + 30_000
+            }
+        }
+    }
+    
+    LaunchedEffect(lockoutUntil) {
+        if (lockoutUntil > System.currentTimeMillis()) {
+            while (System.currentTimeMillis() < lockoutUntil) {
+                secondsRemaining = ((lockoutUntil - System.currentTimeMillis()) / 1000).toInt().coerceAtLeast(0)
+                delay(500)
+            }
+            failedAttempts = 0
+            lockoutUntil = 0
+            secondsRemaining = 0
+        }
+    }
     val isDarkTheme = dark
     val currentLang = language
 
@@ -92,8 +117,10 @@ fun LoginScreen(
         val emailOk = AuthenticationLogic.validateEmail(email.trim(), mode == LoginMode.SIGNUP).isValid
         val passwordOk = AuthenticationLogic.validatePassword(password, mode == LoginMode.SIGNUP).isValid
         val nameOk = if (mode == LoginMode.SIGNUP) AuthenticationLogic.validateName(name).isValid else true
-        emailOk && passwordOk && nameOk && !busy
+        emailOk && passwordOk && nameOk && !busy && lockoutUntil == 0L
     }
+    
+    val isLocked = lockoutUntil > 0L && System.currentTimeMillis() < lockoutUntil
 
     val primary = MaterialTheme.colorScheme.primary
     val softShadow = Color.Black.copy(alpha = 0.08f)
@@ -300,6 +327,9 @@ fun LoginScreen(
         Spacer(Modifier.height(24.dp))
 
         authError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (isLocked) {
+            Text("Demasiados intentos. Intenta de nuevo en $secondsRemaining segundos.", color = MaterialTheme.colorScheme.error)
+        }
         Text("Cuenta local: tus datos permanecen en este teléfono.", style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(12.dp))
         PsButton(
