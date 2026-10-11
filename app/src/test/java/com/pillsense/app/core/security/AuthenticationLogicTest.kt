@@ -70,4 +70,18 @@ class AuthenticationLogicTest {
         // Step 5: Verificar que los datos persisten correctamente
         assertEquals(name, stored2["profile-$normalized"])
     }
+
+    @Test fun `account key generation is consistent`() {
+        val email = "user@example.com"
+        val key1 = AuthenticationLogic.generateAccountKey(email)
+        val key2 = AuthenticationLogic.generateAccountKey(email)
+        assertEquals(key1, key2)
+        assertTrue(key1.startsWith("account-"))
+    }
+
+    @Test fun `credential pair is always non-empty`() {
+        val (salt, hash) = AuthenticationLogic.createCredentials("testpass123")
+        assertTrue("Salt must not be empty", salt.isNotEmpty())
+        assertTrue("Hash must not be empty", hash.isNotEmpty())
+    }
 }
