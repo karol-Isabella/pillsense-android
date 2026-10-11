@@ -179,6 +179,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                             ) }
                         }
                         if (route != "scan" && route != "confirm") {
+                            val tabs = listOf("today", "history", "scan", "insights", "profile")
                             val icons = listOf(R.drawable.ic_lucide_calendar_check, R.drawable.ic_lucide_history, R.drawable.ic_lucide_scan_line, R.drawable.ic_lucide_chart_bars, R.drawable.ic_lucide_user_round)
                             val labels = listOf(stringResource(R.string.tab_today), stringResource(R.string.tab_history), "Escanear", stringResource(R.string.tab_insights), stringResource(R.string.tab_profile))
                             PsBottomBar(icons.mapIndexed { index, icon -> PsBottomBarItem(icon = {
