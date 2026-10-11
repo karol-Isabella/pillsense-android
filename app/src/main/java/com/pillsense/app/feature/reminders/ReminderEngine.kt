@@ -91,7 +91,7 @@ class ReminderEngine @Inject constructor(
             val action = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             notification.addAction(0, label, action)
         }
-        manager.notify(intake.id, 0, notification.build())
+        manager.notify(intake.id.hashCode(), notification.build())
     }
     override suspend fun act(id: String, status: String) = mutex.withLock {
         require(status in listOf("TAKEN", "POSTPONED", "SKIPPED"))
@@ -101,7 +101,7 @@ class ReminderEngine @Inject constructor(
         if (intake.owner != owner || intake.scheduledAt > now) return@withLock
         val until = if (status == "POSTPONED") now + TimeUnit.MINUTES.toMillis(15) else null
         if (repository.dao.act(id, owner, status, now, until) > 0) {
-            manager.cancel(id, 0)
+            manager.cancel(id.hashCode())
             schedule(owner)
         }
     }
