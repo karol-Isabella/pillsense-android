@@ -16,8 +16,18 @@ class SessionStore @Inject constructor(private val secure: SecureStore) {
     
     suspend fun authenticate(email: String, password: String, name: String = "", register: Boolean) = withContext(Dispatchers.IO) {
         val normalized = AuthenticationLogic.normalizeEmail(email)
-        require(AuthenticationLogic.validateEmail(normalized)) { "Introduce un correo válido." }
-        require(AuthenticationLogic.validatePassword(password)) { "La contraseña debe tener entre 8 y 128 caracteres." }
+        
+        val emailValidation = AuthenticationLogic.validateEmail(normalized, register)
+        require(emailValidation.isValid) { emailValidation.errorReason ?: "Correo inválido" }
+        
+        val passwordValidation = AuthenticationLogic.validatePassword(password, register)
+        require(passwordValidation.isValid) { passwordValidation.errorReason ?: "Contraseña inválida" }
+        
+        if (register) {
+            val nameValidation = AuthenticationLogic.validateName(name)
+            require(nameValidation.isValid) { nameValidation.errorReason ?: "Nombre inválido" }
+        }
+        
         val accountKey = AuthenticationLogic.generateAccountKey(normalized)
         val existing = secure.get(accountKey)
         if (register) {
