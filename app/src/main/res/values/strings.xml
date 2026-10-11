@@ -81,6 +81,7 @@
     <string name="scan_identifying">Identificando medicamento</string>
     <string name="scan_interpreting">Interpretando dosis y frecuencia</string>
     <string name="scan_camera_alt">Vista de la cámara apuntando a una caja de medicamento</string>
+    <string name="scan_photo_hint">Foto de la caja o receta</string>
     <string name="scan_close">Cerrar escáner</string>
     <string name="scan_doc_type">Tipo de documento</string>
     <string name="scan_mode_caja">Caja</string>

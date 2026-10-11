@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,7 +39,6 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
     onManual: () -> Unit = {}, modifier: Modifier = Modifier, viewModel: ScanViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var mode by rememberSaveable { mutableIntStateOf(0) }
     var photoUri by rememberSaveable { mutableStateOf<String?>(null) }
     var selectedUri by rememberSaveable { mutableStateOf<String?>(null) }
     var cameraError by remember { mutableStateOf<String?>(null) }
@@ -63,7 +63,6 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
             TextButton(onClick = onClose, enabled = !state.busy) { Text("Cancelar") }
             Text("Escanear medicamento", style = MaterialTheme.typography.titleMedium)
         }
-        PsSegmentedControl(listOf("Caja", "Receta"), mode, { mode = it })
         PsCard(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().heightIn(min = 230.dp).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
@@ -72,7 +71,7 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
                 } else {
                     Icon(painterResource(R.drawable.ic_lucide_scan_line), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
                     Spacer(Modifier.height(20.dp))
-                    Text(if (state.busy) "Leyendo el texto de tu foto…" else "Encuadra el nombre y la dosis con buena luz.",
+                    Text(if (state.busy) stringResource(R.string.scan_detecting) else stringResource(R.string.scan_photo_hint),
                         style = MaterialTheme.typography.bodyLarge)
                 }
                 if (state.busy) { Spacer(Modifier.height(20.dp)); CircularProgressIndicator() }

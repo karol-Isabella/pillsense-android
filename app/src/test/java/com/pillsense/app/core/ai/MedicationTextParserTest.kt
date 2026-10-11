@@ -82,4 +82,13 @@ class MedicationTextParserTest {
         assertEquals("Acetaminofén", result.nombre)
         assertEquals("500 mg", result.dosis)
     }
+
+    @Test fun `extracts frequency and duration when explicitly written`() {
+        val text = "Acetaminofén 500 mg cada 8 horas por 5 días"
+        val result = MedicationTextParser.parse(text)
+        assertEquals("Acetaminofén", result.nombre)
+        assertEquals("500 mg", result.dosis)
+        assertEquals("Cada 8 horas", result.frecuencia)
+        assertEquals(5, result.duracionDias)
+    }
 }

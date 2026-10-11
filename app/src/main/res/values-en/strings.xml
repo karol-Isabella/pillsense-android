@@ -81,6 +81,7 @@
     <string name="scan_identifying">Identifying medication</string>
     <string name="scan_interpreting">Reading dose and frequency</string>
     <string name="scan_camera_alt">Camera view pointing at a box of medicine</string>
+    <string name="scan_photo_hint">Photo of box or prescription</string>
     <string name="scan_close">Close scanner</string>
     <string name="scan_doc_type">Document type</string>
     <string name="scan_mode_caja">Box</string>

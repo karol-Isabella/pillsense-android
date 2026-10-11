@@ -69,8 +69,14 @@ object MedicationTextParser {
         }
         
         // Limpiar y filtrar candidatos
-        val cleaned = candidates.map { strength.replace(it, "").trim(' ', '-', ':', '·') }
-            .filter { it.length in 3..80 && it.count(Char::isLetter) >= 3 && !excluded.containsMatchIn(it) && !interval.containsMatchIn(it) }
+        val cleaned = candidates.map { line ->
+            var cleaned = strength.replace(line, "").trim(' ', '-', ':', '·').replace(Regex("""\s+"""), " ")
+            // Remover frases de frecuencia y duración si están presentes
+            cleaned = cleaned.replace(Regex("""(?i)\s*(?:cada|every)\s+\d{1,2}\s*(?:horas?|hours?|h)\b.*"""), "")
+            cleaned = cleaned.replace(Regex("""(?i)\s*(?:durante|por|for)\s+\d{1,3}\s*(?:d[ií]as?|days?)\b.*"""), "")
+            cleaned.trim()
+        }
+            .filter { it.length in 3..80 && it.count(Char::isLetter) >= 3 && !excluded.containsMatchIn(it) }
             .filter { !isAcronym(it) } // Descartar siglas como WBPM, BPM, INVIMA
         
         // Seleccionar por tamaño (la línea más grande)
@@ -79,8 +85,14 @@ object MedicationTextParser {
     
     private fun selectNameFallback(lines: List<String>, doseLine: Int): String {
         val candidates = if (doseLine >= 0) listOf(lines[doseLine]) + lines.take(doseLine).asReversed() else lines
-        return candidates.map { strength.replace(it, "").trim(' ', '-', ':', '·') }
-            .firstOrNull { it.length in 3..80 && it.count(Char::isLetter) >= 3 && !excluded.containsMatchIn(it) && !interval.containsMatchIn(it) && !isAcronym(it) } ?: ""
+        return candidates.map { line ->
+            var cleaned = strength.replace(line, "").trim(' ', '-', ':', '·').replace(Regex("""\s+"""), " ")
+            // Remover frases de frecuencia y duración si están presentes
+            cleaned = cleaned.replace(Regex("""(?i)\s*(?:cada|every)\s+\d{1,2}\s*(?:horas?|hours?|h)\b.*"""), "")
+            cleaned = cleaned.replace(Regex("""(?i)\s*(?:durante|por|for)\s+\d{1,3}\s*(?:d[ií]as?|days?)\b.*"""), "")
+            cleaned.trim()
+        }
+            .firstOrNull { it.length in 3..80 && it.count(Char::isLetter) >= 3 && !excluded.containsMatchIn(it) && !isAcronym(it) } ?: ""
     }
     
     private fun isAcronym(text: String): Boolean {
