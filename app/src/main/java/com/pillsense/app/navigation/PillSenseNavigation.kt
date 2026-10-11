@@ -1,5 +1,6 @@
 package com.pillsense.app.navigation
 
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -142,7 +143,18 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 TextButton(onClick = { viewModel.error.value = null }) { Text("Cerrar") }
                             }
                         }
-                        if (permissionIssue && route == "today") TextButton(onClick = { permissions() }, modifier = Modifier.fillMaxWidth()) { Text("Activar permisos de recordatorios") }
+                        if (permissionIssue && route == "today") {
+                            TextButton(onClick = { permissions() }, modifier = Modifier.fillMaxWidth()) { Text("Activar permisos de recordatorios") }
+                            TextButton(onClick = { 
+                                try { 
+                                    context.startActivity(Intent().setComponent(ComponentName("com.android.settings", "com.android.settings.BatteryOptimizationSettings"))) 
+                                } catch (_: Exception) { 
+                                    try { 
+                                        context.startActivity(Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)) 
+                                    } catch (_: Exception) { }
+                                }
+                            }, modifier = Modifier.fillMaxWidth()) { Text("Poner PillSense en 'Sin restricciones' de batería") }
+                        }
                         NavHost(navController = nav, startDestination = "today", modifier = Modifier.weight(1f)) {
                             composable("today") {
                                 val zone = ZoneId.systemDefault()
