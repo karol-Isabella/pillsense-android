@@ -147,10 +147,10 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                             TextButton(onClick = { permissions() }, modifier = Modifier.fillMaxWidth()) { Text("Activar permisos de recordatorios") }
                             TextButton(onClick = { 
                                 try { 
-                                    context.startActivity(Intent().setComponent(ComponentName("com.android.settings", "com.android.settings.BatteryOptimizationSettings"))) 
+                                    context.startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply { data = android.net.Uri.parse("package:${context.packageName}") }) 
                                 } catch (_: Exception) { 
                                     try { 
-                                        context.startActivity(Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)) 
+                                        context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = android.net.Uri.parse("package:${context.packageName}") }) 
                                     } catch (_: Exception) { }
                                 }
                             }, modifier = Modifier.fillMaxWidth()) { Text("Poner PillSense en 'Sin restricciones' de batería") }
