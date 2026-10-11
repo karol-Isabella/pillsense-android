@@ -45,9 +45,30 @@ class AuthenticationLogicTest {
 
     @Test fun `signup password min 8 chars with letter and number`() {
         assertTrue(AuthenticationLogic.validatePassword("Pass1234", true).isValid)
-        assertFalse(AuthenticationLogic.validatePassword("Pass123", true).isValid) // 7 chars
-        assertFalse(AuthenticationLogic.validatePassword("Password", true).isValid) // no number
-        assertFalse(AuthenticationLogic.validatePassword("12345678", true).isValid) // no letter
+    }
+
+    @Test fun `signup password 7 chars fails`() {
+        val result = AuthenticationLogic.validatePassword("Pass123", true)
+        assertFalse(result.isValid)
+        assertEquals("La contraseña debe tener al menos 8 caracteres", result.errorReason)
+    }
+
+    @Test fun `signup password 33 chars fails`() {
+        val result = AuthenticationLogic.validatePassword("x".repeat(33), true)
+        assertFalse(result.isValid)
+        assertEquals("La contraseña no puede exceder 32 caracteres", result.errorReason)
+    }
+
+    @Test fun `signup password only letters fails`() {
+        val result = AuthenticationLogic.validatePassword("Password", true)
+        assertFalse(result.isValid)
+        assertEquals("La contraseña debe contener al menos un número", result.errorReason)
+    }
+
+    @Test fun `signup password only numbers fails`() {
+        val result = AuthenticationLogic.validatePassword("12345678", true)
+        assertFalse(result.isValid)
+        assertEquals("La contraseña debe contener al menos una letra", result.errorReason)
     }
 
     @Test fun `login password only checks max 64 chars`() {

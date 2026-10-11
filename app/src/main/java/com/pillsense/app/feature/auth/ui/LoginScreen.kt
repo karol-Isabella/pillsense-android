@@ -299,7 +299,7 @@ fun LoginScreen(
                 PsTextField(
                     value = password,
                     onValueChange = {
-                        password = it.take(64)
+                        password = it.take(32)
                         if (passwordError != null) passwordError = null
                     },
                     label = stringResource(R.string.login_password),
@@ -320,6 +320,8 @@ fun LoginScreen(
                 )
                 if (passwordError != null) {
                     Text(passwordError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Text(stringResource(R.string.login_password_hint), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

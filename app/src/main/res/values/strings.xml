@@ -40,6 +40,7 @@
     <string name="login_password">Contraseña</string>
     <string name="login_show">Mostrar contraseña</string>
     <string name="login_hide">Ocultar contraseña</string>
+    <string name="login_password_hint">Mínimo 8 caracteres, con letras y números</string>
     <string name="login_invalid_email">Introduce un correo electrónico válido.</string>
     <string name="login_short_password">La contraseña debe tener al menos 8 caracteres.</string>
     <string name="login_no_errors">Sin errores</string>

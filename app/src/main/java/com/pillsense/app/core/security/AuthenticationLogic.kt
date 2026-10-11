@@ -40,7 +40,7 @@ object AuthenticationLogic {
     fun validatePassword(password: String, isSignup: Boolean = false): ValidationResult {
         if (isSignup) {
             if (password.length < 8) return ValidationResult(false, "La contraseña debe tener al menos 8 caracteres")
-            if (password.length > 64) return ValidationResult(false, "La contraseña no puede exceder 64 caracteres")
+            if (password.length > 32) return ValidationResult(false, "La contraseña no puede exceder 32 caracteres")
             if (!password.matches(Regex(".*[a-zA-Z].*"))) {
                 return ValidationResult(false, "La contraseña debe contener al menos una letra")
             }
