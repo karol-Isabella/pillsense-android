@@ -119,9 +119,9 @@ fun PsTextField(
     readOnly: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    singleLine: Boolean = false
+    singleLine: Boolean = false,
+    trailingIcon: (@Composable () -> Unit)? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -171,14 +171,24 @@ fun PsTextField(
                 visualTransformation = visualTransformation,
                 singleLine = singleLine,
                 decorationBox = { innerTextField ->
-                    if (value.isEmpty() && !isFocused) {
-                        Text(
-                            text = placeholder,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (value.isEmpty() && !isFocused) {
+                                Text(
+                                    text = placeholder,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                        if (trailingIcon != null) {
+                            trailingIcon()
+                        }
                     }
-                    innerTextField()
                 }
             )
         }

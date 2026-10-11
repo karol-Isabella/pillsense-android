@@ -13,6 +13,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -173,31 +174,51 @@ fun LoginScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            PsTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    if (error == LoginError.INVALID_EMAIL) error = null
-                },
-                label = stringResource(R.string.login_email),
-                placeholder = "user@example.com",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
-            PsTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    if (error == LoginError.SHORT_PASSWORD) error = null
-                },
-                label = stringResource(R.string.login_password),
-                placeholder = "••••••••",
-                visualTransformation = if (showPassword) VisualTransformation.None
-                else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (mode == LoginMode.SIGNUP) {
+            // Login mode: Email, Password
+            if (mode == LoginMode.LOGIN) {
+                PsTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        if (error == LoginError.INVALID_EMAIL) error = null
+                    },
+                    label = stringResource(R.string.login_email),
+                    placeholder = "user@example.com",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                PsTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        if (error == LoginError.SHORT_PASSWORD) error = null
+                    },
+                    label = stringResource(R.string.login_password),
+                    placeholder = "••••••••",
+                    visualTransformation = if (showPassword) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { showPassword = !showPassword },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye
+                                ),
+                                contentDescription = stringResource(
+                                    if (showPassword) R.string.login_hide else R.string.login_show
+                                ),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                // Signup mode: Name, Email, Password
                 PsTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -206,8 +227,48 @@ fun LoginScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                 )
+                PsTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        if (error == LoginError.INVALID_EMAIL) error = null
+                    },
+                    label = stringResource(R.string.login_email),
+                    placeholder = "user@example.com",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                PsTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        if (error == LoginError.SHORT_PASSWORD) error = null
+                    },
+                    label = stringResource(R.string.login_password),
+                    placeholder = "••••••••",
+                    visualTransformation = if (showPassword) VisualTransformation.None
+                    else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { showPassword = !showPassword },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye
+                                ),
+                                contentDescription = stringResource(
+                                    if (showPassword) R.string.login_hide else R.string.login_show
+                                ),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-            TextButton(onClick = { showPassword = !showPassword }) { Text(if (showPassword) "Ocultar contraseña" else "Mostrar contraseña") }
             if (error != null) {
                 Text(
                     text = when (error) {
