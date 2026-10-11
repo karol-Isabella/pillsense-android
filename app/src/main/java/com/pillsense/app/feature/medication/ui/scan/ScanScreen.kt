@@ -93,6 +93,13 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
                 Text(state.result!!.name.ifBlank { "Texto reconocido" }, style = MaterialTheme.typography.headlineSmall)
                 Text(state.result!!.dose)
                 Text("Verifica los datos y completa los campos que no aparecen en la foto.")
+                if (state.result!!.originalText.isNotBlank()) {
+                    Spacer(Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(R.drawable.ic_lucide_lightbulb), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                        Text("Son sugerencias del texto leído. Verifica cada campo con la receta; no se infieren dosis ni frecuencias ausentes.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+                    }
+                }
             } }
             PsButton({ onScanComplete(state.result!!) }, "Revisar datos", Modifier.fillMaxWidth())
         }

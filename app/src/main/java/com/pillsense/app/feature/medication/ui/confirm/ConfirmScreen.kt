@@ -370,7 +370,10 @@ fun ConfirmScreen(
 
                         if (times.isEmpty()) Text("Introduce una hora válida en formato HH:mm (por ejemplo, 08:30).", color = MaterialTheme.colorScheme.error)
                         if (duration.isNotBlank() && (durationDays == null || durationDays !in 1..3650)) Text("La duración debe ser un número entre 1 y 3650 días.", color = MaterialTheme.colorScheme.error)
-                        if (frequency !in frequencies) Text("Selecciona y confirma la frecuencia indicada en tu receta.", color = MaterialTheme.colorScheme.error)
+                        if (frequency !in frequencies) Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(painterResource(R.drawable.ic_lucide_lightbulb), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                            Text("Selecciona y confirma la frecuencia indicada en tu receta.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+                        }
                         // Time pills
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
