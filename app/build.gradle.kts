@@ -76,6 +76,9 @@ dependencies {
     // SQLCipher
     implementation(libs.sqlcipher.android)
 
+    // Security
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
