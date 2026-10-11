@@ -23,7 +23,7 @@ import com.pillsense.app.core.designsystem.*
 fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<EmergencyContact>, dark: Boolean,
     onThemeChange: () -> Unit, onLogout: () -> Unit, onArchive: (String) -> Unit,
     onSaveContact: (String, String, String, () -> Unit) -> Unit, onRemoveContact: (String) -> Unit,
-    onPermissions: () -> Unit, remindersReady: Boolean) {
+    onPermissions: () -> Unit, remindersReady: Boolean, userName: String? = null) {
     val context = LocalContext.current
     var adding by rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -43,7 +43,7 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { Text("Perfil", style = MaterialTheme.typography.displayMedium) }
         item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp)) {
-            Text(email.substringBefore('@').replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.headlineSmall)
+            Text(if (!userName.isNullOrBlank()) userName else email.substringBefore('@').replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.headlineSmall)
             Text(email, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp)); PsBadge("Cuenta local · datos cifrados")
         } } }
