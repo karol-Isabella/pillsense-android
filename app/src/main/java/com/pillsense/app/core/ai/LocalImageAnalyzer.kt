@@ -13,6 +13,14 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 /**
+ * Información de una línea OCR con tamaño de letra estimado.
+ */
+data class OcrLine(
+    val text: String,
+    val height: Float // altura del boundingBox en píxeles
+)
+
+/**
  * Implementación de ImageAnalyzer usando ML Kit Text Recognition local (sin API).
  * Bundled on-device text model: no API key, photo upload o model download requerido.
  */
@@ -32,14 +40,27 @@ class LocalImageAnalyzer @Inject constructor() : ImageAnalyzer {
                 ExifInterface(ByteArrayInputStream(imageBitmapBytes)).rotationDegrees
             }.getOrDefault(0)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-            val recognized = suspendCancellableCoroutine<String> { continuation ->
+            val result = suspendCancellableCoroutine<Pair<String, List<OcrLine>>> { continuation ->
                 recognizer.process(InputImage.fromBitmap(bitmap, rotation))
-                    .addOnSuccessListener { if (continuation.isActive) continuation.resume(it.text) }
+                    .addOnSuccessListener { visionText ->
+                        if (continuation.isActive) {
+                            val ocrLines = visionText.textBlocks.flatMap { block ->
+                                block.lines.map { line ->
+                                    OcrLine(
+                                        text = line.text,
+                                        height = (line.boundingBox?.height() ?: 0f).toFloat()
+                                    )
+                                }
+                            }
+                            continuation.resume(visionText.text to ocrLines)
+                        }
+                    }
                     .addOnFailureListener { if (continuation.isActive) continuation.resumeWithException(it) }
                     .addOnCompleteListener { bitmap.recycle(); recognizer.close() }
             }
-            MedicationTextParser.parse(recognized)
+            MedicationTextParser.parse(result.first, result.second)
         } catch (e: CancellationException) { throw e }
         catch (_: Exception) { MedicationExtractResult(error = "No fue posible leer la foto. Usa una imagen clara o registra los datos manualmente.") }
     }
 }
+
