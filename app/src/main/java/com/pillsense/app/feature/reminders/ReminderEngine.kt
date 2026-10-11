@@ -64,8 +64,14 @@ class ReminderEngine @Inject constructor(
             repository.dao.pending(owner).filter {
                 it.notifiedAt == null && (it.postponedUntil ?: it.scheduledAt) in (now - TimeUnit.DAYS.toMillis(1))..now
             }.forEach { intake ->
-                show(intake)
-                repository.dao.markNotified(intake.id, now)
+                // Mark as "SKIPPED" automatically after 60 min grace period if no user action
+                val graceEnd = intake.scheduledAt + TimeUnit.MINUTES.toMillis(60)
+                if (now > graceEnd && intake.status == "PENDING") {
+                    repository.dao.act(intake.id, owner, "SKIPPED", now, null)
+                    manager.cancel(intake.id.hashCode())
+                } else {
+                    show(intake)
+                }
             }
         }
         schedule(owner)
@@ -92,6 +98,7 @@ class ReminderEngine @Inject constructor(
             notification.addAction(0, label, action)
         }
         manager.notify(intake.id.hashCode(), notification.build())
+        // No mark as notified yet; user action or 60-min grace period will determine status
     }
     override suspend fun act(id: String, status: String) = mutex.withLock {
         require(status in listOf("TAKEN", "POSTPONED", "SKIPPED"))
