@@ -10,15 +10,16 @@ class AuthenticationLogicTest {
     }
 
     @Test fun `rejects invalid email formats`() {
-        assertThrows(IllegalArgumentException::class.java) { AuthenticationLogic.validateEmail("invalid") }
-        assertThrows(IllegalArgumentException::class.java) { AuthenticationLogic.validateEmail("@nodomain") }
-        assertThrows(IllegalArgumentException::class.java) { AuthenticationLogic.validateEmail("user@") }
+        assertTrue(AuthenticationLogic.validateEmail("user@example.com"))
+        assertFalse(AuthenticationLogic.validateEmail("invalid"))
+        assertFalse(AuthenticationLogic.validateEmail("@nodomain"))
+        assertFalse(AuthenticationLogic.validateEmail("user@"))
     }
 
     @Test fun `validates password length and content`() {
-        AuthenticationLogic.validatePassword("validPass123")
-        assertThrows(IllegalArgumentException::class.java) { AuthenticationLogic.validatePassword("short") }
-        assertThrows(IllegalArgumentException::class.java) { AuthenticationLogic.validatePassword("a".repeat(129)) }
+        assertTrue(AuthenticationLogic.validatePassword("validPass123"))
+        assertFalse(AuthenticationLogic.validatePassword("short"))
+        assertFalse(AuthenticationLogic.validatePassword("a".repeat(129)))
     }
 
     @Test fun `creates and verifies credentials consistently`() {
