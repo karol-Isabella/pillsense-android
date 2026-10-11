@@ -346,8 +346,7 @@ fun ConfirmScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .padding(bottom = 24.dp),
-                    backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+                        .padding(bottom = 24.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
