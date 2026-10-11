@@ -71,7 +71,7 @@
     <string name="today_all_done">All done for today</string>
     <string name="today_all_done_body">You completed your medication schedule.</string>
     <string name="today_schedule">Today\'s schedule</string>
-    <string name="today_scan">Scan prescription</string>
+    <string name="today_scan">Scan medication</string>
     <string name="today_scan_sub">Add with AI</string>
     <string name="today_week">Week %1$d%%</string>
     <string name="today_suggestions">2 suggestions</string>

@@ -71,7 +71,7 @@
     <string name="today_all_done">Todo listo por hoy</string>
     <string name="today_all_done_body">Completaste tu agenda de medicamentos.</string>
     <string name="today_schedule">Agenda de hoy</string>
-    <string name="today_scan">Escanear receta</string>
+    <string name="today_scan">Escanear medicamento</string>
     <string name="today_scan_sub">Añade con IA</string>
     <string name="today_week">Semana %1$d%%</string>
     <string name="today_suggestions">2 sugerencias</string>
