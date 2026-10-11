@@ -3,6 +3,8 @@ package com.pillsense.app.feature.intake.ui
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,7 +35,11 @@ fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>) {
                 } }
             }
         } }
-        item { PsSegmentedControl(listOf("Todas", "Tomadas", "Posterg.", "Omitidas"), filter, { filter = it }) }
+        item { Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Todas" to 0, "Tomadas" to 1, "Pospuestas" to 2, "Omitidas" to 3).forEach { (label, idx) ->
+                FilterChip(selected = filter == idx, onClick = { filter = idx }, label = { Text(label, maxLines = 1, softWrap = false) })
+            }
+        } }
         if (visible.isEmpty()) item { PsCard(Modifier.fillMaxWidth()) { Text("Todavía no hay tomas en este filtro.", Modifier.padding(24.dp)) } }
         val grouped = visible.groupBy { Instant.ofEpochMilli(it.scheduledAt).atZone(ZoneId.systemDefault()).toLocalDate() }
         grouped.forEach { (day, entries) ->
