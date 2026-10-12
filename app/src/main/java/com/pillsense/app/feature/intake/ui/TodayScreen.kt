@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
@@ -150,11 +152,20 @@ fun TodayScreen(
                                 .clickable { onProfileClick() },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = userName.take(1).uppercase(),
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
-                            )
+                            if (userName.isNotBlank()) {
+                                Text(
+                                    text = userName.take(1).uppercase(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Filled.Person,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
                 }
