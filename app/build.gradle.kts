@@ -20,6 +20,11 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        val geminiApiKey = project.findProperty("GEMINI_API_KEY") as? String ?: ""
+        val geminiModel = project.findProperty("GEMINI_MODEL") as? String ?: "gemini-3.8-flash"
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "GEMINI_MODEL", "\"$geminiModel\"")
+
     }
 
     buildTypes {
