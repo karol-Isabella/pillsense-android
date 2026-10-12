@@ -101,6 +101,15 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                 Text("Lectura de fotos sin conexión, datos cifrados y consejos automáticos basados en tus registros. No necesitas cuentas externas ni claves de API.")
             } }
         }
+        item { PsSectionHeader("Análisis con IA")
+            PsCard(Modifier.fillMaxWidth()) { Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Recomendaciones con IA", style = MaterialTheme.typography.titleSmall)
+                    Text("Solo estadísticas anónimas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(checked = false, onCheckedChange = {}, enabled = false)
+            } }
+        }
         item { PsButton(onLogout, "Cerrar sesión", Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)
             Text("Al cerrar sesión se pausan tus avisos. Se reactivan cuando vuelves a entrar.", Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodySmall) }
     }
