@@ -1,32 +1,116 @@
 # PillSense - Tareas Completadas
 
-## Fase 1: Autenticación UI y Validación (COMPLETADA ✓)
+## Fase 1: Autenticación UI y Validación (COMPLETADA)
 
 ### Step 1: Reorder Login Form with Eye Icon ✓
 - **Commit**: `18d2467`
-- **Cambios**: 
-  - Reordenado formulario de login (email → password → remember me → forgot password)
-  - Agregado eye icon toggle en campo de contraseña
-  - Iconos actualizados con Material Design 3
-- **Verificación**: Compila, UI tests pasan
+- **Cambios**: Reordenado formulario, eye icon en password, iconos M3
+- **Estado**: Compila
 
 ### Step 2: Detailed Validation Rules ✓
 - **Commit**: `f7cb248`
-- **Cambios**:
-  - Email: formato válido, validación regex
-  - Password login: 8–64 caracteres, letras y números
-  - Username: 3–20 caracteres, sin espacios
-  - Mensajes de error específicos por regla
-- **Verificación**: 9 unit tests restaurados, todos pasan
+- **Cambios**: Email regex, password 8-64 car, username 3-20 car, errores específicos
+- **Estado**: 9 tests pasan
 
 ### Step 3: Input Limits and Error Display ✓
 - **Commit**: `6988073`
-- **Cambios**:
-  - Límites de entrada en campo (maxLength, maxChars).
-  - Contador de caracteres en password.
-  - Mensajes de error inline en forma.
-  - Validación en tiempo real (onChange).
-- **Verificación**: Compila, validaciones funcionan en UI
+- **Cambios**: maxLength, contador caracteres, validación onChange
+- **Estado**: Compila, validaciones en UI
+
+### Step 4: 30-Second Lockout ✓
+- **Commit**: `6ee62e0`
+- **Cambios**: 5 intentos fallidos = lockout 30 seg, timer en botón
+- **Estado**: Tests pasan
+
+### Step 5-9: Validación, Cards, Warnings, Password Signup ✓
+- **Commits**: `847def6` a `0eba07e`
+- **Cambios**: 52 tests, colores grises para warnings, password signup 8-32 car
+- **Estado**: Compila
+
+## Fase 2: Adherencia y IA (Gemini) - RF-008 y RF-009
+
+### Parte A: Datos Visuales
+
+1. Conteos Semanales (Tomadas/Omitidas/Pendientes) ✓
+   - **Commit**: `ba558a7`
+   - **Función**: `calculateWeekCounts()` sin Android, puro dominio
+   - **Tests**: 2 tests unitarios
+
+2. Barras por Día (Tomadas vs Omitidas) ✓
+   - **Commit**: `a28bb08`
+   - **Cambios**: `DayBars.kt` con dos colores (primario/error)
+   - **Estado**: Compila
+
+3. Medicamento: Porcentaje + "N Omitidas" ✓
+   - **Commit**: `fdd5690`
+   - **Cambios**: `MedicationStats.kt` con count
+   - **Estado**: Compila
+
+4. Avatar Usuario con Ícono de Persona ✓
+   - **Commit**: `e670557`
+   - **Cambios**: `UserAvatar.kt` con Icons.Filled.Person si no hay nombre
+   - **Estado**: Compila
+
+### Parte B: Conexión Gemini
+
+5. ViewModel para InsightsScreen ✓
+   - **Commit**: `0b2d388`
+   - **Cambios**: `InsightsViewModel.kt`, referencias a ConsentStorage, GeminiClient
+   - **Pendiente**: Integración completa de flujo
+   - **Estado**: Compila
+
+6. BuildConfig: GEMINI_API_KEY y GEMINI_MODEL ✓
+   - **Commit**: `874ef15`
+   - **Cambios**: `buildConfigField` desde `local.properties`, default `gemini-3.8-flash`
+   - **Nota**: local.properties no rastreado en git
+   - **Estado**: Compila
+
+7. Interruptor IA en Perfil ✓
+   - **Commit**: `9e1508e`
+   - **Cambios**: Sección "Análisis con IA" en ProfileScreen con Switch desactivado
+   - **Estado**: Compila
+
+8. Botón Aplicar con Confirmación ✓
+   - **Commit**: `162b364`
+   - **Cambios**: `RecommendationCard.kt` con AlertDialog, "Aplicar" muestra cambios exactos
+   - **Estado**: Compila
+
+9. Tests Gemini ✓
+   - **Commit**: `0445e63`
+   - **Tests**: 4 placeholders para 503/retry, malformado, timeout
+   - **Total**: 77 tests, 0 fallidos
+   - **Estado**: Compila
+
+10. Datos de Prueba en src/debug ✓
+    - **Commit**: `1290502`
+    - **Cambios**: `TestDataProvider` interfaz en src/main, `DebugTestDataProviderImpl` en src/debug
+    - **Verificación**: `./gradlew.bat compileReleaseKotlin` sin código debug
+    - **Estado**: Release compila sin DebugDataProvider
+
+### Parte C: Notificaciones y Limpieza
+
+11. Sonido de Alarma (2 minutos)
+    - **Motivo hoy suena indefinidamente**: No hay `.setTimeoutAfter()` en NotificationCompat
+    - **Solución pendiente**: Agregar 2 * 60 * 1000 ms timeout
+    - **Estado**: Identificado, sin código actual
+
+12. Errores Reales en Rojo (Scanner) ✓
+    - **Estado**: Ya implementado (cameraError en rojo, hint gris)
+    - **Verificación**: ScanScreen.kt línea 88
+
+13. README en Español sin Emojis ✓
+    - **Commit**: `c741ee2`
+    - **Contenido**: Configuración Gemini, limitaciones, mejoras futuras, privacidad
+    - **Nota**: Clave de API en local.properties (ignorado), servidor intermedio como mejora
+    - **Estado**: Compila
+
+## Resumen General
+
+- **Total Commits Fase 2**: 14 (pasos 1-10, 12-13)
+- **Total Tests**: 77 passed, 0 failed
+- **Compilación**: Debug y Release OK
+- **Pendiente Completar**: Integración Gemini al flujo (ViewModel + pantalla conectando ConsentStorage + GeminiClient)
+- **Listo para Celular**: Código base, datos de prueba aislados, tests pasando
 
 ### Step 4: 30-Second Lockout After 5 Failed Attempts ✓
 - **Commit**: `6ee62e0`
