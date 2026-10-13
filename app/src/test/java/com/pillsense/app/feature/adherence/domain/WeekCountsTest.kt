@@ -2,13 +2,19 @@ package com.pillsense.app.feature.adherence.domain
 
 import org.junit.Test
 import org.junit.Assert.*
+import com.pillsense.app.core.database.Intake
 import java.time.LocalDate
+import java.time.ZoneId
 
 class WeekCountsTest {
 
+    private val zone = ZoneId.systemDefault()
+    private val now = System.currentTimeMillis()
+
     @Test
     fun emptyIntakesAndSchedules() {
-        val counts = calculateWeekCounts(emptyList(), emptyList(), LocalDate.now())
+        val weekStart = LocalDate.now()
+        val counts = calculateWeekCounts(emptyList(), weekStart, now, zone)
         assertEquals(0, counts.taken)
         assertEquals(0, counts.postponed)
         assertEquals(0, counts.omitted)
@@ -16,60 +22,91 @@ class WeekCountsTest {
     }
 
     @Test
-    fun twoOmittedZeroTaken() {
+    fun oneTakenStatus() {
         val weekStart = LocalDate.of(2026, 10, 5)
-        val schedules = (0..1).map { Schedule("s$it", "m1", 8, weekStart.plusDays(it.toLong()), weekStart.plusDays(it.toLong())) }
-        val counts = calculateWeekCounts(emptyList(), schedules, weekStart)
-        assertEquals(0, counts.taken)
-        assertEquals(2, counts.omitted)
-    }
-
-    @Test
-    fun oneTakenOneOmitted() {
-        val weekStart = LocalDate.of(2026, 10, 5)
-        val schedules = listOf(
-            Schedule("s1", "m1", 8, weekStart, weekStart),
-            Schedule("s2", "m1", 8, weekStart.plusDays(1), weekStart.plusDays(1))
-        )
+        val weekStartEpoch = weekStart.atStartOfDay(zone).toInstant().toEpochMilli()
         val intakes = listOf(
-            Intake("i1", "m1", "s1", weekStart, 8)
+            Intake("i1", "u", "m", weekStartEpoch + 1000, "TAKEN")
         )
-        val counts = calculateWeekCounts(intakes, schedules, weekStart)
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
         assertEquals(1, counts.taken)
-        assertEquals(1, counts.omitted)
-    }
-
-    @Test
-    fun allTakenInWeek() {
-        val weekStart = LocalDate.of(2026, 10, 5)
-        val schedules = (0..4).map { Schedule("s$it", "m1", 8, weekStart.plusDays(it.toLong()), weekStart.plusDays(it.toLong())) }
-        val intakes = (0..4).map { Intake("i$it", "m1", "s$it", weekStart.plusDays(it.toLong()), 8) }
-        val counts = calculateWeekCounts(intakes, schedules, weekStart)
-        assertEquals(5, counts.taken)
+        assertEquals(0, counts.postponed)
         assertEquals(0, counts.omitted)
+        assertEquals(0, counts.pending)
     }
 
     @Test
-    fun mixedScenario() {
+    fun onePostponedStatus() {
         val weekStart = LocalDate.of(2026, 10, 5)
-        val schedules = (0..5).map { Schedule("s$it", "m1", 8, weekStart.plusDays(it.toLong()), weekStart.plusDays(it.toLong())) }
+        val weekStartEpoch = weekStart.atStartOfDay(zone).toInstant().toEpochMilli()
         val intakes = listOf(
-            Intake("i1", "m1", "s1", weekStart.plusDays(1), 8),
-            Intake("i2", "m1", "s2", weekStart.plusDays(2), 8),
-            Intake("i3", "m1", "s4", weekStart.plusDays(4), 8)
+            Intake("i1", "u", "m", weekStartEpoch + 1000, "POSTPONED")
         )
-        val counts = calculateWeekCounts(intakes, schedules, weekStart)
-        assertEquals(3, counts.taken)
-        assertEquals(3, counts.omitted)  // s0, s3, s5 have no intake
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
+        assertEquals(0, counts.taken)
+        assertEquals(1, counts.postponed)
+        assertEquals(0, counts.omitted)
+        assertEquals(0, counts.pending)
     }
 
     @Test
-    fun noSchedulesInWeek() {
+    fun oneSkippedStatus() {
         val weekStart = LocalDate.of(2026, 10, 5)
-        val schedules = emptyList<Schedule>()
-        val intakes = emptyList<Intake>()
-        val counts = calculateWeekCounts(intakes, schedules, weekStart)
+        val weekStartEpoch = weekStart.atStartOfDay(zone).toInstant().toEpochMilli()
+        val intakes = listOf(
+            Intake("i1", "u", "m", weekStartEpoch + 1000, "SKIPPED")
+        )
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
         assertEquals(0, counts.taken)
+        assertEquals(0, counts.postponed)
+        assertEquals(1, counts.omitted)
+        assertEquals(0, counts.pending)
+    }
+
+    @Test
+    fun onePendingStatus() {
+        val weekStart = LocalDate.of(2026, 10, 5)
+        val weekStartEpoch = weekStart.atStartOfDay(zone).toInstant().toEpochMilli()
+        val intakes = listOf(
+            Intake("i1", "u", "m", weekStartEpoch + 1000, "PENDING")
+        )
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
+        assertEquals(0, counts.taken)
+        assertEquals(0, counts.postponed)
         assertEquals(0, counts.omitted)
+        assertEquals(1, counts.pending)
+    }
+
+    @Test
+    fun mixedStatesSum() {
+        val weekStart = LocalDate.of(2026, 10, 5)
+        val weekStartEpoch = weekStart.atStartOfDay(zone).toInstant().toEpochMilli()
+        val intakes = listOf(
+            Intake("i1", "u", "m", weekStartEpoch + 1000, "TAKEN"),
+            Intake("i2", "u", "m", weekStartEpoch + 2000, "POSTPONED"),
+            Intake("i3", "u", "m", weekStartEpoch + 3000, "SKIPPED"),
+            Intake("i4", "u", "m", weekStartEpoch + 4000, "PENDING")
+        )
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
+        assertEquals(1, counts.taken)
+        assertEquals(1, counts.postponed)
+        assertEquals(1, counts.omitted)
+        assertEquals(1, counts.pending)
+        assertEquals(4, counts.taken + counts.postponed + counts.omitted + counts.pending)
+    }
+
+    @Test
+    fun outsideWeekNotCounted() {
+        val weekStart = LocalDate.of(2026, 10, 5)
+        val weekBefore = weekStart.minusDays(1)
+        val weekAfter = weekStart.plusDays(7)
+        val beforeEpoch = weekBefore.atStartOfDay(zone).toInstant().toEpochMilli()
+        val afterEpoch = weekAfter.atStartOfDay(zone).toInstant().toEpochMilli()
+        val intakes = listOf(
+            Intake("i1", "u", "m", beforeEpoch, "TAKEN"),
+            Intake("i2", "u", "m", afterEpoch, "TAKEN")
+        )
+        val counts = calculateWeekCounts(intakes, weekStart, now, zone)
+        assertEquals(0, counts.taken)
     }
 }
