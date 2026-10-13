@@ -14,6 +14,7 @@ import com.pillsense.app.core.database.*
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.model.Schedule
 import com.pillsense.app.core.model.AdherenceAdvice
+import com.pillsense.app.feature.adherence.domain.calculateWeekCounts
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -24,6 +25,7 @@ fun InsightsScreen(intakes: List<Intake>, medications: List<Medication>) {
     val zone = ZoneId.systemDefault()
     val recent = intakes.filter { it.scheduledAt in today.minusDays(6).atStartOfDay(zone).toInstant().toEpochMilli()..now }
     val average = Schedule.adherence(recent, now)
+    val weekCounts = calculateWeekCounts(recent, today.minusDays(6), now, zone)
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         item { Text("ÚLTIMOS 7 DÍAS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("Mi progreso", style = MaterialTheme.typography.displayMedium) }
@@ -52,6 +54,14 @@ fun InsightsScreen(intakes: List<Intake>, medications: List<Medication>) {
                 }
             }
         } } }
+        item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("Tomadas" to weekCounts.taken, "Pospuestas" to weekCounts.postponed, "Omitidas" to weekCounts.omitted, "Pendientes" to weekCounts.pending).forEach { (label, count) ->
+                PsCard(Modifier.weight(1f)) { Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(count.toString(), style = MaterialTheme.typography.headlineSmall)
+                    Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } }
+            }
+        } }
         item { PsSectionHeader("Recomendaciones")
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Pequeños hábitos, más constancia", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
