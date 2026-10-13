@@ -6,10 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.pillsense.app.BuildConfig
 import com.pillsense.app.core.database.*
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.model.Schedule
@@ -19,13 +23,25 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun InsightsScreen(intakes: List<Intake>, medications: List<Medication>) {
+fun InsightsScreen(
+    intakes: List<Intake>,
+    medications: List<Medication>,
+    viewModel: InsightsViewModel = hiltViewModel()
+) {
     val now = System.currentTimeMillis()
     val today = LocalDate.now()
     val zone = ZoneId.systemDefault()
     val recent = intakes.filter { it.scheduledAt in today.minusDays(6).atStartOfDay(zone).toInstant().toEpochMilli()..now }
     val average = Schedule.adherence(recent, now)
     val weekCounts = calculateWeekCounts(recent, today.minusDays(6), now, zone)
+    val uiState = viewModel.uiState.collectAsState().value
+    
+    LaunchedEffect(Unit) {
+        if (uiState.isAiEnabled) {
+            viewModel.loadGeminiAdvice(intakes, medications, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL)
+        }
+    }
+    
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         item { Text("ÚLTIMOS 7 DÍAS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("Mi progreso", style = MaterialTheme.typography.displayMedium) }
@@ -62,13 +78,21 @@ fun InsightsScreen(intakes: List<Intake>, medications: List<Medication>) {
                 } }
             }
         } }
+        if (uiState.geminiResponse != null) {
+            item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Análisis con IA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
+                PsBadge("IA")
+            } } }
+        }
         item { PsSectionHeader("Recomendaciones")
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Pequeños hábitos, más constancia", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 Text(AdherenceAdvice.generate(recent, now))
-                PsBadge("Basado en tus registros · sin conexión")
+                PsBadge("Reglas locales")
             } }
         }
+        item { Text("Esta app no sustituye a un profesional de salud.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }
         item { PsSectionHeader("Por medicamento") }
         medications.filter { med -> recent.any { it.medicationId == med.id } }.forEach { med ->
             item(key = med.id) { val value = Schedule.adherence(recent.filter { it.medicationId == med.id }, now) ?: 0

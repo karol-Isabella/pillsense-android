@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
+import okhttp3.OkHttpClient
 import javax.inject.Singleton
 
 @Module
@@ -22,4 +23,10 @@ object AppModule {
             .openHelperFactory(SupportOpenHelperFactory(secure.databaseKey())).build()
     }
     @Provides fun dao(database: PillSenseDatabase) = database.dao()
+    
+    @Provides @Singleton
+    fun okHttpClient(): OkHttpClient {
+        return OkHttpClient()
+    }
 }
+
