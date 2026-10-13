@@ -23,7 +23,8 @@ import com.pillsense.app.core.designsystem.*
 fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<EmergencyContact>, dark: Boolean,
     onThemeChange: () -> Unit, onLogout: () -> Unit, onArchive: (String) -> Unit,
     onSaveContact: (String, String, String, () -> Unit) -> Unit, onRemoveContact: (String) -> Unit,
-    onPermissions: () -> Unit, remindersReady: Boolean, userName: String? = null) {
+    onPermissions: () -> Unit, remindersReady: Boolean, userName: String? = null,
+    isAiEnabled: Boolean = false, onAiConsentChange: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
     var adding by rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -32,6 +33,25 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     var archive by remember { mutableStateOf<Medication?>(null) }
     var removing by remember { mutableStateOf<EmergencyContact?>(null) }
     var dialError by remember { mutableStateOf<String?>(null) }
+    var showConsentDialog by remember { mutableStateOf(false) }
+    var aiEnabled by remember { mutableStateOf(isAiEnabled) }
+    
+    if (showConsentDialog) {
+        AlertDialog(onDismissRequest = { showConsentDialog = false }, 
+            title = { Text("Análisis con IA") },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Se enviarán al análisis de IA:", style = MaterialTheme.typography.titleSmall)
+                Text("• Conteos anónimos de tomas (tomadas, pospuestas, omitidas)", style = MaterialTheme.typography.bodySmall)
+                Text("• Porcentaje de adherencia por período", style = MaterialTheme.typography.bodySmall)
+                Text("\nNO se enviarán:", style = MaterialTheme.typography.titleSmall)
+                Text("• Nombres de medicamentos reales", style = MaterialTheme.typography.bodySmall)
+                Text("• Dosis, instrucciones o frecuencias", style = MaterialTheme.typography.bodySmall)
+                Text("• Tu correo electrónico o contactos", style = MaterialTheme.typography.bodySmall)
+                Text("• Fechas exactas", style = MaterialTheme.typography.bodySmall)
+            } },
+            confirmButton = { TextButton(onClick = { showConsentDialog = false; onAiConsentChange(true); aiEnabled = true }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { showConsentDialog = false; aiEnabled = false }) { Text("Ahora no") } })
+    }
     archive?.let { med -> AlertDialog(onDismissRequest = { archive = null }, title = { Text("Finalizar tratamiento") },
         text = { Text("Se detendrán los recordatorios de ${med.name}. El historial se conservará.") },
         confirmButton = { TextButton(onClick = { onArchive(med.id); archive = null }) { Text("Finalizar") } },
@@ -107,7 +127,14 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     Text("Recomendaciones con IA", style = MaterialTheme.typography.titleSmall)
                     Text("Solo estadísticas anónimas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Switch(checked = false, onCheckedChange = {}, enabled = false)
+                Switch(checked = aiEnabled, onCheckedChange = { 
+                    if (it && !isAiEnabled) {
+                        showConsentDialog = true
+                    } else {
+                        onAiConsentChange(it)
+                        aiEnabled = it
+                    }
+                })
             } }
         }
         item { PsButton(onLogout, "Cerrar sesión", Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)
