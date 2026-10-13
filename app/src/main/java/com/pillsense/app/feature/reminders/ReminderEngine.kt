@@ -59,19 +59,15 @@ class ReminderEngine @Inject constructor(
         val owner = session.user.value ?: return@withLock
         repository.refresh(owner)
         val now = System.currentTimeMillis()
+        // Mark PENDING doses >60min overdue (any age) as SKIPPED without notification
+        repository.dao.pending(owner).filter { it.status == "PENDING" && now > it.scheduledAt + TimeUnit.MINUTES.toMillis(60) }
+            .forEach { repository.dao.act(it.id, owner, "SKIPPED", now, null) }
         if (PermissionManager.isGranted(context, AppPermission.NOTIFICATIONS) && NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             manager.createNotificationChannel(NotificationChannel("doses", "Recordatorios de medicamentos", NotificationManager.IMPORTANCE_HIGH))
             repository.dao.pending(owner).filter {
                 it.notifiedAt == null && (it.postponedUntil ?: it.scheduledAt) in (now - TimeUnit.DAYS.toMillis(1))..now
             }.forEach { intake ->
-                // Mark as "SKIPPED" automatically after 60 min grace period if no user action
-                val graceEnd = intake.scheduledAt + TimeUnit.MINUTES.toMillis(60)
-                if (now > graceEnd && intake.status == "PENDING") {
-                    repository.dao.act(intake.id, owner, "SKIPPED", now, null)
-                    manager.cancel(intake.id.hashCode())
-                } else {
-                    show(intake)
-                }
+                show(intake)
             }
         }
         schedule(owner)
@@ -98,7 +94,7 @@ class ReminderEngine @Inject constructor(
             notification.addAction(0, label, action)
         }
         manager.notify(intake.id.hashCode(), notification.build())
-        // No mark as notified yet; user action or 60-min grace period will determine status
+        repository.dao.markNotified(intake.id, System.currentTimeMillis())
     }
     override suspend fun act(id: String, status: String) = mutex.withLock {
         require(status in listOf("TAKEN", "POSTPONED", "SKIPPED"))
