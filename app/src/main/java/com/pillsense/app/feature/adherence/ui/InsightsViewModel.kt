@@ -8,6 +8,7 @@ import com.pillsense.app.feature.adherence.data.GeminiResponse
 import com.pillsense.app.feature.adherence.domain.validateGeminiResponse
 import com.pillsense.app.core.database.Intake as DbIntake
 import com.pillsense.app.core.database.Medication
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,6 +23,7 @@ data class InsightsUiState(
     val lastAdviceDate: String? = null
 )
 
+@HiltViewModel
 class InsightsViewModel @Inject constructor(
     private val consentStorage: ConsentStorage,
     private val geminiClient: GeminiClient
