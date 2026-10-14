@@ -80,9 +80,24 @@ fun InsightsScreen(
         } }
         if (uiState.geminiResponse != null) {
             item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Análisis con IA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text("Análisis con IA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    PsBadge("IA")
+                }
                 Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
-                PsBadge("IA")
+                if (uiState.geminiResponse.recommendations.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text("Recomendaciones:", style = MaterialTheme.typography.labelMedium)
+                    uiState.geminiResponse.recommendations.forEach { rec ->
+                        Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("•", style = MaterialTheme.typography.bodySmall)
+                            Column {
+                                Text("${rec.type} (${rec.medicationLabel})", style = MaterialTheme.typography.bodySmall)
+                                Text(rec.reason, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
             } } }
         }
         item { PsSectionHeader("Recomendaciones")
