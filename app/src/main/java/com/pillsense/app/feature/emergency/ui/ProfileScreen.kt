@@ -36,6 +36,8 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     var showConsentDialog by remember { mutableStateOf(false) }
     var aiEnabled by remember { mutableStateOf(isAiEnabled) }
     
+    LaunchedEffect(isAiEnabled) { aiEnabled = isAiEnabled }
+    
     if (showConsentDialog) {
         AlertDialog(onDismissRequest = { showConsentDialog = false }, 
             title = { Text("Análisis con IA") },

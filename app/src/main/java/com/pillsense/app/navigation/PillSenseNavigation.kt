@@ -180,7 +180,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                             composable("profile") { ProfileScreen(user.orEmpty(), health.medications, health.contacts, dark,
                                 viewModel::toggleTheme, { viewModel.logout(); nav.popBackStack("today", false) }, viewModel::archive,
                                 viewModel::saveContact, viewModel::removeContact, { permissions() }, ready, viewModel.getUserName(),
-                                isAiEnabled = false, onAiConsentChange = {}) }
+                                isAiEnabled = viewModel.hasAiConsent(), onAiConsentChange = { viewModel.setAiConsent(it) }) }
                             composable("scan") { ScanScreen(onScanComplete = {
                                 hasScan = true; scannedName = it.name; scannedDose = it.dose; scannedForm = it.form
                                 scannedFrequency = it.frequency; scannedDuration = it.duration; scannedInstructions = it.instructions; scannedOriginal = it.originalText
