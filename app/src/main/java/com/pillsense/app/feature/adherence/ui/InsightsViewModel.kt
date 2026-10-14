@@ -37,7 +37,9 @@ class InsightsViewModel @Inject constructor(
     }
 
     fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, apiKey: String, model: String) {
-        if (!_uiState.value.isAiEnabled || apiKey.isBlank()) return
+        // Check consent each time, not just at init
+        val hasConsent = consentStorage.hasConsent()
+        if (!hasConsent || apiKey.isBlank()) return
         
         viewModelScope.launch {
             try {
