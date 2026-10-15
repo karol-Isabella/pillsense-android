@@ -5,6 +5,7 @@ import androidx.security.crypto.MasterKey
 import android.content.Context
 import com.pillsense.app.feature.adherence.data.ConsentStorage
 import com.pillsense.app.feature.adherence.data.GeminiClient
+import com.pillsense.app.feature.emergency.data.SmsNotificationStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,5 +43,11 @@ object AdherenceModule {
     @Singleton
     fun geminiClient(okHttpClient: OkHttpClient): GeminiClient {
         return GeminiClient(okHttpClient)
+    }
+
+    @Provides
+    @Singleton
+    fun smsNotificationStorage(prefs: EncryptedSharedPreferences): SmsNotificationStorage {
+        return SmsNotificationStorage(prefs)
     }
 }

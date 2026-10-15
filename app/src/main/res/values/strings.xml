@@ -146,7 +146,7 @@
     <string name="profile_title">Perfil</string>
     <string name="profile_my_meds">Mis medicamentos</string>
     <string name="profile_units">%1$d uds.</string>
-    <string name="profile_emergency">Contactos de emergencia</string>
+    <string name="profile_emergency">Contactos</string>
     <string name="profile_call">Llamar a %1$s</string>
     <string name="profile_remove">Eliminar a %1$s</string>
     <string name="profile_name_label">Nombre</string>

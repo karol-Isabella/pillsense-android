@@ -7,6 +7,7 @@ import com.pillsense.app.core.database.*
 import com.pillsense.app.core.model.ReminderCoordinator
 import com.pillsense.app.core.security.SessionStore
 import com.pillsense.app.feature.adherence.data.ConsentStorage
+import com.pillsense.app.feature.emergency.data.SmsNotificationStorage
 import com.pillsense.app.feature.medication.ui.confirm.ConfirmMedicationData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -21,7 +22,7 @@ data class HealthState(val medications: List<Medication> = emptyList(), val inta
 class AppViewModel @Inject constructor(
     private val session: SessionStore, private val repository: HealthRepository,
     private val reminders: ReminderCoordinator, private val preferences: Preferences,
-    private val consentStorage: ConsentStorage,
+    private val consentStorage: ConsentStorage, private val smsStorage: SmsNotificationStorage,
 ) : ViewModel() {
     val user = session.user
     val dark = preferences.dark.stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -69,6 +70,8 @@ class AppViewModel @Inject constructor(
     fun toggleLanguage() = action { preferences.setLanguage(if (language.value == "es") "en" else "es") }
     fun hasAiConsent(): Boolean = consentStorage.hasConsent(user.value.orEmpty())
     fun setAiConsent(granted: Boolean) = action { consentStorage.setConsent(user.value.orEmpty(), granted) }
+    fun isSmsNotificationEnabled(): Boolean = smsStorage.isSmsNotificationEnabled(user.value.orEmpty())
+    fun setSmsNotificationEnabled(enabled: Boolean) = action { smsStorage.setSmsNotificationEnabled(user.value.orEmpty(), enabled) }
     fun archive(id: String) = action { user.value?.let { repository.archive(id, it); reminders.refresh() } }
     fun saveContact(name: String, relation: String, phone: String, onSaved: () -> Unit) = action {
         val owner = user.value ?: return@action

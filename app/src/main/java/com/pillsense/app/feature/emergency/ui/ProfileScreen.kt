@@ -24,7 +24,8 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     onThemeChange: () -> Unit, onLogout: () -> Unit, onArchive: (String) -> Unit,
     onSaveContact: (String, String, String, () -> Unit) -> Unit, onRemoveContact: (String) -> Unit,
     onPermissions: () -> Unit, remindersReady: Boolean, userName: String? = null,
-    isAiEnabled: Boolean = false, onAiConsentChange: (Boolean) -> Unit = {}) {
+    isAiEnabled: Boolean = false, onAiConsentChange: (Boolean) -> Unit = {},
+    isSmsNotificationEnabled: Boolean = false, onSmsNotificationChange: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
     var adding by rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -32,9 +33,9 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     var phone by rememberSaveable { mutableStateOf("") }
     var archive by remember { mutableStateOf<Medication?>(null) }
     var removing by remember { mutableStateOf<EmergencyContact?>(null) }
-    var dialError by remember { mutableStateOf<String?>(null) }
     var showConsentDialog by remember { mutableStateOf(false) }
     var aiEnabled by remember { mutableStateOf(isAiEnabled) }
+    var smsEnabled by remember { mutableStateOf(isSmsNotificationEnabled) }
     
     LaunchedEffect(isAiEnabled) { aiEnabled = isAiEnabled }
     
@@ -91,17 +92,11 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                 Text(contact.name, style = MaterialTheme.typography.titleMedium)
                 Text("${contact.relation} · ${contact.phone}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row {
-                    TextButton(onClick = { try {
-                        context.startActivity(Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", contact.phone, null)))
-                    } catch (_: Exception) { dialError = "No hay una aplicación de llamadas disponible." } }) {
-                        Icon(painterResource(R.drawable.ic_lucide_phone), null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("Llamar")
-                    }
                     TextButton(onClick = { removing = contact }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
                 }
             } }
         }
         item {
-            dialError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             if (adding) PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 PsTextField(name, { name = it }, label = "Nombre", modifier = Modifier.fillMaxWidth())
                 PsTextField(relation, { relation = it }, label = "Relación", modifier = Modifier.fillMaxWidth())
@@ -137,6 +132,20 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                         aiEnabled = it
                     }
                 })
+            } }
+        }
+        item { PsSectionHeader("Notificaciones a contactos")
+            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Avisar a mis contactos", style = MaterialTheme.typography.titleSmall)
+                    }
+                    Switch(checked = smsEnabled, onCheckedChange = { 
+                        onSmsNotificationChange(it)
+                        smsEnabled = it
+                    })
+                }
+                Text("Si no marcas una toma en 30 minutos, enviaremos un SMS a tus contactos para que te recuerden. El mensaje no incluye el nombre de tus medicamentos.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } }
         }
         item { PsButton(onLogout, "Cerrar sesión", Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)
