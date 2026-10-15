@@ -136,7 +136,7 @@
     <string name="insights_on_track">Vas por buen camino. La meta recomendada es mantenerte por encima del 80%%.</string>
     <string name="insights_daily_aria">Adherencia diaria</string>
     <string name="insights_ai">IA</string>
-    <string name="insights_weekly_doses">Tomaste %1$d de %2$d tomas programadas hasta ahora esta semana.</string>
+    <string name="insights_weekly_doses">Tomaste %1$d de %2$d toma(s) programada(s) hasta ahora esta semana.</string>
     <string name="insights_no_doses">Todavía no hay tomas programadas para esta semana.</string>
     <string name="insights_recommendations">Recomendaciones</string>
     <string name="insights_applied">Aplicado</string>
