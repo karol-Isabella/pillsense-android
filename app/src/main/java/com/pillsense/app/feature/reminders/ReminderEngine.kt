@@ -14,6 +14,7 @@ import com.pillsense.app.core.model.ReminderCoordinator
 import com.pillsense.app.core.security.SessionStore
 import com.pillsense.app.core.util.permissions.*
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.TimeUnit
@@ -55,6 +56,10 @@ class ReminderEngine @Inject constructor(
             catch (_: SecurityException) { alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, alarmIntent()) }
         } else alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, alarmIntent())
     }
+    private fun soundRemovalIntent(intakeId: String) = PendingIntent.getBroadcast(context, intakeId.hashCode() + 1000000,
+        Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.SILENT")
+            .putExtra("id", intakeId),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     suspend fun deliver() = mutex.withLock {
         val owner = session.user.value ?: return@withLock
         repository.refresh(owner)
@@ -63,7 +68,8 @@ class ReminderEngine @Inject constructor(
         repository.dao.pending(owner).filter { it.status == "PENDING" && now > it.scheduledAt + TimeUnit.MINUTES.toMillis(60) }
             .forEach { repository.dao.act(it.id, owner, "SKIPPED", now, null) }
         if (PermissionManager.isGranted(context, AppPermission.NOTIFICATIONS) && NotificationManagerCompat.from(context).areNotificationsEnabled()) {
-            manager.createNotificationChannel(NotificationChannel("doses", "Recordatorios de medicamentos", NotificationManager.IMPORTANCE_HIGH))
+            // New channel with insistent sound (will only be created once)
+            manager.createNotificationChannel(NotificationChannel("doses-sound", "Medicamentos - Con sonido", NotificationManager.IMPORTANCE_HIGH))
             repository.dao.pending(owner).filter {
                 it.notifiedAt == null && (it.postponedUntil ?: it.scheduledAt) in (now - TimeUnit.DAYS.toMillis(1))..now
             }.forEach { intake ->
@@ -80,12 +86,15 @@ class ReminderEngine @Inject constructor(
         val scheduledLabel = java.time.Instant.ofEpochMilli(intake.scheduledAt).atZone(java.time.ZoneId.systemDefault())
             .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
         val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
-        val notification = NotificationCompat.Builder(context, "doses")
+        val notification = NotificationCompat.Builder(context, "doses-sound")
             .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
             .setContentText("${med.name} · ${med.dose} · $scheduledLabel")
             .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
             .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true)
+            .setDefaults(Notification.DEFAULT_ALL)
+        // Add FLAG_INSISTENT for 60 seconds of repeated sound
+        val notificationWithSound = notification.build().apply { flags = flags or Notification.FLAG_INSISTENT }
         listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitida").forEach { (status, label) ->
             val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
                 .setData(Uri.parse("pillsense://intake/${Uri.encode(intake.id)}/$status"))
@@ -93,8 +102,15 @@ class ReminderEngine @Inject constructor(
             val action = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             notification.addAction(0, label, action)
         }
-        manager.notify(intake.id.hashCode(), notification.build())
+        manager.notify(intake.id.hashCode(), notificationWithSound)
         repository.dao.markNotified(intake.id, System.currentTimeMillis())
+        
+        // Schedule sound removal at 60 seconds
+        val soundRemovalTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60)
+        if (PermissionManager.isGranted(context, AppPermission.EXACT_ALARM)) {
+            try { alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, soundRemovalTime, soundRemovalIntent(intake.id)) }
+            catch (_: SecurityException) { alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, soundRemovalTime, soundRemovalIntent(intake.id)) }
+        } else alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, soundRemovalTime, soundRemovalIntent(intake.id))
     }
     override suspend fun act(id: String, status: String) = mutex.withLock {
         require(status in listOf("TAKEN", "POSTPONED", "SKIPPED"))
@@ -105,6 +121,8 @@ class ReminderEngine @Inject constructor(
         val until = if (status == "POSTPONED") now + TimeUnit.MINUTES.toMillis(15) else null
         if (repository.dao.act(id, owner, status, now, until) > 0) {
             manager.cancel(id.hashCode())
+            // Cancel sound removal alarm
+            alarm.cancel(soundRemovalIntent(id))
             schedule(owner)
         }
     }
@@ -112,5 +130,31 @@ class ReminderEngine @Inject constructor(
         alarm.cancel(alarmIntent())
         manager.cancelAll()
         WorkManager.getInstance(context).cancelUniqueWork("pillsense-maintenance")
+    }
+    fun removeSoundFromNotification(intakeId: String) {
+        // Re-post notification without FLAG_INSISTENT but with same buttons
+        val intake = runBlocking { repository.dao.intake(intakeId) } ?: return
+        val med = runBlocking { repository.dao.medication(intake.medicationId) } ?: return
+        if (!med.active) return
+        val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val scheduledLabel = java.time.Instant.ofEpochMilli(intake.scheduledAt).atZone(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+        val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
+        val notification = NotificationCompat.Builder(context, "doses-sound")
+            .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
+            .setContentText("${med.name} · ${med.dose} · $scheduledLabel")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
+            .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+        listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitida").forEach { (status, label) ->
+            val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
+                .setData(Uri.parse("pillsense://intake/${Uri.encode(intakeId)}/$status"))
+                .putExtra("id", intakeId).putExtra("status", status)
+            val action = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            notification.addAction(0, label, action)
+        }
+        manager.notify(intakeId.hashCode(), notification.build())
     }
 }
