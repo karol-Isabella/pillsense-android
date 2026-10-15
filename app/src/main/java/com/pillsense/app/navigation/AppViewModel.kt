@@ -56,7 +56,8 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             try { safely {
                 repository.save(Medication(UUID.randomUUID().toString(), owner, data.name, data.dose, data.form,
-                    data.intervalHours, data.firstTime, data.instructions, LocalDate.now().toString(), data.durationDays))
+                    data.intervalHours, data.firstTime, data.instructions, LocalDate.now().toString(), data.durationDays,
+                    unitsRemaining = data.unitsRemaining, unitsPerDose = data.unitsPerDose))
                 onSaved()
                 reminders.refresh()
             } } finally { busy.value = false }

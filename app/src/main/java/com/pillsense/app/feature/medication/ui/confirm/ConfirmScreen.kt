@@ -40,6 +40,8 @@ data class ConfirmMedicationData(
     val intervalHours: Int,
     val firstTime: String,
     val durationDays: Int?,
+    val unitsRemaining: Int? = null,
+    val unitsPerDose: Int = 1,
 )
 
 @Composable
@@ -76,6 +78,8 @@ fun ConfirmScreen(
     var startTime by rememberSaveable { mutableStateOf("08:00") }
     var instructions by rememberSaveable { mutableStateOf(scannedMed?.instructions.orEmpty()) }
     var showFullText by rememberSaveable { mutableStateOf(false) }
+    var unitsRemaining by rememberSaveable { mutableStateOf("") }
+    var unitsPerDose by rememberSaveable { mutableStateOf("1") }
 
     val frequencies = listOf(
         stringResource(R.string.freq_once_daily),
@@ -136,7 +140,9 @@ fun ConfirmScreen(
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
-                                intervalHours = interval, firstTime = startTime, durationDays = durationDays
+                                intervalHours = interval, firstTime = startTime, durationDays = durationDays,
+                                unitsRemaining = unitsRemaining.toIntOrNull(),
+                                unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
                     }
@@ -282,6 +288,26 @@ fun ConfirmScreen(
                             options = forms,
                             onValueChange = { form = it }
                         )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        PsTextField(
+                            value = unitsRemaining,
+                            onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
+                            label = "Unidades en la caja (opcional)",
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        PsTextField(
+                            value = unitsPerDose,
+                            onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
+                            label = "Unidades por toma",
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -418,7 +444,9 @@ fun ConfirmScreen(
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
-                                intervalHours = interval, firstTime = startTime, durationDays = durationDays
+                                intervalHours = interval, firstTime = startTime, durationDays = durationDays,
+                                unitsRemaining = unitsRemaining.toIntOrNull(),
+                                unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
                     }
