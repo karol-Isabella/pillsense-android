@@ -8,7 +8,7 @@ data class Medication(
     @PrimaryKey val id: String, val owner: String, val name: String, val dose: String,
     val form: String, val intervalHours: Int, val firstTime: String, val instructions: String,
     val startDate: String, val durationDays: Int?, val createdAt: Long = System.currentTimeMillis(),
-    val active: Boolean = true,
+    val active: Boolean = true, val unitsRemaining: Int? = null, val unitsPerDose: Int = 1,
 )
 @Entity(tableName = "intakes", indices = [Index("owner"), Index("medicationId")])
 data class Intake(
@@ -57,5 +57,5 @@ interface PillSenseDao {
     @Query("DELETE FROM contacts WHERE id = :id AND owner = :owner")
     suspend fun deleteContact(id: String, owner: String)
 }
-@Database(entities = [Medication::class, Intake::class, EmergencyContact::class], version = 1, exportSchema = true)
+@Database(entities = [Medication::class, Intake::class, EmergencyContact::class], version = 2, exportSchema = true)
 abstract class PillSenseDatabase : RoomDatabase() { abstract fun dao(): PillSenseDao }
