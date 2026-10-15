@@ -27,8 +27,12 @@ import java.time.format.DateTimeFormatter
 fun InsightsScreen(
     intakes: List<Intake>,
     medications: List<Medication>,
+    email: String = "",
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(email) {
+        viewModel.setUserEmail(email)
+    }
     val now = System.currentTimeMillis()
     val today = LocalDate.now()
     val zone = ZoneId.systemDefault()

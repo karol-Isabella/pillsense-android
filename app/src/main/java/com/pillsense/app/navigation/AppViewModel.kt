@@ -66,8 +66,8 @@ class AppViewModel @Inject constructor(
     fun refresh() = action { reminders.refresh() }
     fun toggleTheme() = action { preferences.setDark(!dark.value) }
     fun toggleLanguage() = action { preferences.setLanguage(if (language.value == "es") "en" else "es") }
-    fun hasAiConsent(): Boolean = consentStorage.hasConsent()
-    fun setAiConsent(granted: Boolean) = action { consentStorage.setConsent(granted) }
+    fun hasAiConsent(): Boolean = consentStorage.hasConsent(user.value.orEmpty())
+    fun setAiConsent(granted: Boolean) = action { consentStorage.setConsent(user.value.orEmpty(), granted) }
     fun archive(id: String) = action { user.value?.let { repository.archive(id, it); reminders.refresh() } }
     fun saveContact(name: String, relation: String, phone: String, onSaved: () -> Unit) = action {
         val owner = user.value ?: return@action

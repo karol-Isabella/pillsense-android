@@ -176,7 +176,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                     onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, showBottomBar = false)
                             }
                             composable("history") { HistoryScreen(health.intakes, health.medications) }
-                            composable("insights") { InsightsScreen(health.intakes, health.medications) }
+                            composable("insights") { InsightsScreen(health.intakes, health.medications, user.orEmpty()) }
                             composable("profile") { ProfileScreen(user.orEmpty(), health.medications, health.contacts, dark,
                                 viewModel::toggleTheme, { viewModel.logout(); nav.popBackStack("today", false) }, viewModel::archive,
                                 viewModel::saveContact, viewModel::removeContact, { permissions() }, ready, viewModel.getUserName(),

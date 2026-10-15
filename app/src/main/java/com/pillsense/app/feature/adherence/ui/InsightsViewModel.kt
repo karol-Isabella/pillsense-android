@@ -31,14 +31,21 @@ class InsightsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(InsightsUiState())
     val uiState: StateFlow<InsightsUiState> = _uiState
+    
+    private var currentEmail = ""
 
     init {
-        _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent())
+        _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(currentEmail))
+    }
+    
+    fun setUserEmail(email: String) {
+        currentEmail = email
+        _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
     fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, apiKey: String, model: String) {
         // Check consent each time, not just at init
-        val hasConsent = consentStorage.hasConsent()
+        val hasConsent = consentStorage.hasConsent(currentEmail)
         if (!hasConsent || apiKey.isBlank()) return
         
         viewModelScope.launch {
@@ -50,6 +57,7 @@ class InsightsViewModel @Inject constructor(
                 val anonLabel = AnonymousAdherence.buildAnonymousStats(intakes, medications, zone)
                 
                 val result = geminiClient.generateAdvice(anonLabel, apiKey, model)
+                if (result.isFailure) android.util.Log.w("PillSenseAI", "fallo: ${result.exceptionOrNull()?.message}")
                 if (result.isSuccess) {
                     val response = result.getOrNull()
                     if (response != null) {
@@ -65,7 +73,7 @@ class InsightsViewModel @Inject constructor(
                         val cleanPatterns = validated.patterns.filterNot { AnonymousAdherence.containsForbiddenKeyword(it) }
                         val cleanRecs = validated.recommendations.filterNot { AnonymousAdherence.containsForbiddenKeyword(it.reason) }
                         
-                        if (cleanRecs.isNotEmpty() || cleanPatterns.isNotEmpty()) {
+                        if (response.summary.isNotBlank()) {
                             val cleanedResponse = response.copy(
                                 patterns = cleanPatterns,
                                 recommendations = cleanRecs
@@ -81,12 +89,13 @@ class InsightsViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 // Silent fail: keep local recommendations
+                android.util.Log.w("PillSenseAI", "error: ${e.javaClass.simpleName}")
             }
         }
     }
 
     fun setConsentGranted(granted: Boolean) {
-        consentStorage.setConsent(granted)
+        consentStorage.setConsent(currentEmail, granted)
         _uiState.value = _uiState.value.copy(isAiEnabled = granted)
     }
 }
