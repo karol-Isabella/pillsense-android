@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pillsense.app.BuildConfig
 import com.pillsense.app.core.database.*
@@ -53,7 +54,7 @@ fun InsightsScreen(
                     Text(average?.let { "$it%" } ?: "—", style = MaterialTheme.typography.headlineMedium)
                 }
                 Column { Text("Adherencia semanal", style = MaterialTheme.typography.titleMedium)
-                    Text(if (average == null) "Tus estadísticas aparecerán con las primeras tomas." else "${recent.count { it.status == "TAKEN" }} de ${recent.size} dosis vencidas registradas como tomadas.", style = MaterialTheme.typography.bodyMedium) }
+                    Text(if (recent.isEmpty()) stringResource(com.pillsense.app.R.string.insights_no_doses) else stringResource(com.pillsense.app.R.string.insights_weekly_doses, recent.count { it.status == "TAKEN" }, recent.size), style = MaterialTheme.typography.bodyMedium) }
             }
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
@@ -70,14 +71,6 @@ fun InsightsScreen(
                 }
             }
         } } }
-        item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("Tomadas" to weekCounts.taken, "Pospuestas" to weekCounts.postponed, "Omitidas" to weekCounts.omitted, "Pendientes" to weekCounts.pending).forEach { (label, count) ->
-                PsCard(Modifier.weight(1f)) { Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(count.toString(), style = MaterialTheme.typography.headlineSmall)
-                    Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                } }
-            }
-        } }
         if (uiState.geminiResponse != null) {
             item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -104,7 +97,7 @@ fun InsightsScreen(
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Pequeños hábitos, más constancia", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                 Text(AdherenceAdvice.generate(recent, now))
-                PsBadge("Reglas locales")
+                PsBadge("Basado en tus registros")
             } }
         }
         item { Text("Esta app no sustituye a un profesional de salud.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }

@@ -135,6 +135,8 @@
     <string name="insights_on_track">You\'re on track. The recommended goal is to stay above 80%%.</string>
     <string name="insights_daily_aria">Daily adherence</string>
     <string name="insights_ai">AI</string>
+    <string name="insights_weekly_doses">You took %1$d of %2$d scheduled doses so far this week.</string>
+    <string name="insights_no_doses">There are no scheduled doses yet for this week.</string>
     <string name="insights_recommendations">Recommendations</string>
     <string name="insights_applied">Applied</string>
     <string name="insights_per_med">By medication</string>
