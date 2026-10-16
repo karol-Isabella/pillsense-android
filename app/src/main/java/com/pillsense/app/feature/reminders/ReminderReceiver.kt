@@ -10,6 +10,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class ReminderReceiver : BroadcastReceiver() {
     @Inject lateinit var engine: ReminderEngine
+    @Inject lateinit var smsEngine: SmsNotificationEngine
     override fun onReceive(context: Context, intent: Intent) {
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
@@ -19,6 +20,8 @@ class ReminderReceiver : BroadcastReceiver() {
                         intent.getStringExtra("status") ?: return@launch)
                     "com.pillsense.REMIND" -> engine.deliver()
                     "com.pillsense.SILENT" -> engine.removeSoundFromNotification(intent.getStringExtra("id") ?: return@launch)
+                    "com.pillsense.SMS" -> smsEngine.sendSms(intent.getStringExtra("intakeId") ?: return@launch,
+                        intent.getStringExtra("owner") ?: return@launch)
                     Intent.ACTION_BOOT_COMPLETED -> engine.refresh()
                     else -> engine.refresh()
                 }
