@@ -1,3 +1,5 @@
+
+import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,9 +21,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        val geminiApiKey = project.findProperty("GEMINI_API_KEY") as? String ?: ""
-        val geminiModel = project.findProperty("GEMINI_MODEL") as? String ?: "gemini-3.8-flash"
+        val localProps = Properties().apply {
+            val f = rootProject.file("local.properties")
+            if (f.exists()) f.inputStream().use { load(it) }
+        }
+        val geminiApiKey = localProps.getProperty("GEMINI_API_KEY", "").trim()
+        val geminiModel = localProps.getProperty("GEMINI_MODEL", "gemini-3.8-flash").trim()
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         buildConfigField("String", "GEMINI_MODEL", "\"$geminiModel\"")
 
