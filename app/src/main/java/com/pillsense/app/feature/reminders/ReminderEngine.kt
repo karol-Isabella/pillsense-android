@@ -26,6 +26,7 @@ class ReminderEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: HealthRepository,
     private val session: SessionStore,
+    private val smsEngine: SmsNotificationEngine,
 ) : ReminderCoordinator {
     private val mutex = Mutex()
     private val alarm get() = context.getSystemService(AlarmManager::class.java)
@@ -105,6 +106,9 @@ class ReminderEngine @Inject constructor(
         manager.notify(intake.id.hashCode(), notificationWithSound)
         repository.dao.markNotified(intake.id, System.currentTimeMillis())
         
+        // Schedule SMS alarm for this intake
+        smsEngine.scheduleSmsAlarm(intake.id)
+        
         // Schedule sound removal at 60 seconds
         val soundRemovalTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60)
         if (PermissionManager.isGranted(context, AppPermission.EXACT_ALARM)) {
@@ -123,6 +127,8 @@ class ReminderEngine @Inject constructor(
             manager.cancel(id.hashCode())
             // Cancel sound removal alarm
             alarm.cancel(soundRemovalIntent(id))
+            // Cancel SMS alarm
+            smsEngine.cancelSmsAlarm(id)
             schedule(owner)
         }
     }

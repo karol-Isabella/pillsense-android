@@ -28,6 +28,8 @@ interface PillSenseDao {
     fun observeIntakes(owner: String): Flow<List<Intake>>
     @Query("SELECT * FROM contacts WHERE owner = :owner ORDER BY name")
     fun observeContacts(owner: String): Flow<List<EmergencyContact>>
+    @Query("SELECT * FROM contacts WHERE owner = :owner ORDER BY name")
+    suspend fun contacts(owner: String): List<EmergencyContact>
     @Query("SELECT * FROM medications WHERE owner = :owner AND active = 1")
     suspend fun activeMedications(owner: String): List<Medication>
     @Query("SELECT MAX(scheduledAt) FROM intakes WHERE medicationId = :id")
