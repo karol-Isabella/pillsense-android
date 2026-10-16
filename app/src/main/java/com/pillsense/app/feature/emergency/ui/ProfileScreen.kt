@@ -36,6 +36,7 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     var name by rememberSaveable { mutableStateOf("") }
     var relation by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
+    var consentAgreed by rememberSaveable { mutableStateOf(false) }
     var archive by remember { mutableStateOf<Medication?>(null) }
     var removing by remember { mutableStateOf<EmergencyContact?>(null) }
     var showConsentDialog by remember { mutableStateOf(false) }
@@ -138,10 +139,15 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
         item {
             if (adding) PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 PsTextField(name, { name = it }, label = "Nombre", modifier = Modifier.fillMaxWidth())
-                PsTextField(relation, { relation = it }, label = "Relación", modifier = Modifier.fillMaxWidth())
-                PsTextField(phone, { phone = it }, label = "Teléfono", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
-                PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = "" } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phone.count { it.isDigit() } in 7..15)
-                TextButton(onClick = { adding = false }) { Text("Cancelar") }
+                PsTextField(relation, { relation = it }, label = "Relación (opcional)", modifier = Modifier.fillMaxWidth())
+                PsTextField(phone, { phone = it.filter { c -> c.isDigit() || c == '+' || c == ' ' } }, label = "Teléfono", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Checkbox(checked = consentAgreed, onCheckedChange = { consentAgreed = it }, modifier = Modifier.size(24.dp))
+                    Text("Esta persona está de acuerdo en recibir estos avisos", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                }
+                val phoneDigitCount = phone.count { it.isDigit() }
+                PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phoneDigitCount in 7..15 && consentAgreed)
+                TextButton(onClick = { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false }) { Text("Cancelar") }
             } } else if (smsEnabled) PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary, enabled = contacts.size < 2)
         }
         item { PsSectionHeader("Recordatorios")
@@ -154,7 +160,7 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
         item { PsSectionHeader("Privacidad")
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Todo empieza en tu teléfono", style = MaterialTheme.typography.titleMedium)
-                Text("Lectura de fotos sin conexión, datos cifrados y consejos automáticos basados en tus registros. No necesitas cuentas externas ni claves de API.")
+                Text("Tus datos se guardan cifrados en tu teléfono. El análisis con IA es opcional y solo envía estadísticas anónimas.", style = MaterialTheme.typography.bodySmall)
             } }
         }
         item { PsSectionHeader("Análisis con IA")

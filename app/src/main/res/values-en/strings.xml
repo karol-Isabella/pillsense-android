@@ -146,6 +146,7 @@
     <string name="profile_my_meds">My medications</string>
     <string name="profile_units">%1$d left</string>
     <string name="profile_emergency">Contacts</string>
+    <string name="profile_emergency_section">Contacts</string>
     <string name="profile_call">Call %1$s</string>
     <string name="profile_remove">Remove %1$s</string>
     <string name="profile_name_label">Name</string>
