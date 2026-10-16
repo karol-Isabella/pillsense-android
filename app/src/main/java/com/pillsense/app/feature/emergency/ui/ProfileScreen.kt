@@ -2,6 +2,7 @@ package com.pillsense.app.feature.emergency.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,12 +13,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
 import com.pillsense.app.R
 import com.pillsense.app.core.database.*
 import com.pillsense.app.core.designsystem.*
+import com.pillsense.app.core.util.permissions.AppPermission
+import com.pillsense.app.core.util.permissions.PermissionManager
 
 @Composable
 fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<EmergencyContact>, dark: Boolean,
@@ -36,6 +41,18 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     var showConsentDialog by remember { mutableStateOf(false) }
     var aiEnabled by remember { mutableStateOf(isAiEnabled) }
     var smsEnabled by remember { mutableStateOf(isSmsNotificationEnabled) }
+    var showSmsConsentDialog by remember { mutableStateOf(false) }
+    var showSmsPermissionDenied by remember { mutableStateOf(false) }
+    
+    val smsPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            onSmsNotificationChange(true)
+            smsEnabled = true
+        } else {
+            showSmsPermissionDenied = true
+            smsEnabled = false
+        }
+    }
     
     LaunchedEffect(isAiEnabled) { aiEnabled = isAiEnabled }
     
@@ -54,6 +71,28 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
             } },
             confirmButton = { TextButton(onClick = { showConsentDialog = false; onAiConsentChange(true); aiEnabled = true }) { Text("Aceptar") } },
             dismissButton = { TextButton(onClick = { showConsentDialog = false; aiEnabled = false }) { Text("Ahora no") } })
+    }
+    if (showSmsConsentDialog) {
+        AlertDialog(onDismissRequest = { showSmsConsentDialog = false }, 
+            title = { Text(stringResource(R.string.profile_sms_dialog_title)) },
+            text = { Text(stringResource(R.string.profile_sms_dialog_message)) },
+            confirmButton = { TextButton(onClick = { 
+                showSmsConsentDialog = false
+                // Request SEND_SMS permission
+                if (PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
+                    onSmsNotificationChange(true)
+                    smsEnabled = true
+                } else {
+                    PermissionManager.requestPermission(smsPermissionLauncher, AppPermission.SEND_SMS)
+                }
+            }) { Text("Aceptar") } },
+            dismissButton = { TextButton(onClick = { showSmsConsentDialog = false; smsEnabled = false }) { Text("Ahora no") } })
+    }
+    if (showSmsPermissionDenied) {
+        AlertDialog(onDismissRequest = { showSmsPermissionDenied = false }, 
+            title = { Text("Permiso rechazado") },
+            text = { Text(stringResource(R.string.profile_sms_permission_denied)) },
+            confirmButton = { TextButton(onClick = { showSmsPermissionDenied = false }) { Text("Entendido") } })
     }
     archive?.let { med -> AlertDialog(onDismissRequest = { archive = null }, title = { Text("Finalizar tratamiento") },
         text = { Text("Se detendrán los recordatorios de ${med.name}. El historial se conservará.") },
@@ -103,7 +142,7 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                 PsTextField(phone, { phone = it }, label = "Teléfono", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
                 PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = "" } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phone.count { it.isDigit() } in 7..15)
                 TextButton(onClick = { adding = false }) { Text("Cancelar") }
-            } } else PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary)
+            } } else if (smsEnabled) PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary, enabled = contacts.size < 2)
         }
         item { PsSectionHeader("Recordatorios")
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -140,12 +179,18 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     Column(Modifier.weight(1f)) {
                         Text("Avisar a mis contactos", style = MaterialTheme.typography.titleSmall)
                     }
-                    Switch(checked = smsEnabled, onCheckedChange = { 
-                        onSmsNotificationChange(it)
-                        smsEnabled = it
+                    Switch(checked = smsEnabled, onCheckedChange = { checked ->
+                        if (checked && !isSmsNotificationEnabled) {
+                            // First activation: show consent dialog
+                            showSmsConsentDialog = true
+                        } else if (!checked) {
+                            // Disabling
+                            onSmsNotificationChange(false)
+                            smsEnabled = false
+                        }
                     })
                 }
-                Text("Si no marcas una toma en 30 minutos, enviaremos un SMS a tus contactos para que te recuerden. El mensaje no incluye el nombre de tus medicamentos.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.profile_sms_notify_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } }
         }
         item { PsButton(onLogout, "Cerrar sesión", Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)

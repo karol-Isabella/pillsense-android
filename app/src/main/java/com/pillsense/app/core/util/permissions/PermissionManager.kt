@@ -24,7 +24,8 @@ enum class AppPermission(val manifestPermission: String) {
             Manifest.permission.SCHEDULE_EXACT_ALARM
         else ""
     ),
-    CAMERA(Manifest.permission.CAMERA);
+    CAMERA(Manifest.permission.CAMERA),
+    SEND_SMS(Manifest.permission.SEND_SMS);
 }
 
 object PermissionManager {

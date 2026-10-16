@@ -159,6 +159,10 @@
     <string name="profile_cancel">Cancelar</string>
     <string name="profile_add">Añadir</string>
     <string name="profile_add_contact">Añadir contacto</string>
+    <string name="profile_sms_dialog_title">Avisar a mis contactos</string>
+    <string name="profile_sms_dialog_message">Si no marcas una toma en 30 minutos, enviaremos un SMS a tus contactos. El mensaje no incluye el nombre de tus medicamentos. Puede usar el saldo o plan de tu línea.</string>
+    <string name="profile_sms_notify_text">Si no marcas una toma en 30 minutos, enviaremos un SMS a tus contactos para que te recuerden. El mensaje no incluye el nombre de tus medicamentos.</string>
+    <string name="profile_sms_permission_denied">Permiso rechazado. No podremos enviar SMS sin este permiso.</string>
     <string name="profile_appearance">Apariencia e idioma</string>
     <string name="profile_theme">Tema</string>
     <string name="profile_light">Claro</string>

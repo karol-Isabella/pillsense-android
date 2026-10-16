@@ -158,6 +158,10 @@
     <string name="profile_cancel">Cancel</string>
     <string name="profile_add">Add</string>
     <string name="profile_add_contact">Add contact</string>
+    <string name="profile_sms_dialog_title">Notify my contacts</string>
+    <string name="profile_sms_dialog_message">If you don\'t mark a dose in 30 minutes, we\'ll send an SMS to your contacts. The message does not include your medication names. It may use your phone plan credit.</string>
+    <string name="profile_sms_notify_text">If you don\'t mark a dose in 30 minutes, we\'ll send an SMS to your contacts to remind you. The message does not include your medication names.</string>
+    <string name="profile_sms_permission_denied">Permission denied. We won\'t be able to send SMS without this permission.</string>
     <string name="profile_appearance">Appearance &amp; language</string>
     <string name="profile_theme">Theme</string>
     <string name="profile_light">Light</string>
