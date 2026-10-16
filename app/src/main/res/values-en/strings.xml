@@ -213,4 +213,7 @@
     <string name="rec_vitamin_d3_snoozed">You keep snoozing Vitamin D3</string>
     <string name="rec_vitamin_d3_adjustment">You usually take it 25 min after the alert. Scheduling it at 10:00 fits your breakfast routine better.</string>
     <string name="rec_adjust_to_10">Adjust to 10:00</string>
+    
+    <!-- SMS Notifications -->
+    <string name="sms_notification_message">PillSense: %1$s has not confirmed a dose of their medication. Please contact that person.</string>
 </resources>

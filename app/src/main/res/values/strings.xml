@@ -214,4 +214,7 @@
     <string name="rec_vitamin_d3_snoozed">Pospones la Vitamina D3</string>
     <string name="rec_vitamin_d3_adjustment">Sueles tomarla 25 min después del aviso. Programarla a las 10:00 se ajusta mejor a tu rutina de desayuno.</string>
     <string name="rec_adjust_to_10">Ajustar a 10:00</string>
+    
+    <!-- SMS Notifications -->
+    <string name="sms_notification_message">PillSense: %1$s no ha confirmado una toma de su medicación. Por favor comunícate con esa persona.</string>
 </resources>
