@@ -57,6 +57,14 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     
     LaunchedEffect(isAiEnabled) { aiEnabled = isAiEnabled }
     
+    // Check SEND_SMS permission each time Perfil opens
+    LaunchedEffect(Unit) {
+        if (smsEnabled && !PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
+            smsEnabled = false
+            onSmsNotificationChange(false)
+        }
+    }
+    
     if (showConsentDialog) {
         AlertDialog(onDismissRequest = { showConsentDialog = false }, 
             title = { Text("Análisis con IA") },
@@ -100,7 +108,7 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
         confirmButton = { TextButton(onClick = { onArchive(med.id); archive = null }) { Text("Finalizar") } },
         dismissButton = { TextButton(onClick = { archive = null }) { Text("Cancelar") } }) }
     removing?.let { contact -> AlertDialog(onDismissRequest = { removing = null }, title = { Text("Eliminar contacto") },
-        text = { Text("¿Eliminar a ${contact.name} de tus contactos de emergencia?") },
+        text = { Text("¿Eliminar a ${contact.name} de tus contactos?") },
         confirmButton = { TextButton(onClick = { onRemoveContact(contact.id); removing = null }) { Text("Eliminar") } },
         dismissButton = { TextButton(onClick = { removing = null }) { Text("Cancelar") } }) }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -126,29 +134,48 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                 TextButton(onClick = { archive = med }) { Text("Finalizar tratamiento", color = MaterialTheme.colorScheme.error) }
             } }
         }
-        item { PsSectionHeader("Contactos de emergencia") }
-        items(contacts, key = { it.id }) { contact ->
-            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
-                Text(contact.name, style = MaterialTheme.typography.titleMedium)
-                Text("${contact.relation} · ${contact.phone}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row {
-                    TextButton(onClick = { removing = contact }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+        item { PsSectionHeader("Contactos")
+            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Avisar a mis contactos", style = MaterialTheme.typography.titleSmall)
+                    }
+                    Switch(checked = smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS), onCheckedChange = { checked ->
+                        if (checked && !isSmsNotificationEnabled) {
+                            showSmsConsentDialog = true
+                        } else if (!checked) {
+                            onSmsNotificationChange(false)
+                            smsEnabled = false
+                        }
+                    })
                 }
+                Text(stringResource(R.string.profile_sms_notify_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } }
         }
-        item {
-            if (adding) PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                PsTextField(name, { name = it }, label = "Nombre", modifier = Modifier.fillMaxWidth())
-                PsTextField(relation, { relation = it }, label = "Relación (opcional)", modifier = Modifier.fillMaxWidth())
-                PsTextField(phone, { phone = it.filter { c -> c.isDigit() || c == '+' || c == ' ' } }, label = "Teléfono", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Checkbox(checked = consentAgreed, onCheckedChange = { consentAgreed = it }, modifier = Modifier.size(24.dp))
-                    Text("Esta persona está de acuerdo en recibir estos avisos", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                }
-                val phoneDigitCount = phone.count { it.isDigit() }
-                PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phoneDigitCount in 7..15 && consentAgreed)
-                TextButton(onClick = { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false }) { Text("Cancelar") }
-            } } else if (smsEnabled) PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary, enabled = contacts.size < 2)
+        if (smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
+            items(contacts, key = { it.id }) { contact ->
+                PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
+                    Text(contact.name, style = MaterialTheme.typography.titleMedium)
+                    Text("${contact.relation} · ${contact.phone}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Row {
+                        TextButton(onClick = { removing = contact }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                    }
+                } }
+            }
+            item {
+                if (adding) PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    PsTextField(name, { name = it }, label = "Nombre", modifier = Modifier.fillMaxWidth())
+                    PsTextField(relation, { relation = it }, label = "Relación (opcional)", modifier = Modifier.fillMaxWidth())
+                    PsTextField(phone, { phone = it.filter { c -> c.isDigit() || c == '+' || c == ' ' } }, label = "Teléfono", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), modifier = Modifier.fillMaxWidth())
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Checkbox(checked = consentAgreed, onCheckedChange = { consentAgreed = it }, modifier = Modifier.size(24.dp))
+                        Text("Esta persona está de acuerdo en recibir estos avisos", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                    }
+                    val phoneDigitCount = phone.count { it.isDigit() }
+                    PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phoneDigitCount in 7..15 && consentAgreed)
+                    TextButton(onClick = { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false }) { Text("Cancelar") }
+                } } else PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary, enabled = contacts.size < 2)
+            }
         }
         item { PsSectionHeader("Recordatorios")
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
