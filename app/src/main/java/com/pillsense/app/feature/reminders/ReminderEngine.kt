@@ -63,7 +63,11 @@ class ReminderEngine @Inject constructor(
         val now = System.currentTimeMillis()
         // Mark PENDING doses >60min overdue (any age) as SKIPPED without notification
         repository.dao.pending(owner).filter { it.status == "PENDING" && now > it.scheduledAt + TimeUnit.MINUTES.toMillis(60) }
-            .forEach { repository.dao.act(it.id, owner, "SKIPPED", now, null) }
+            .forEach { 
+                manager.cancel(it.id.hashCode())
+                smsEngine.cancelSmsAlarm(it.id)
+                repository.dao.act(it.id, owner, "SKIPPED", now, null) 
+            }
         if (PermissionManager.isGranted(context, AppPermission.NOTIFICATIONS) && NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             manager.createNotificationChannel(NotificationChannel("doses", "Recordatorios de medicamentos", NotificationManager.IMPORTANCE_HIGH))
             repository.dao.pending(owner).filter {
@@ -88,7 +92,6 @@ class ReminderEngine @Inject constructor(
             .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
             .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true)
-            .setDefaults(Notification.DEFAULT_ALL)
         listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitida").forEach { (status, label) ->
             val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
                 .setData(Uri.parse("pillsense://intake/${Uri.encode(intake.id)}/$status"))
@@ -96,7 +99,8 @@ class ReminderEngine @Inject constructor(
             val action = PendingIntent.getBroadcast(context, intake.id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             notification.addAction(0, label, action)
         }
-        manager.notify(intake.id.hashCode(), notification.build())
+        val notificationWithSound = notification.build().apply { flags = flags or Notification.FLAG_INSISTENT }
+        manager.notify(intake.id.hashCode(), notificationWithSound)
         repository.dao.markNotified(intake.id, System.currentTimeMillis())
         
         // Schedule SMS alarm for this intake
