@@ -16,6 +16,8 @@ import com.pillsense.app.core.util.permissions.PermissionManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,6 +34,14 @@ class SmsNotificationEngine @Inject constructor(
     fun scheduleSmsAlarm(intakeId: String) {
         val owner = session.user.value ?: return
         val smsTime = System.currentTimeMillis() + (SmsConstants.SMS_DELAY_MINUTES * 60 * 1000)
+        
+        // Check if exact alarm permission is available
+        if (!PermissionManager.isGranted(context, AppPermission.EXACT_ALARM)) {
+            Timber.tag("PillSenseSMS").d("programada para %s (inexacta)", formatTime(smsTime))
+        } else {
+            Timber.tag("PillSenseSMS").d("programada para %s", formatTime(smsTime))
+        }
+        
         val intent = Intent(context, ReminderReceiver::class.java)
             .setAction("com.pillsense.SMS")
             .putExtra("intakeId", intakeId)
@@ -49,7 +59,14 @@ class SmsNotificationEngine @Inject constructor(
         } else alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, smsTime, pendingIntent)
     }
     
+    private fun formatTime(timeMs: Long): String {
+        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return sdf.format(Date(timeMs))
+    }
+    
     fun sendSms(intakeId: String, owner: String) {
+        Timber.tag("PillSenseSMS").d("disparada")
+        
         // Check if already sent (avoid duplicates)
         if (sharedPrefs.getBoolean("sent_$intakeId", false)) {
             Timber.tag("PillSenseSMS").d("toma ya resuelta")
@@ -102,7 +119,7 @@ class SmsNotificationEngine @Inject constructor(
             sharedPrefs.edit().putBoolean("sent_$intakeId", true).apply()
             Timber.tag("PillSenseSMS").d("enviado")
         } catch (e: Exception) {
-            Timber.tag("PillSenseSMS").d("error")
+            Timber.tag("PillSenseSMS").d("error: %s", e.javaClass.simpleName)
         }
     }
     
