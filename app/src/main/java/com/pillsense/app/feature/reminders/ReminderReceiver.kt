@@ -19,7 +19,6 @@ class ReminderReceiver : BroadcastReceiver() {
                     "com.pillsense.ACTION" -> engine.act(intent.getStringExtra("id") ?: return@launch,
                         intent.getStringExtra("status") ?: return@launch)
                     "com.pillsense.REMIND" -> engine.deliver()
-                    "com.pillsense.SILENT" -> engine.removeSoundFromNotification(intent.getStringExtra("id") ?: return@launch)
                     "com.pillsense.SMS" -> smsEngine.sendSms(intent.getStringExtra("intakeId") ?: return@launch,
                         intent.getStringExtra("owner") ?: return@launch)
                     Intent.ACTION_BOOT_COMPLETED -> engine.refresh()
