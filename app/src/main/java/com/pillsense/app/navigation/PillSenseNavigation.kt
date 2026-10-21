@@ -121,7 +121,15 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
             PermissionManager.requestPermission(notification, AppPermission.NOTIFICATIONS)
         } else if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
             notificationSettings.launch(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName))
-        } else requestExact()
+        } else if (Build.VERSION.SDK_INT >= 31 && !PermissionManager.isGranted(context, AppPermission.EXACT_ALARM)) {
+            exact.launch(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply { data = Uri.parse("package:${context.packageName}") })
+        } else {
+            try {
+                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = Uri.parse("package:${context.packageName}") })
+            } catch (_: Exception) {
+                finishPermissions()
+            }
+        }
     }
     val localizedContext = remember(context, language) {
         val config = android.content.res.Configuration(context.resources.configuration)
