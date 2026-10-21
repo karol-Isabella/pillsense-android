@@ -46,7 +46,14 @@ class InsightsViewModel @Inject constructor(
     fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, apiKey: String, model: String) {
         // Check consent each time, not just at init
         val hasConsent = consentStorage.hasConsent(currentEmail)
-        if (!hasConsent || apiKey.isBlank()) return
+        if (!hasConsent) {
+            android.util.Log.d("PillSenseAI", "sin consentimiento")
+            return
+        }
+        if (apiKey.isBlank()) {
+            android.util.Log.d("PillSenseAI", "sin clave API")
+            return
+        }
         
         viewModelScope.launch {
             try {
@@ -56,13 +63,22 @@ class InsightsViewModel @Inject constructor(
                 // Build anonymous stats
                 val anonLabel = AnonymousAdherence.buildAnonymousStats(intakes, medications, zone)
                 
+                if (intakes.isEmpty()) {
+                    android.util.Log.d("PillSenseAI", "sin datos de tomas")
+                    return@launch
+                }
+                
                 val result = geminiClient.generateAdvice(anonLabel, apiKey, model)
-                if (result.isFailure) android.util.Log.w("PillSenseAI", "fallo: ${result.exceptionOrNull()?.message}")
+                if (result.isFailure) {
+                    android.util.Log.w("PillSenseAI", "fallo: ${result.exceptionOrNull()?.message}")
+                    return@launch
+                }
                 if (result.isSuccess) {
                     val response = result.getOrNull()
                     if (response != null) {
                         // Filter: discard if summary contains forbidden keywords
                         if (AnonymousAdherence.containsForbiddenKeyword(response.summary)) {
+                            android.util.Log.d("PillSenseAI", "filtrado: palabras prohibidas")
                             return@launch  // Silent fall back to local
                         }
                         
@@ -84,6 +100,9 @@ class InsightsViewModel @Inject constructor(
                             )
                             consentStorage.setLastAdviceText(cleanedResponse.summary)
                             consentStorage.setLastAdviceDate(LocalDate.now().toString())
+                            android.util.Log.d("PillSenseAI", "consejo generado exitosamente")
+                        } else {
+                            android.util.Log.d("PillSenseAI", "resumen vacío")
                         }
                     }
                 }
