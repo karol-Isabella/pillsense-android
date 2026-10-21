@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.telephony.SmsManager
+import android.util.Log
 import androidx.core.content.ContextCompat
 import com.pillsense.app.core.data.HealthRepository
 import com.pillsense.app.core.security.SessionStore
@@ -74,7 +75,9 @@ class SmsNotificationEngine @Inject constructor(
         }
         
         // Check SMS permission
-        if (!PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
+        val permissionGranted = PermissionManager.isGranted(context, AppPermission.SEND_SMS)
+        Log.d("PillSenseSMS", "SEND_SMS permission granted: $permissionGranted")
+        if (!permissionGranted) {
             Timber.tag("PillSenseSMS").d("sin permiso")
             return
         }
@@ -82,7 +85,9 @@ class SmsNotificationEngine @Inject constructor(
         // Check if SMS notifications are enabled for this account
         val smsStorage = context.getSharedPreferences("sms-notifications", Context.MODE_PRIVATE)
         val normalizedEmail = owner.lowercase().trim()
-        if (!smsStorage.getBoolean("enabled_$normalizedEmail", false)) {
+        val smsEnabled = smsStorage.getBoolean("enabled_$normalizedEmail", false)
+        Log.d("PillSenseSMS", "SMS toggle active: $smsEnabled")
+        if (!smsEnabled) {
             Timber.tag("PillSenseSMS").d("interruptor apagado")
             return
         }
@@ -96,6 +101,7 @@ class SmsNotificationEngine @Inject constructor(
         
         // Get first contact
         val contacts = runBlocking { repository.dao.contacts(owner) }
+        Log.d("PillSenseSMS", "Contacts count: ${contacts.size}")
         if (contacts.isEmpty()) {
             Timber.tag("PillSenseSMS").d("sin contactos")
             return
@@ -113,13 +119,16 @@ class SmsNotificationEngine @Inject constructor(
             val firstName = contact.name.split(" ").first().takeIf { it.isNotEmpty() } ?: "Tu contacto"
             val message = "PillSense: $firstName no ha confirmado una toma de su medicación. Por favor comunícate con esa persona."
             
+            Log.d("PillSenseSMS", "Attempting sendTextMessage")
             smsManager.sendTextMessage(contact.phone, null, message, null, null)
             
             // Mark as sent
             sharedPrefs.edit().putBoolean("sent_$intakeId", true).apply()
             Timber.tag("PillSenseSMS").d("enviado")
+            Log.d("PillSenseSMS", "SMS sent successfully")
         } catch (e: Exception) {
             Timber.tag("PillSenseSMS").d("error: %s", e.javaClass.simpleName)
+            Log.w("PillSenseSMS", "Send failed: ${e.javaClass.simpleName}")
         }
     }
     
