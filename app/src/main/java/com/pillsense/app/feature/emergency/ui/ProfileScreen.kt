@@ -140,7 +140,8 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     Column(Modifier.weight(1f)) {
                         Text("Avisar a mis contactos", style = MaterialTheme.typography.titleSmall)
                     }
-                    Switch(checked = smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS), onCheckedChange = { checked ->
+                    val smsSwitchEnabled = smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS)
+                    Switch(checked = smsSwitchEnabled, onCheckedChange = { checked ->
                         if (checked && !isSmsNotificationEnabled) {
                             showSmsConsentDialog = true
                         } else if (!checked) {
@@ -204,26 +205,6 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                         aiEnabled = it
                     }
                 })
-            } }
-        }
-        item { PsSectionHeader("Notificaciones a contactos")
-            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text("Avisar a mis contactos", style = MaterialTheme.typography.titleSmall)
-                    }
-                    Switch(checked = smsEnabled, onCheckedChange = { checked ->
-                        if (checked && !isSmsNotificationEnabled) {
-                            // First activation: show consent dialog
-                            showSmsConsentDialog = true
-                        } else if (!checked) {
-                            // Disabling
-                            onSmsNotificationChange(false)
-                            smsEnabled = false
-                        }
-                    })
-                }
-                Text(stringResource(R.string.profile_sms_notify_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } }
         }
         item { PsButton(onLogout, "Cerrar sesión", Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)
