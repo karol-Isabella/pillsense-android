@@ -18,6 +18,17 @@ class ReminderReceiver : BroadcastReceiver() {
                 when (intent.action) {
                     "com.pillsense.ACTION" -> engine.act(intent.getStringExtra("id") ?: return@launch,
                         intent.getStringExtra("status") ?: return@launch)
+                    "com.pillsense.DISMISSED" -> {
+                        val id = intent.getStringExtra("id") ?: return@launch
+                        val intake = engine.repository.dao.intake(id)
+                        if (intake != null && intake.status == "PENDING") {
+                            val notif = engine.buildNotification(intake)
+                            if (notif != null) {
+                                val manager = context.getSystemService(android.app.NotificationManager::class.java)
+                                manager.notify(id.hashCode(), notif)
+                            }
+                        }
+                    }
                     "com.pillsense.REMIND" -> engine.deliver()
                     "com.pillsense.SMS" -> smsEngine.sendSms(intent.getStringExtra("intakeId") ?: return@launch,
                         intent.getStringExtra("owner") ?: return@launch)

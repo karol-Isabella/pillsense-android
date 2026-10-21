@@ -24,7 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class ReminderEngine @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: HealthRepository,
+    val repository: HealthRepository,
     private val session: SessionStore,
     private val smsEngine: SmsNotificationEngine,
 ) : ReminderCoordinator {
@@ -79,28 +79,8 @@ class ReminderEngine @Inject constructor(
         schedule(owner)
     }
     private suspend fun show(intake: Intake) {
-        val med = repository.dao.medication(intake.medicationId) ?: return
-        if (!med.active) return
-        val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val scheduledLabel = java.time.Instant.ofEpochMilli(intake.scheduledAt).atZone(java.time.ZoneId.systemDefault())
-            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
-        val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
-        val notification = NotificationCompat.Builder(context, "doses")
-            .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
-            .setContentText("${med.name} · ${med.dose} · $scheduledLabel")
-            .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
-            .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(true)
-        listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitida").forEach { (status, label) ->
-            val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
-                .setData(Uri.parse("pillsense://intake/${Uri.encode(intake.id)}/$status"))
-                .putExtra("id", intake.id).putExtra("status", status)
-            val action = PendingIntent.getBroadcast(context, intake.id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-            notification.addAction(0, label, action)
-        }
-        val notificationWithSound = notification.build().apply { flags = flags or Notification.FLAG_INSISTENT }
-        manager.notify(intake.id.hashCode(), notificationWithSound)
+        val builtNotification = buildNotification(intake) ?: return
+        manager.notify(intake.id.hashCode(), builtNotification)
         repository.dao.markNotified(intake.id, System.currentTimeMillis())
         
         // Schedule SMS alarm for this intake
@@ -124,5 +104,33 @@ class ReminderEngine @Inject constructor(
         alarm.cancel(alarmIntent())
         manager.cancelAll()
         WorkManager.getInstance(context).cancelUniqueWork("pillsense-maintenance")
+    }
+    suspend fun buildNotification(intake: Intake): Notification? {
+        val med = repository.dao.medication(intake.medicationId) ?: return null
+        if (!med.active) return null
+        val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val scheduledLabel = java.time.Instant.ofEpochMilli(intake.scheduledAt).atZone(java.time.ZoneId.systemDefault())
+            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+        val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
+        val notification = NotificationCompat.Builder(context, "doses")
+            .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
+            .setContentText("${med.name} · ${med.dose} · $scheduledLabel")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
+            .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(false).setOngoing(true)
+        listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitir").forEach { (status, label) ->
+            val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
+                .setData(Uri.parse("pillsense://intake/${Uri.encode(intake.id)}/$status"))
+                .putExtra("id", intake.id).putExtra("status", status)
+            val action = PendingIntent.getBroadcast(context, intake.id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            notification.addAction(0, label, action)
+        }
+        val deleteIntent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.DISMISSED")
+            .putExtra("id", intake.id)
+        val deleteAction = PendingIntent.getBroadcast(context, intake.id.hashCode() + 1000000, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        notification.setDeleteIntent(deleteAction)
+        val notificationWithSound = notification.build().apply { flags = flags or Notification.FLAG_INSISTENT }
+        return notificationWithSound
     }
 }
