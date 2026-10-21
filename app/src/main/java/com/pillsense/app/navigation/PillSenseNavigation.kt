@@ -124,11 +124,14 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
         } else if (Build.VERSION.SDK_INT >= 31 && !PermissionManager.isGranted(context, AppPermission.EXACT_ALARM)) {
             exact.launch(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply { data = Uri.parse("package:${context.packageName}") })
         } else {
-            try {
-                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = Uri.parse("package:${context.packageName}") })
-            } catch (_: Exception) {
-                finishPermissions()
-            }
+            finishPermissions()
+        }
+    }
+    fun openPermissionsSettings() {
+        try {
+            context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply { data = Uri.parse("package:${context.packageName}") })
+        } catch (_: Exception) {
+            finishPermissions()
         }
     }
     val localizedContext = remember(context, language) {
@@ -187,7 +190,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                             composable("insights") { InsightsScreen(health.intakes, health.medications, user.orEmpty()) }
                             composable("profile") { ProfileScreen(user.orEmpty(), health.medications, health.contacts, dark,
                                 viewModel::toggleTheme, { viewModel.logout(); nav.popBackStack("today", false) }, viewModel::archive,
-                                viewModel::saveContact, viewModel::removeContact, { permissions() }, ready, viewModel.getUserName(),
+                                viewModel::saveContact, viewModel::removeContact, { openPermissionsSettings() }, ready, viewModel.getUserName(),
                                 isAiEnabled = viewModel.hasAiConsent(), onAiConsentChange = { viewModel.setAiConsent(it) },
                                 isSmsNotificationEnabled = viewModel.isSmsNotificationEnabled(), onSmsNotificationChange = { viewModel.setSmsNotificationEnabled(it) }) }
                             composable("scan") { ScanScreen(onScanComplete = {
