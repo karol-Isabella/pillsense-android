@@ -5,6 +5,7 @@
     <!-- Tabs & Navigation -->
     <string name="tab_today">Today</string>
     <string name="tab_history">History</string>
+    <string name="tab_scan">Scan</string>
     <string name="tab_insights">Progress</string>
     <string name="tab_profile">Profile</string>
     <string name="nav_main">Main navigation</string>
@@ -153,6 +154,7 @@
     <string name="insights_ai">AI</string>
     <string name="insights_weekly_doses">You took %1$d of %2$d scheduled dose(s) so far this week.</string>
     <string name="insights_no_doses">There are no scheduled doses yet for this week.</string>
+    <string name="insights_weekly_adherence">Weekly adherence</string>
     <string name="insights_recommendations">Recommendations</string>
     <string name="insights_applied">Applied</string>
     <string name="insights_per_med">By medication</string>
