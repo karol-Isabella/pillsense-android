@@ -26,9 +26,11 @@ android {
             if (f.exists()) f.inputStream().use { load(it) }
         }
         val geminiApiKey = localProps.getProperty("GEMINI_API_KEY", "").trim()
-        val geminiModel = localProps.getProperty("GEMINI_MODEL", "gemini-1.5-flash").trim()
+        val geminiModel = localProps.getProperty("GEMINI_MODEL", "gemini-3.5-flash-lite").trim()
+        val geminiModelFallback = localProps.getProperty("GEMINI_MODEL_FALLBACK", "gemini-3.1-flash-lite").trim()
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         buildConfigField("String", "GEMINI_MODEL", "\"$geminiModel\"")
+        buildConfigField("String", "GEMINI_MODEL_FALLBACK", "\"$geminiModelFallback\"")
 
     }
 

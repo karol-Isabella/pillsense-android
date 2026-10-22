@@ -43,7 +43,7 @@ fun InsightsScreen(
     val uiState = viewModel.uiState.collectAsState().value
     
     LaunchedEffect(email) {
-        viewModel.loadGeminiAdvice(intakes, medications, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL)
+        viewModel.loadGeminiAdvice(intakes, medications)
     }
     
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
