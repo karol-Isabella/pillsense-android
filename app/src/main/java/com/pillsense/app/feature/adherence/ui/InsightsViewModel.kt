@@ -114,7 +114,10 @@ class InsightsViewModel @Inject constructor(
                     val response = result.getOrNull()
                     if (response != null && response.summary.isNotBlank()) {
                         if (AnonymousAdherence.containsForbiddenKeyword(response.summary)) {
-                            android.util.Log.d("PillSenseAI", "filtrado: palabras prohibidas")
+                            android.util.Log.w("PillSenseAI", "respuesta bloqueada por seguridad, usando respaldo local")
+                            _uiState.value = _uiState.value.copy(
+                                source = "Reglas locales (respuesta de IA bloqueada por seguridad)"
+                            )
                             return@launch
                         }
                         
