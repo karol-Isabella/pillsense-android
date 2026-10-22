@@ -65,6 +65,11 @@ class SmsNotificationEngine @Inject constructor(
         return sdf.format(Date(timeMs))
     }
     
+    private fun normalizePhoneNumber(phone: String): String {
+        val cleaned = phone.filter { it.isDigit() || it == '+' }
+        return if (cleaned.startsWith("+")) cleaned else "+57$cleaned"
+    }
+    
     fun sendSms(intakeId: String, owner: String) {
         Timber.tag("PillSenseSMS").d("disparada")
         
@@ -116,11 +121,12 @@ class SmsNotificationEngine @Inject constructor(
             }
             
             val contact = contacts.first()
+            val normalizedPhone = normalizePhoneNumber(contact.phone)
             val firstName = contact.name.split(" ").first().takeIf { it.isNotEmpty() } ?: "Tu contacto"
             val message = "PillSense: $firstName no ha confirmado una toma de su medicación. Por favor comunícate con esa persona."
             
-            Log.d("PillSenseSMS", "Attempting sendTextMessage")
-            smsManager.sendTextMessage(contact.phone, null, message, null, null)
+            Log.w("PillSenseSMS", "INTENTO SMS: permiso Granted=$permissionGranted, contactos=${contacts.size}, enviadoA=$normalizedPhone")
+            smsManager.sendTextMessage(normalizedPhone, null, message, null, null)
             
             // Mark as sent
             sharedPrefs.edit().putBoolean("sent_$intakeId", true).apply()

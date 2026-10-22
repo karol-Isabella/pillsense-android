@@ -111,6 +111,18 @@
     <string name="confirm_frequency_placeholder">Selecciona la frecuencia</string>
     <string name="confirm_first_dose">Primera toma</string>
     <string name="confirm_duration">Duración</string>
+    <string name="confirm_units_remaining">Unidades en la caja (opcional)</string>
+    <string name="confirm_units_per_dose">Unidades por toma</string>
+    <string name="confirm_duration_days">Duración en días (vacío = continuo)</string>
+    <string name="confirm_detected">Detectado</string>
+    <string name="confirm_name_label">Nombre</string>
+    <string name="confirm_dose_label">Dosis</string>
+    <string name="confirm_form_label">Presentación</string>
+    <string name="confirm_full_text">Texto completo</string>
+    <string name="confirm_review_check">He comparado nombre, dosis y frecuencia con mi receta.</string>
+    <string name="confirm_invalid_time">Introduce una hora válida en formato HH:mm (por ejemplo, 08:30).</string>
+    <string name="confirm_invalid_duration">La duración debe ser un número entre 1 y 3650 días.</string>
+    <string name="confirm_select_frequency">Selecciona y confirma la frecuencia indicada en tu receta.</string>
     <string name="confirm_instructions">Indicaciones</string>
     <string name="confirm_will_schedule">Se programarán %1$d recordatorios diarios</string>
     <string name="confirm_offline_note">Funcionan sin conexión y aunque la app esté cerrada.</string>
@@ -119,6 +131,8 @@
     <string name="confirm_pm">PM</string>
     <string name="confirm_default_instructions">Tomar con agua</string>
     <string name="confirm_no_instructions">Sin indicaciones</string>
+    <string name="confirm_hide_text">Ocultar texto leído</string>
+    <string name="confirm_period">Período</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Registro de tomas</string>
@@ -158,6 +172,7 @@
     <string name="profile_relation_ph">Relación (ej. Hermano)</string>
     <string name="profile_phone_label">Teléfono</string>
     <string name="profile_phone_ph">Teléfono</string>
+    <string name="profile_phone_note">Ingresa el número con código de país (ej. +573001234567)</string>
     <string name="profile_contact_fallback">Contacto</string>
     <string name="profile_cancel">Cancelar</string>
     <string name="profile_add">Añadir</string>

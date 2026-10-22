@@ -110,6 +110,18 @@
     <string name="confirm_frequency_placeholder">Select frequency</string>
     <string name="confirm_first_dose">First dose</string>
     <string name="confirm_duration">Duration</string>
+    <string name="confirm_units_remaining">Units in box (optional)</string>
+    <string name="confirm_units_per_dose">Units per dose</string>
+    <string name="confirm_duration_days">Duration in days (blank = ongoing)</string>
+    <string name="confirm_detected">Detected</string>
+    <string name="confirm_name_label">Name</string>
+    <string name="confirm_dose_label">Dose</string>
+    <string name="confirm_form_label">Form</string>
+    <string name="confirm_full_text">Full text</string>
+    <string name="confirm_review_check">I checked name, dose and frequency against my prescription.</string>
+    <string name="confirm_invalid_time">Enter a valid time in HH:mm format (for example, 08:30).</string>
+    <string name="confirm_invalid_duration">Duration must be a number between 1 and 3650 days.</string>
+    <string name="confirm_select_frequency">Select and confirm the frequency from your prescription.</string>
     <string name="confirm_instructions">Instructions</string>
     <string name="confirm_will_schedule">%1$d daily reminders will be scheduled</string>
     <string name="confirm_offline_note">They work offline and even when the app is closed.</string>
@@ -118,6 +130,8 @@
     <string name="confirm_pm">PM</string>
     <string name="confirm_default_instructions">Take with water</string>
     <string name="confirm_no_instructions">No instructions</string>
+    <string name="confirm_hide_text">Hide read text</string>
+    <string name="confirm_period">Period</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Dose log</string>
@@ -157,6 +171,7 @@
     <string name="profile_relation_ph">Relationship (e.g. Brother)</string>
     <string name="profile_phone_label">Phone</string>
     <string name="profile_phone_ph">Phone</string>
+    <string name="profile_phone_note">Enter number with country code (e.g. +573001234567)</string>
     <string name="profile_contact_fallback">Contact</string>
     <string name="profile_cancel">Cancel</string>
     <string name="profile_add">Add</string>
