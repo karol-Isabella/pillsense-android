@@ -20,6 +20,13 @@ data class Intake(
 data class EmergencyContact(
     @PrimaryKey val id: String, val owner: String, val name: String, val relation: String, val phone: String,
 )
+@Entity(tableName = "ai_cache", primaryKeys = ["owner"])
+data class AiCache(
+    val owner: String,
+    val summary: String,
+    val dataHash: String,
+    val cachedAt: Long = System.currentTimeMillis(),
+)
 @Dao
 interface PillSenseDao {
     @Query("SELECT * FROM medications WHERE owner = :owner ORDER BY createdAt")
@@ -58,6 +65,10 @@ interface PillSenseDao {
     suspend fun saveContact(contact: EmergencyContact)
     @Query("DELETE FROM contacts WHERE id = :id AND owner = :owner")
     suspend fun deleteContact(id: String, owner: String)
+    @Query("SELECT * FROM ai_cache WHERE owner = :owner")
+    suspend fun getAiCache(owner: String): AiCache?
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveAiCache(cache: AiCache)
 }
-@Database(entities = [Medication::class, Intake::class, EmergencyContact::class], version = 2, exportSchema = true)
+@Database(entities = [Medication::class, Intake::class, EmergencyContact::class, AiCache::class], version = 3, exportSchema = true)
 abstract class PillSenseDatabase : RoomDatabase() { abstract fun dao(): PillSenseDao }
