@@ -31,12 +31,22 @@ class AnonymousAdherenceTest {
 
     @Test
     fun forbiddenKeywordDetectionWorks() {
+        // Ejemplos que DEBEN bloquearse (patrones peligrosos)
         assertTrue(AnonymousAdherence.containsForbiddenKeyword("aumentar la dosis"))
         assertTrue(AnonymousAdherence.containsForbiddenKeyword("suspender el medicamento"))
-        assertTrue(AnonymousAdherence.containsForbiddenKeyword("cambiar las pastillas"))
-        assertTrue(AnonymousAdherence.containsForbiddenKeyword("disminuir cantidad"))
+        assertTrue(AnonymousAdherence.containsForbiddenKeyword("duplica la dosis"))
+        assertTrue(AnonymousAdherence.containsForbiddenKeyword("deja de tomar"))
+        assertTrue(AnonymousAdherence.containsForbiddenKeyword("reduce la cantidad"))
+        
+        // Ejemplos que NO deben bloquearse (vocabulario normal de adherencia)
+        assertFalse(AnonymousAdherence.containsForbiddenKeyword("Tomaste el 71% de tus dosis; la noche es tu punto débil"))
         assertFalse(AnonymousAdherence.containsForbiddenKeyword("tomar con agua"))
         assertFalse(AnonymousAdherence.containsForbiddenKeyword("adherencia mejorada"))
+        assertFalse(AnonymousAdherence.containsForbiddenKeyword("el recordatorio por la mañana funciona mejor"))
+        
+        // Derivación a profesionales: NO debe bloquearse
+        assertFalse(AnonymousAdherence.containsForbiddenKeyword("Consulta a tu médico o farmacéutico"))
+        assertFalse(AnonymousAdherence.containsForbiddenKeyword("contacta a tu profesional de salud"))
     }
 
     @Test
