@@ -71,6 +71,19 @@ fun ConfirmScreen(
     val defaultFrequencyText = stringResource(R.string.freq_once_daily)
     val amText = stringResource(R.string.confirm_am)
     val pmText = stringResource(R.string.confirm_pm)
+    val unitsRemainingLabel = stringResource(R.string.confirm_units_remaining)
+    val unitsPerDoseLabel = stringResource(R.string.confirm_units_per_dose)
+    val durationDaysLabel = stringResource(R.string.confirm_duration_days)
+    val detectedText = stringResource(R.string.confirm_detected)
+    val nameLabelText = stringResource(R.string.confirm_name_label)
+    val doseLabelText = stringResource(R.string.confirm_dose_label)
+    val formLabelText = stringResource(R.string.confirm_form_label)
+    val fullTextLabel = stringResource(R.string.confirm_full_text)
+    val reviewCheckText = stringResource(R.string.confirm_review_check)
+    val invalidTimeText = stringResource(R.string.confirm_invalid_time)
+    val invalidDurationText = stringResource(R.string.confirm_invalid_duration)
+    val selectFrequencyText = stringResource(R.string.confirm_select_frequency)
+    val periodLabel = stringResource(R.string.confirm_period)
 
     var name by rememberSaveable { mutableStateOf(scannedMed?.name ?: "") }
     var dose by rememberSaveable { mutableStateOf(scannedMed?.dose ?: "") }
@@ -234,38 +247,38 @@ fun ConfirmScreen(
                 PsCard(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
                     Column(Modifier.padding(16.dp)) {
                         // Summary of scanned data
-                        Text("Detectado", style = MaterialTheme.typography.titleMedium)
+                        Text(detectedText, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         if (scannedMed.name.isNotBlank()) {
-                            Text("Nombre: ${scannedMed.name}", style = MaterialTheme.typography.bodySmall)
+                            Text("$nameLabelText: ${scannedMed.name}", style = MaterialTheme.typography.bodySmall)
                         }
                         if (scannedMed.dose.isNotBlank()) {
-                            Text("Dosis: ${scannedMed.dose}", style = MaterialTheme.typography.bodySmall)
+                            Text("$doseLabelText: ${scannedMed.dose}", style = MaterialTheme.typography.bodySmall)
                         }
                         if (scannedMed.form.isNotBlank()) {
-                            Text("Presentación: ${scannedMed.form}", style = MaterialTheme.typography.bodySmall)
+                            Text("$formLabelText: ${scannedMed.form}", style = MaterialTheme.typography.bodySmall)
                         }
                         
                         Spacer(modifier = Modifier.height(12.dp))
                         
                         // Button to show full OCR text
                         TextButton(onClick = { showFullText = !showFullText }) {
-                            Text(if (showFullText) "Ocultar texto leído" else "Ver texto leído")
+                            Text(if (showFullText) stringResource(R.string.confirm_hide_text) else fullTextLabel)
                         }
                         
                         // Full OCR text (hidden by default)
                         AnimatedVisibility(visible = showFullText, enter = fadeIn(), exit = androidx.compose.animation.fadeOut()) {
                             Column {
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Text("Texto completo:", style = MaterialTheme.typography.labelSmall)
+                                Text(fullTextLabel, style = MaterialTheme.typography.labelSmall)
                                 Text(scannedMed.originalText.take(4000), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                         
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = reviewed, onCheckedChange = { reviewed = it })
-                            Text("He comparado nombre, dosis y frecuencia con mi receta.", style = MaterialTheme.typography.bodySmall)
+                            Text(reviewCheckText, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -313,7 +326,7 @@ fun ConfirmScreen(
                         PsTextField(
                             value = unitsRemaining,
                             onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
-                            label = "Unidades en la caja (opcional)",
+                            label = unitsRemainingLabel,
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -323,7 +336,7 @@ fun ConfirmScreen(
                         PsTextField(
                             value = unitsPerDose,
                             onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
-                            label = "Unidades por toma",
+                            label = unitsPerDoseLabel,
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -374,7 +387,7 @@ fun ConfirmScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Período:",
+                                text = periodLabel,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.weight(0.3f)
@@ -398,7 +411,7 @@ fun ConfirmScreen(
                         PsTextField(
                             value = duration,
                             onValueChange = { duration = it },
-                            label = "Duración en días (vacío = continuo)",
+                            label = durationDaysLabel,
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -442,11 +455,11 @@ fun ConfirmScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        if (times.isEmpty()) Text("Introduce una hora válida en formato HH:mm (por ejemplo, 08:30).", color = MaterialTheme.colorScheme.error)
-                        if (duration.isNotBlank() && (durationDays == null || durationDays !in 1..3650)) Text("La duración debe ser un número entre 1 y 3650 días.", color = MaterialTheme.colorScheme.error)
+                        if (times.isEmpty()) Text(invalidTimeText, color = MaterialTheme.colorScheme.error)
+                        if (duration.isNotBlank() && (durationDays == null || durationDays !in 1..3650)) Text(invalidDurationText, color = MaterialTheme.colorScheme.error)
                         if (frequency !in frequencies) Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(painterResource(R.drawable.ic_lucide_lightbulb), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
-                            Text("Selecciona y confirma la frecuencia indicada en tu receta.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+                            Text(selectFrequencyText, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
                         }
                         // Time pills
                         FlowRow(

@@ -46,6 +46,7 @@ class InsightsViewModel @Inject constructor(
     fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, apiKey: String, model: String) {
         // Check consent each time, not just at init
         val hasConsent = consentStorage.hasConsent(currentEmail)
+        android.util.Log.w("PillSenseAI", "GEMINI EXECUTE: apiKeyIsPresent=${apiKey.isNotBlank()}, consent=$hasConsent")
         android.util.Log.w("PillSenseAI", "loadGeminiAdvice llamado, consent: $hasConsent")
         if (!hasConsent) {
             android.util.Log.d("PillSenseAI", "sin consentimiento")
