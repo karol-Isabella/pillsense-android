@@ -43,6 +43,8 @@ fun InsightsScreen(
     
     LaunchedEffect(Unit) {
         if (uiState.isAiEnabled) {
+            val hasConsent = uiState.isAiEnabled
+            android.util.Log.w("PillSenseAI", "loadGeminiAdvice llamado, consent: $hasConsent")
             viewModel.loadGeminiAdvice(intakes, medications, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL)
         }
     }
