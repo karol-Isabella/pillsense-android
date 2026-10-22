@@ -71,8 +71,27 @@ class InsightsViewModel @Inject constructor(
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
                 
+                // Umbral de datos mínimos: 3+ días con tomas, 5+ dosis totales
+                val today = LocalDate.now()
+                var daysWithData = 0
+                (0..6).forEach { offset ->
+                    val dayStart = today.minusDays(offset.toLong()).atStartOfDay(zone).toInstant().toEpochMilli()
+                    val dayEnd = today.minusDays(offset.toLong()).plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+                    if (intakes.any { it.scheduledAt in dayStart until dayEnd }) daysWithData++
+                }
+                
+                val totalDoses = intakes.size
+                if (daysWithData < 3 || totalDoses < 5) {
+                    android.util.Log.d("PillSenseAI", "datos insuficientes: días=$daysWithData, dosis=$totalDoses")
+                    _uiState.value = _uiState.value.copy(
+                        source = "Reglas locales",
+                        geminiResponse = null
+                    )
+                    return@launch
+                }
+                
                 val anonLabel = try {
-                    AnonymousAdherence.buildAnonymousStats(intakes, medications, zone)
+                    AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, "es")
                 } catch (e: Exception) {
                     android.util.Log.w("PillSenseAI", "error buildAnonymousStats: ${e.javaClass.simpleName}")
                     return@launch
@@ -81,6 +100,10 @@ class InsightsViewModel @Inject constructor(
                 if (intakes.isEmpty() || anonLabel.isBlank()) {
                     android.util.Log.d("PillSenseAI", "sin datos de tomas")
                     return@launch
+                }
+                
+                if (BuildConfig.DEBUG) {
+                    android.util.Log.d("PillSenseAI", "Payload JSON: $anonLabel")
                 }
 
                 val dataHash = anonLabel.hashCode().toString()
