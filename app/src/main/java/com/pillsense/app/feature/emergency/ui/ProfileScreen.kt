@@ -30,7 +30,8 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
     onSaveContact: (String, String, String, () -> Unit) -> Unit, onRemoveContact: (String) -> Unit,
     onPermissions: () -> Unit, remindersReady: Boolean, userName: String? = null,
     isAiEnabled: Boolean = false, onAiConsentChange: (Boolean) -> Unit = {},
-    isSmsNotificationEnabled: Boolean = false, onSmsNotificationChange: (Boolean) -> Unit = {}) {
+    isSmsNotificationEnabled: Boolean = false, onSmsNotificationChange: (Boolean) -> Unit = {},
+    language: String = "es", onLanguageChange: (String) -> Unit = {}) {
     val context = LocalContext.current
     var adding by rememberSaveable { mutableStateOf(false) }
     var name by rememberSaveable { mutableStateOf("") }
@@ -119,9 +120,24 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
             Spacer(Modifier.height(8.dp)); PsBadge("Cuenta local · datos cifrados")
         } } }
         item { PsSectionHeader("Apariencia")
-            PsCard(Modifier.fillMaxWidth()) { Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Modo oscuro", style = MaterialTheme.typography.titleMedium)
-                Switch(checked = dark, onCheckedChange = { onThemeChange() })
+            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text("Modo oscuro", style = MaterialTheme.typography.titleMedium)
+                    Switch(checked = dark, onCheckedChange = { onThemeChange() })
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Text("Idioma", style = MaterialTheme.typography.titleMedium)
+                    var expanded by remember { mutableStateOf(false) }
+                    Box {
+                        TextButton(onClick = { expanded = true }) {
+                            Text(if (language == "es") "Español" else "English")
+                        }
+                        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                            DropdownMenuItem(text = { Text("Español") }, onClick = { onLanguageChange("es"); expanded = false })
+                            DropdownMenuItem(text = { Text("English") }, onClick = { onLanguageChange("en"); expanded = false })
+                        }
+                    }
+                }
             } }
         }
         item { PsSectionHeader("Mis medicamentos") }
@@ -175,7 +191,13 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     val phoneDigitCount = phone.count { it.isDigit() }
                     PsButton({ onSaveContact(name, relation, phone) { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false } }, "Guardar contacto", Modifier.fillMaxWidth(), enabled = name.isNotBlank() && phoneDigitCount in 7..15 && consentAgreed)
                     TextButton(onClick = { adding = false; name = ""; relation = ""; phone = ""; consentAgreed = false }) { Text("Cancelar") }
-                } } else PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary, enabled = contacts.size < 2)
+                } } else {
+                    if (contacts.size >= 2) {
+                        Text("Máximo 2 contactos permitidos", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.fillMaxWidth())
+                    } else {
+                        PsButton({ adding = true }, "Añadir contacto", Modifier.fillMaxWidth(), style = PsButtonStyle.Secondary)
+                    }
+                }
             }
         }
         item { PsSectionHeader("Recordatorios")
