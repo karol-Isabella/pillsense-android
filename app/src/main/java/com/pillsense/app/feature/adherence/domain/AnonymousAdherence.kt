@@ -6,7 +6,19 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 object AnonymousAdherence {
-    private val FORBIDDEN_KEYWORDS = listOf("dosis", "pastillas", "suspender", "dejar", "aumentar", "disminuir", "cambiar")
+    // Patrones de frases PELIGROSAS que deben bloquearse
+    private val DANGEROUS_PATTERNS = listOf(
+        // Cambios de dosis
+        Regex("\\b(duplica|aumenta|dobla|eleva|reduce|reduce|disminuye)\\s+(la\\s+)?dosis\\b", RegexOption.IGNORE_CASE),
+        Regex("\\b(aumenta|reduce|cambia)\\s+(la\\s+)?cantidad\\b", RegexOption.IGNORE_CASE),
+        // Suspender tratamiento
+        Regex("\\b(suspende|deja|detén|para)\\s+(de\\s+)?tomar", RegexOption.IGNORE_CASE),
+        Regex("\\b(suspender|abandonar|descontinuar)\\s+(el\\s+)?(medicamento|tratamiento|pastilla)", RegexOption.IGNORE_CASE),
+        // Indicaciones tras olvidar
+        Regex("\\bsi\\s+olvida.*qué\\s+(hacer|hago)", RegexOption.IGNORE_CASE),
+        // Diagnósticos directos
+        Regex("\\btienes?\\s+(una\\s+)?(infección|enfermedad|alergia|reacción)\\b", RegexOption.IGNORE_CASE),
+    )
 
     fun buildAnonymousStats(
         intakes: List<DbIntake>,
@@ -34,8 +46,23 @@ object AnonymousAdherence {
     }
 
     fun containsForbiddenKeyword(text: String): Boolean {
-        return FORBIDDEN_KEYWORDS.any { keyword ->
-            text.contains(keyword, ignoreCase = true)
+        // Permitir: derivación a profesionales de salud
+        val derivationPattern = Regex("\\b(consulta|habla|contacta)\\s+(a\\s+tu\\s+)?(médico|farmacéutico|profesional|doctor)\\b", RegexOption.IGNORE_CASE)
+        if (derivationPattern.containsMatchIn(text)) {
+            android.util.Log.d("PillSenseAI", "Respuesta permitida: contiene derivación a profesional")
+            return false
         }
+        
+        // Bloquear si coincide algún patrón peligroso
+        for (pattern in DANGEROUS_PATTERNS) {
+            val match = pattern.find(text)
+            if (match != null) {
+                android.util.Log.w("PillSenseAI", "Respuesta bloqueada: patrón peligroso '${match.value}' encontrado, longitud=${text.length}")
+                return true
+            }
+        }
+        
+        android.util.Log.d("PillSenseAI", "Respuesta permitida: longitud=${text.length}")
+        return false
     }
 }
