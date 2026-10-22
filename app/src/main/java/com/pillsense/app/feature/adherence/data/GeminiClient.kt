@@ -16,15 +16,15 @@ class GeminiClient(private val okHttpClient: OkHttpClient) {
         "No menciones dosis, cantidades, ni cambios de tratamiento, y no uses las palabras suspender, dejar, aumentar ni disminuir. " +
         "Si hay olvidos, sugiere consultar al profesional de salud."
 
-    suspend fun generateAdvice(anonData: String, primaryModel: String, fallbackModel: String): Result<GeminiResponse> =
+    suspend fun generateAdvice(anonData: String, apiKey: String, primaryModel: String, fallbackModel: String): Result<GeminiResponse> =
         withContext(Dispatchers.IO) {
             try {
-                val result = callGemini(anonData, primaryModel)
+                val result = callGemini(anonData, apiKey, primaryModel)
                 if (result.isSuccess) return@withContext result
                 val error = result.exceptionOrNull()
                 if (error is GeminiRateLimitError) {
                     android.util.Log.w("PillSenseAI", "429 en $primaryModel, intentando fallback $fallbackModel")
-                    return@withContext callGemini(anonData, fallbackModel)
+                    return@withContext callGemini(anonData, apiKey, fallbackModel)
                 }
                 return@withContext result
             } catch (e: Exception) {
@@ -32,7 +32,7 @@ class GeminiClient(private val okHttpClient: OkHttpClient) {
             }
         }
 
-    private suspend fun callGemini(anonData: String, model: String): Result<GeminiResponse> {
+    private suspend fun callGemini(anonData: String, apiKey: String, model: String): Result<GeminiResponse> {
         return try {
             val json = buildJsonObject {
                 putJsonObject("systemInstruction") {
@@ -48,7 +48,7 @@ class GeminiClient(private val okHttpClient: OkHttpClient) {
             }.toString()
             val request = Request.Builder()
                 .url("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent")
-                .header("x-goog-api-key", "") // NO registrar clave
+                .header("x-goog-api-key", apiKey.trim())
                 .post(json.toRequestBody("application/json".toMediaType()))
                 .build()
             val response = okHttpClient.newCall(request).execute()
@@ -74,7 +74,7 @@ class GeminiClient(private val okHttpClient: OkHttpClient) {
                     Result.failure(GeminiRateLimitError("API 429 en $model"))
                 }
                 else -> {
-                    android.util.Log.w("PillSenseAI", "Error en $model: $code")
+                    android.util.Log.w("PillSenseAI", "Error en $model: código $code, respuesta: $respBody")
                     Result.failure(IOException("Status $code"))
                 }
             }
