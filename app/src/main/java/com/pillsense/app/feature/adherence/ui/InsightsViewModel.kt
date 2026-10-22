@@ -104,7 +104,7 @@ class InsightsViewModel @Inject constructor(
                 
                 lastLoadTime = now
                 
-                val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
+                val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
                 if (result.isFailure) {
                     android.util.Log.w("PillSenseAI", "fallo: ${result.exceptionOrNull()?.message}")
                     return@launch
