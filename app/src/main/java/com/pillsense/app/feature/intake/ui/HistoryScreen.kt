@@ -48,9 +48,9 @@ fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>) {
                 val med = names[intake.medicationId]
                 PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(med?.name ?: "Medicamento", style = MaterialTheme.typography.titleMedium)
-                    Text("${med?.dose.orEmpty()} · ${Instant.ofEpochMilli(intake.scheduledAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm"))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${med?.dose.orEmpty()} · ${Instant.ofEpochMilli(intake.scheduledAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("hh:mm a"))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     PsBadge(when (intake.status) { "TAKEN" -> "Tomada"; "POSTPONED" -> "Pospuesta"; "SKIPPED" -> "Omitida"; else -> "Sin registrar" })
-                    intake.actedAt?.let { Text("Registro: ${Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, HH:mm"))}", style = MaterialTheme.typography.bodySmall) }
+                    intake.actedAt?.let { Text("Registro: ${Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, hh:mm a"))}", style = MaterialTheme.typography.bodySmall) }
                 } }
             }
         }

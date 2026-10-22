@@ -61,7 +61,7 @@ class SmsNotificationEngine @Inject constructor(
     }
     
     private fun formatTime(timeMs: Long): String {
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
         return sdf.format(Date(timeMs))
     }
     

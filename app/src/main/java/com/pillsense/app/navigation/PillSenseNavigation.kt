@@ -174,7 +174,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 val doses = health.intakes.filter { Instant.ofEpochMilli(it.scheduledAt).atZone(zone).toLocalDate() == today }
                                     .sortedBy { it.postponedUntil ?: it.scheduledAt }.mapNotNull { intake ->
                                         val med = names[intake.medicationId] ?: return@mapNotNull null
-                                        DoseItem(intake.id, Instant.ofEpochMilli(intake.postponedUntil ?: intake.scheduledAt).atZone(zone).format(DateTimeFormatter.ofPattern("HH:mm")),
+                                        DoseItem(intake.id, Instant.ofEpochMilli(intake.postponedUntil ?: intake.scheduledAt).atZone(zone).format(DateTimeFormatter.ofPattern("hh:mm a")),
                                             med.name, med.dose, med.instructions, DoseStatus.valueOf(intake.status), intake.scheduledAt <= now)
                                     }
                                 val recent = health.intakes.filter { it.scheduledAt >= today.minusDays(6).atStartOfDay(zone).toInstant().toEpochMilli() }
@@ -192,7 +192,8 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 viewModel::toggleTheme, { viewModel.logout(); nav.popBackStack("today", false) }, viewModel::archive,
                                 viewModel::saveContact, viewModel::removeContact, { openPermissionsSettings() }, ready, viewModel.getUserName(),
                                 isAiEnabled = viewModel.hasAiConsent(), onAiConsentChange = { viewModel.setAiConsent(it) },
-                                isSmsNotificationEnabled = viewModel.isSmsNotificationEnabled(), onSmsNotificationChange = { viewModel.setSmsNotificationEnabled(it) }) }
+                                isSmsNotificationEnabled = viewModel.isSmsNotificationEnabled(), onSmsNotificationChange = { viewModel.setSmsNotificationEnabled(it) },
+                                language = language, onLanguageChange = { _ -> viewModel.toggleLanguage() }) }
                             composable("scan") { ScanScreen(onScanComplete = {
                                 hasScan = true; scannedName = it.name; scannedDose = it.dose; scannedForm = it.form
                                 scannedFrequency = it.frequency; scannedDuration = it.duration; scannedInstructions = it.instructions; scannedOriginal = it.originalText

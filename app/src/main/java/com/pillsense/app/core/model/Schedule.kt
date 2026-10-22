@@ -6,7 +6,7 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 
 object Schedule {
-    private val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    private val formatter = DateTimeFormatter.ofPattern("hh:mm a")
     fun times(first: String, interval: Int): List<String> {
         require(interval in listOf(6, 8, 12, 24))
         require(first.matches(Regex("([01][0-9]|2[0-3]):[0-5][0-9]")))

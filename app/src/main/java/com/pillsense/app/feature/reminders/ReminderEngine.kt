@@ -111,7 +111,7 @@ class ReminderEngine @Inject constructor(
         val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val scheduledLabel = java.time.Instant.ofEpochMilli(intake.scheduledAt).atZone(java.time.ZoneId.systemDefault())
-            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, HH:mm"))
+            .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, hh:mm a"))
         val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
         val notification = NotificationCompat.Builder(context, "doses")
             .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
