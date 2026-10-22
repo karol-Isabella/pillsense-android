@@ -61,10 +61,15 @@ class InsightsViewModel @Inject constructor(
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
                 
-                // Build anonymous stats
-                val anonLabel = AnonymousAdherence.buildAnonymousStats(intakes, medications, zone)
+                // Build anonymous stats with error handling
+                val anonLabel = try {
+                    AnonymousAdherence.buildAnonymousStats(intakes, medications, zone)
+                } catch (e: Exception) {
+                    android.util.Log.w("PillSenseAI", "error buildAnonymousStats: ${e.javaClass.simpleName}")
+                    ""
+                }
                 
-                if (intakes.isEmpty()) {
+                if (intakes.isEmpty() || anonLabel.isBlank()) {
                     android.util.Log.d("PillSenseAI", "sin datos de tomas")
                     return@launch
                 }
