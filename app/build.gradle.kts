@@ -26,7 +26,7 @@ android {
             if (f.exists()) f.inputStream().use { load(it) }
         }
         val geminiApiKey = localProps.getProperty("GEMINI_API_KEY", "").trim()
-        val geminiModel = localProps.getProperty("GEMINI_MODEL", "gemini-3.8-flash").trim()
+        val geminiModel = localProps.getProperty("GEMINI_MODEL", "gemini-1.5-flash").trim()
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
         buildConfigField("String", "GEMINI_MODEL", "\"$geminiModel\"")
 
