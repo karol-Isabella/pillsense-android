@@ -69,6 +69,8 @@ fun ConfirmScreen(
     val saveScheduleText = stringResource(R.string.confirm_save_schedule)
     val defaultFormText = stringResource(R.string.med_form_capsule)
     val defaultFrequencyText = stringResource(R.string.freq_once_daily)
+    val amText = stringResource(R.string.confirm_am)
+    val pmText = stringResource(R.string.confirm_pm)
 
     var name by rememberSaveable { mutableStateOf(scannedMed?.name ?: "") }
     var dose by rememberSaveable { mutableStateOf(scannedMed?.dose ?: "") }
@@ -76,6 +78,7 @@ fun ConfirmScreen(
     var frequency by rememberSaveable { mutableStateOf(scannedMed?.frequency ?: defaultFrequencyText) }
     var duration by rememberSaveable { mutableStateOf(scannedMed?.duration ?: "") }
     var startTime by rememberSaveable { mutableStateOf("08:00") }
+    var amPm by rememberSaveable { mutableStateOf("AM") }
     var instructions by rememberSaveable { mutableStateOf(scannedMed?.instructions.orEmpty()) }
     var showFullText by rememberSaveable { mutableStateOf(false) }
     var unitsRemaining by rememberSaveable { mutableStateOf("") }
@@ -97,7 +100,23 @@ fun ConfirmScreen(
     )
 
     val interval = listOf(24, 12, 8, 6).getOrElse(frequencies.indexOf(frequency)) { 24 }
-    val times = runCatching { Schedule.times(startTime, interval) }.getOrDefault(emptyList())
+    val startTime24: String = runCatching {
+        val (hourStr, minStr) = startTime.split(":").let { parts ->
+            Pair(
+                parts.getOrNull(0)?.trim() ?: "08",
+                parts.getOrNull(1)?.trim() ?: "00"
+            )
+        }
+        val hour = hourStr.toInt()
+        val min = minStr.toInt()
+        val adjustedHour = when {
+            amPm == "PM" && hour != 12 -> hour + 12
+            amPm == "AM" && hour == 12 -> 0
+            else -> hour
+        }
+        String.format("%02d:%02d", adjustedHour, min)
+    }.getOrDefault(startTime)
+    val times = runCatching { Schedule.times(startTime24, interval) }.getOrDefault(emptyList())
     val durationDays = duration.toIntOrNull()
     var reviewed by rememberSaveable { mutableStateOf(false) }
     val isValid = name.isNotBlank() && dose.isNotBlank() && form.isNotBlank() && frequency in frequencies && times.isNotEmpty() &&
@@ -140,7 +159,7 @@ fun ConfirmScreen(
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
-                                intervalHours = interval, firstTime = startTime, durationDays = durationDays,
+                                intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
                                 unitsRemaining = unitsRemaining.toIntOrNull(),
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
@@ -345,6 +364,35 @@ fun ConfirmScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
 
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Período:",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(0.3f)
+                            )
+                            FilterChip(
+                                selected = amPm == "AM",
+                                onClick = { amPm = "AM" },
+                                label = { Text(amText) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            FilterChip(
+                                selected = amPm == "PM",
+                                onClick = { amPm = "PM" },
+                                label = { Text(pmText) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         PsTextField(
@@ -444,7 +492,7 @@ fun ConfirmScreen(
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
-                                intervalHours = interval, firstTime = startTime, durationDays = durationDays,
+                                intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
                                 unitsRemaining = unitsRemaining.toIntOrNull(),
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
