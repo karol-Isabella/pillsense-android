@@ -85,11 +85,9 @@ class InsightsViewModel @Inject constructor(
 
                 val dataHash = anonLabel.hashCode().toString()
                 
-                // Validar caché
+                // Validar caché válida (< 1 hora y mismo hash de datos)
                 val cache = database.dao().getAiCache(currentEmail)
-                val cacheValid = cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000
-                
-                if (cacheValid && cache != null) {
+                if (cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000) {
                     android.util.Log.w("PillSenseAI", "Usando caché guardada")
                     _uiState.value = _uiState.value.copy(
                         geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
@@ -98,14 +96,13 @@ class InsightsViewModel @Inject constructor(
                     return@launch
                 }
                 
-                // No hacer llamada si hace menos de 5 minutos de la última
-                if ((now - lastLoadTime) < 300000 && lastDataHash == dataHash) {
+                // Throttle: no hacer llamada si hace menos de 5 minutos desde la última
+                if ((now - lastLoadTime) < 300000) {
                     android.util.Log.w("PillSenseAI", "Menos de 5 min desde última llamada")
                     return@launch
                 }
                 
                 lastLoadTime = now
-                lastDataHash = dataHash
                 
                 val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
                 if (result.isFailure) {
