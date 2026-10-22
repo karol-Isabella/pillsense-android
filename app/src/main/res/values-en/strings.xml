@@ -154,6 +154,7 @@
     <string name="insights_ai">AI</string>
     <string name="insights_weekly_doses">You took %1$d of %2$d scheduled dose(s) so far this week.</string>
     <string name="insights_no_doses">There are no scheduled doses yet for this week.</string>
+    <string name="insights_insufficient_data">Not enough data for analysis yet. Keep recording your doses.</string>
     <string name="insights_weekly_adherence">Weekly adherence</string>
     <string name="insights_recommendations">Recommendations</string>
     <string name="insights_applied">Applied</string>
