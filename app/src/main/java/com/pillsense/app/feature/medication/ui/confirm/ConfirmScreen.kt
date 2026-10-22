@@ -116,7 +116,7 @@ fun ConfirmScreen(
         }
         String.format("%02d:%02d", adjustedHour, min)
     }.getOrDefault(startTime)
-    val times = runCatching { Schedule.times(startTime24, interval) }.getOrDefault(emptyList())
+    val times = runCatching { Schedule.times(startTime24, interval, unitsRemaining.toIntOrNull()) }.getOrDefault(emptyList())
     val durationDays = duration.toIntOrNull()
     var reviewed by rememberSaveable { mutableStateOf(false) }
     val isValid = name.isNotBlank() && dose.isNotBlank() && form.isNotBlank() && frequency in frequencies && times.isNotEmpty() &&
