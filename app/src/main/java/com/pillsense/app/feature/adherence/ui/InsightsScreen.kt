@@ -42,11 +42,9 @@ fun InsightsScreen(
     val uiState = viewModel.uiState.collectAsState().value
     
     LaunchedEffect(Unit) {
-        if (uiState.isAiEnabled) {
-            val hasConsent = uiState.isAiEnabled
-            android.util.Log.w("PillSenseAI", "loadGeminiAdvice llamado, consent: $hasConsent")
-            viewModel.loadGeminiAdvice(intakes, medications, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL)
-        }
+        val hasConsent = uiState.isAiEnabled
+        android.util.Log.w("PillSenseAI", "loadGeminiAdvice llamado, consent: $hasConsent")
+        viewModel.loadGeminiAdvice(intakes, medications, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL)
     }
     
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
