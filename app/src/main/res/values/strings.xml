@@ -115,6 +115,8 @@
     <string name="confirm_will_schedule">Se programarán %1$d recordatorios diarios</string>
     <string name="confirm_offline_note">Funcionan sin conexión y aunque la app esté cerrada.</string>
     <string name="confirm_save_schedule">Guardar y programar</string>
+    <string name="confirm_am">AM</string>
+    <string name="confirm_pm">PM</string>
     <string name="confirm_default_instructions">Tomar con agua</string>
     <string name="confirm_no_instructions">Sin indicaciones</string>
 

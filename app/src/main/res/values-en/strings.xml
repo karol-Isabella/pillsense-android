@@ -114,6 +114,8 @@
     <string name="confirm_will_schedule">%1$d daily reminders will be scheduled</string>
     <string name="confirm_offline_note">They work offline and even when the app is closed.</string>
     <string name="confirm_save_schedule">Save and schedule</string>
+    <string name="confirm_am">AM</string>
+    <string name="confirm_pm">PM</string>
     <string name="confirm_default_instructions">Take with water</string>
     <string name="confirm_no_instructions">No instructions</string>
 
