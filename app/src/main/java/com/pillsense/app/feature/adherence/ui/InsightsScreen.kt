@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pillsense.app.BuildConfig
+import com.pillsense.app.R
 import com.pillsense.app.core.database.*
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.model.Schedule
@@ -55,8 +56,8 @@ fun InsightsScreen(
                         color = MaterialTheme.colorScheme.tertiary, trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = .12f), strokeWidth = 10.dp)
                     Text(average?.let { "$it%" } ?: "—", style = MaterialTheme.typography.headlineMedium)
                 }
-                Column { Text("Adherencia semanal", style = MaterialTheme.typography.titleMedium)
-                    Text(if (recent.isEmpty()) stringResource(com.pillsense.app.R.string.insights_no_doses) else stringResource(com.pillsense.app.R.string.insights_weekly_doses, recent.count { it.status == "TAKEN" }, recent.size), style = MaterialTheme.typography.bodyMedium) }
+                Column { Text(stringResource(R.string.insights_weekly_adherence), style = MaterialTheme.typography.titleMedium)
+                    Text(if (recent.isEmpty()) stringResource(R.string.insights_no_doses) else stringResource(R.string.insights_weekly_doses, recent.count { it.status == "TAKEN" }, recent.size), style = MaterialTheme.typography.bodyMedium) }
             }
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
