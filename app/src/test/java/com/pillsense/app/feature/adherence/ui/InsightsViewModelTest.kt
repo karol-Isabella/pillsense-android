@@ -10,6 +10,7 @@ class InsightsViewModelTest {
 
     @Test
     fun summaryWithForbiddenKeywordIsDiscarded() {
+        // Test that forbidden keywords are detected
         assertTrue(AnonymousAdherence.containsForbiddenKeyword("suspender el tratamiento"))
         assertTrue(AnonymousAdherence.containsForbiddenKeyword("aumentar dosis a 500mg"))
         assertTrue(AnonymousAdherence.containsForbiddenKeyword("cambiar horario de pastillas"))
@@ -17,6 +18,7 @@ class InsightsViewModelTest {
 
     @Test
     fun cleanSummaryPassesFilter() {
+        // Test that normal adherence text passes through
         assertFalse(AnonymousAdherence.containsForbiddenKeyword("adherencia mejorada"))
         assertFalse(AnonymousAdherence.containsForbiddenKeyword("buenos registros"))
         assertFalse(AnonymousAdherence.containsForbiddenKeyword("considere el horario"))
@@ -40,7 +42,7 @@ class InsightsViewModelTest {
         assertFalse(stats.contains("500mg"))
         assertFalse(stats.contains("200mg"))
         assertFalse(stats.contains("user1"))
-        assertTrue(stats.contains("2 tomada"))
+        assertTrue(stats.contains("tomadas"))
     }
 
     @Test

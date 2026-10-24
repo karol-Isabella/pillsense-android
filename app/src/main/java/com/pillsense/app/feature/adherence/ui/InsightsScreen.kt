@@ -47,8 +47,8 @@ fun InsightsScreen(
     }
     
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        item { Text("ÚLTIMOS 7 DÍAS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Mi progreso", style = MaterialTheme.typography.displayMedium) }
+        item { Text(stringResource(R.string.insights_last_7_days), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.insights_my_progress), style = MaterialTheme.typography.displayMedium) }
         item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 Box(Modifier.size(110.dp), contentAlignment = Alignment.Center) {
@@ -77,13 +77,13 @@ fun InsightsScreen(
         if (uiState.geminiResponse != null) {
             item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("Análisis con IA", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                     PsBadge("IA")
                 }
                 Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
                 if (uiState.geminiResponse.recommendations.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
-                    Text("Recomendaciones:", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.insights_recommendations_label), style = MaterialTheme.typography.labelMedium)
                     uiState.geminiResponse.recommendations.forEach { rec ->
                         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("•", style = MaterialTheme.typography.bodySmall)
@@ -96,11 +96,31 @@ fun InsightsScreen(
                 }
             } } }
         }
-        item { PsSectionHeader("Recomendaciones")
+        item { PsSectionHeader(stringResource(R.string.insights_recommendations_label))
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Pequeños hábitos, más constancia", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                Text(AdherenceAdvice.generate(recent, now))
-                PsBadge("Basado en tus registros")
+                Text(stringResource(R.string.insights_local_habits), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                val adviceResult = AdherenceAdvice.generate(recent, now)
+                val adviceText = when (adviceResult) {
+                    is com.pillsense.app.core.model.AdviceResult.NoHistory -> stringResource(R.string.advice_no_history)
+                    is com.pillsense.app.core.model.AdviceResult.MissedIntakes -> {
+                        if (adviceResult.mostCommonHour != null) {
+                            stringResource(R.string.advice_missed_with_hour, adviceResult.count, adviceResult.mostCommonHour)
+                        } else {
+                            stringResource(R.string.advice_missed_base, adviceResult.count)
+                        }
+                    }
+                    is com.pillsense.app.core.model.AdviceResult.PostponedIntakes -> stringResource(R.string.advice_postponed, adviceResult.count)
+                    is com.pillsense.app.core.model.AdviceResult.SomeIncomplete -> {
+                        if (adviceResult.count == 1) {
+                            stringResource(R.string.advice_some_incomplete, adviceResult.count)
+                        } else {
+                            stringResource(R.string.advice_some_incomplete_plural, adviceResult.count)
+                        }
+                    }
+                    is com.pillsense.app.core.model.AdviceResult.AllCompleted -> stringResource(R.string.advice_all_completed)
+                }
+                Text(adviceText)
+                PsBadge(stringResource(R.string.advice_badge))
             } }
         }
         item { Text("Esta app no sustituye a un profesional de salud.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }

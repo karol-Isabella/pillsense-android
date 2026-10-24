@@ -9,9 +9,9 @@ import java.time.ZoneId
 object AnonymousAdherence {
     // Patrones de frases PELIGROSAS que deben bloquearse
     private val DANGEROUS_PATTERNS = listOf(
-        Regex("\\b(duplica|aumenta|dobla|eleva|reduce|reduce|disminuye)\\s+(la\\s+)?dosis\\b", RegexOption.IGNORE_CASE),
-        Regex("\\b(aumenta|reduce|cambia)\\s+(la\\s+)?cantidad\\b", RegexOption.IGNORE_CASE),
-        Regex("\\b(suspende|deja|detén|para)\\s+(de\\s+)?tomar", RegexOption.IGNORE_CASE),
+        Regex("\\b(duplica|aumenta|dobla|eleva|reduce|reduce|disminuye|aumentar|elevar|duplicar|doblar|reducir|disminuir)\\s+(la\\s+)?dosis\\b", RegexOption.IGNORE_CASE),
+        Regex("\\b(aumenta|reduce|cambia|aumentar|reducir|cambiar)\\s+(la\\s+)?(cantidad|horario|hora|frecuencia|dosis|intervalo)\\b", RegexOption.IGNORE_CASE),
+        Regex("\\b(suspende|deja|detén|para|suspender|dejar|detener)\\s+(de\\s+)?tomar", RegexOption.IGNORE_CASE),
         Regex("\\b(suspender|abandonar|descontinuar)\\s+(el\\s+)?(medicamento|tratamiento|pastilla)", RegexOption.IGNORE_CASE),
         Regex("\\bsi\\s+olvida.*qué\\s+(hacer|hago)", RegexOption.IGNORE_CASE),
         Regex("\\btienes?\\s+(una\\s+)?(infección|enfermedad|alergia|reacción)\\b", RegexOption.IGNORE_CASE),

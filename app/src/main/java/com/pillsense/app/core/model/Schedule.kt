@@ -6,7 +6,7 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 
 object Schedule {
-    private val formatter = DateTimeFormatter.ofPattern("hh:mm a")
+    private val formatter = DateTimeFormatter.ofPattern("HH:mm")
     private fun parseTimeRobust(timeStr: String): LocalTime {
         return try {
             LocalTime.parse(timeStr, formatter)
@@ -22,7 +22,7 @@ object Schedule {
         require(interval in listOf(6, 8, 12, 24))
         require(first.matches(Regex("([01][0-9]|2[0-3]):[0-5][0-9]")))
         val start = parseTimeRobust(first)
-        val result = (0 until 24 / interval).map { start.plusHours((it * interval).toLong()).format(formatter) }
+        val result = (0 until 24 / interval).map { start.plusHours((it * interval).toLong()).format(DateTimeFormatter.ofPattern("HH:mm")) }.sorted()
         val capped = if (unitsRemaining != null && unitsRemaining > 0) result.take(unitsRemaining) else result
         return capped
     }

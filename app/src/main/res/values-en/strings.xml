@@ -155,10 +155,19 @@
     <string name="insights_weekly_doses">You took %1$d of %2$d scheduled dose(s) so far this week.</string>
     <string name="insights_no_doses">There are no scheduled doses yet for this week.</string>
     <string name="insights_insufficient_data">Not enough data for analysis yet. Keep recording your doses.</string>
+    <string name="insights_last_7_days">LAST 7 DAYS</string>
+    <string name="insights_my_progress">My progress</string>
+    <string name="insights_ai_title">AI Analysis</string>
+    <string name="insights_recommendations_label">Recommendations</string>
+    <string name="insights_local_habits">Small habits, more consistency</string>
     <string name="insights_weekly_adherence">Weekly adherence</string>
     <string name="insights_recommendations">Recommendations</string>
     <string name="insights_applied">Applied</string>
     <string name="insights_per_med">By medication</string>
+
+    <!-- Consent Dialog -->
+    <string name="consent_ai_title">Personalized AI analysis</string>
+    <string name="consent_ai_message">Allow AI to analyze your adherence and provide personalized recommendations?</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Profile</string>
@@ -194,6 +203,9 @@
     <string name="profile_active">On</string>
     <string name="profile_refill">Refill reminder</string>
     <string name="profile_logout">Sign out</string>
+    <string name="profile_ai_analysis">AI Analysis</string>
+    <string name="profile_privacy_notice">Your data is encrypted on your device. Only anonymous aggregated data is sent to AI.</string>
+    <string name="profile_ai_recommendations">AI Recommendations</string>
 
     <!-- Medication Data -->
     <string name="med_form_tablet">Tablet</string>
@@ -236,4 +248,14 @@
     
     <!-- SMS Notifications -->
     <string name="sms_notification_message">PillSense: %1$s has not confirmed a dose of their medication. Please contact that person.</string>
+
+    <!-- Adherence Advice Messages -->
+    <string name="advice_no_history">Log your first doses to learn your habits. Your personalized tips will appear here automatically.</string>
+    <string name="advice_missed_base">You missed %1$d dose(s) in the last seven days. Check that notifications have sound and link the reminder to a routine you already have. Keep the schedule shown on your prescription.</string>
+    <string name="advice_missed_with_hour">You missed %1$d dose(s) in the last seven days, with more misses around %2$02d:00. Check that notifications have sound and link the reminder to a routine you already have. Keep the schedule shown on your prescription.</string>
+    <string name="advice_postponed">You\'ve snoozed %1$d dose(s) this week. Turn on notification sound and confirm your dose when you take it to keep a clear record.</string>
+    <string name="advice_some_incomplete">You have %1$d incomplete dose. Check your history; if you\'re unsure about a missed dose, consult the doctor who prescribed your treatment.</string>
+    <string name="advice_some_incomplete_plural">You have %1$d incomplete doses. Check your history; if you\'re unsure about a missed dose, consult the doctor who prescribed your treatment.</string>
+    <string name="advice_all_completed">You\'ve logged all doses due so far. Stay consistent and log each dose when you take it.</string>
+    <string name="advice_badge">Based on your records</string>
 </resources>

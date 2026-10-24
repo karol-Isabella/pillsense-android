@@ -3,6 +3,9 @@ package com.pillsense.app.feature.adherence.domain
 import org.junit.Test
 import org.junit.Assert.*
 import com.pillsense.app.core.database.Intake
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -17,16 +20,19 @@ class AnonymousAdherenceTest {
         )
         val stats = AnonymousAdherence.buildAnonymousStats(intakes, emptyList())
         
+        // Parse JSON to verify structure
+        val json = Json.parseToJsonElement(stats).jsonObject
+        
         // Should not contain real user, medication or email info
         assertFalse(stats.contains("user1"))
         assertFalse(stats.contains("med1"))
         assertFalse(stats.contains("med2"))
         assertFalse(stats.contains("med3"))
         
-        // Should contain only counts
-        assertTrue(stats.contains("1 tomada"))
-        assertTrue(stats.contains("1 pospuesta"))
-        assertTrue(stats.contains("1 omitida"))
+        // Should contain counts in JSON fields
+        assertEquals(1, json["tomadas"]?.jsonPrimitive?.content?.toInt())
+        assertEquals(1, json["pospuestas"]?.jsonPrimitive?.content?.toInt())
+        assertEquals(1, json["omitidas"]?.jsonPrimitive?.content?.toInt())
     }
 
     @Test
@@ -57,16 +63,21 @@ class AnonymousAdherenceTest {
         )
         val stats = AnonymousAdherence.buildAnonymousStats(intakes, emptyList())
         
-        // Should use relative dates like "Día -0" not exact dates
-        assertTrue(stats.contains("Día -0"))
+        // Should not contain exact date string
         assertFalse(stats.contains(today.toString()))
+        // Should have valid JSON structure
+        val json = Json.parseToJsonElement(stats).jsonObject
+        assertNotNull(json["dias_con_datos"])
     }
 
     @Test
     fun emptyIntakesProducesValidStats() {
         val stats = AnonymousAdherence.buildAnonymousStats(emptyList(), emptyList())
-        assertTrue(stats.contains("0 tomadas"))
-        assertTrue(stats.contains("0 pospuestas"))
-        assertTrue(stats.contains("0 omitidas"))
+        val json = Json.parseToJsonElement(stats).jsonObject
+        
+        assertEquals(0, json["tomadas"]?.jsonPrimitive?.content?.toInt())
+        assertEquals(0, json["pospuestas"]?.jsonPrimitive?.content?.toInt())
+        assertEquals(0, json["omitidas"]?.jsonPrimitive?.content?.toInt())
     }
 }
+

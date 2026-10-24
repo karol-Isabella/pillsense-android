@@ -156,10 +156,19 @@
     <string name="insights_weekly_doses">Tomaste %1$d de %2$d toma(s) programada(s) hasta ahora esta semana.</string>
     <string name="insights_no_doses">Todavía no hay tomas programadas para esta semana.</string>
     <string name="insights_insufficient_data">Aún no hay suficientes datos para un análisis. Sigue registrando tus tomas.</string>
+    <string name="insights_last_7_days">ÚLTIMOS 7 DÍAS</string>
+    <string name="insights_my_progress">Mi progreso</string>
+    <string name="insights_ai_title">Análisis con IA</string>
+    <string name="insights_recommendations_label">Recomendaciones</string>
+    <string name="insights_local_habits">Pequeños hábitos, más constancia</string>
     <string name="insights_weekly_adherence">Adherencia semanal</string>
     <string name="insights_recommendations">Recomendaciones</string>
     <string name="insights_applied">Aplicado</string>
     <string name="insights_per_med">Por medicamento</string>
+
+    <!-- Consent Dialog -->
+    <string name="consent_ai_title">Análisis personalizado con IA</string>
+    <string name="consent_ai_message">¿Permitir que la IA analice tu adherencia y dé recomendaciones personalizadas?</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Perfil</string>
@@ -195,6 +204,9 @@
     <string name="profile_active">Activo</string>
     <string name="profile_refill">Aviso de reposición</string>
     <string name="profile_logout">Cerrar sesión</string>
+    <string name="profile_ai_analysis">Análisis con IA</string>
+    <string name="profile_privacy_notice">Tus datos se cifran en el dispositivo. Solo se envían datos anónimos agregados a la IA.</string>
+    <string name="profile_ai_recommendations">Recomendaciones con IA</string>
 
     <!-- Medication Data -->
     <string name="med_form_tablet">Tableta</string>
@@ -237,4 +249,14 @@
     
     <!-- SMS Notifications -->
     <string name="sms_notification_message">PillSense: %1$s no ha confirmado una toma de su medicación. Por favor comunícate con esa persona.</string>
+
+    <!-- Adherence Advice Messages -->
+    <string name="advice_no_history">Registra tus primeras tomas para conocer tus hábitos. Tus consejos aparecerán aquí de forma automática.</string>
+    <string name="advice_missed_base">Hay %1$d tomas sin completar en los últimos siete días. Revisa que los avisos tengan sonido y vincula el recordatorio a una rutina que ya tengas. Mantén el horario indicado en tu receta.</string>
+    <string name="advice_missed_with_hour">Hay %1$d tomas sin completar en los últimos siete días, con más olvidos alrededor de las %2$02d:00. Revisa que los avisos tengan sonido y vincula el recordatorio a una rutina que ya tengas. Mantén el horario indicado en tu receta.</string>
+    <string name="advice_postponed">Has pospuesto %1$d toma(s) esta semana. Activa el sonido de los avisos y confirma la toma cuando la realices para mantener un registro claro.</string>
+    <string name="advice_some_incomplete">Tienes %1$d toma sin completar. Revisa el historial; si no sabes qué hacer con una dosis olvidada, consulta al profesional que indicó el tratamiento.</string>
+    <string name="advice_some_incomplete_plural">Tienes %1$d tomas sin completar. Revisa el historial; si no sabes qué hacer con una dosis olvidada, consulta al profesional que indicó el tratamiento.</string>
+    <string name="advice_all_completed">Has registrado todas las tomas que ya correspondían. Mantén la constancia y registra cada toma cuando la realices.</string>
+    <string name="advice_badge">Basado en tus registros</string>
 </resources>
