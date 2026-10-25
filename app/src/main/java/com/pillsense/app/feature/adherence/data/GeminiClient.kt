@@ -11,10 +11,9 @@ import java.io.IOException
 
 class GeminiClient(private val okHttpClient: OkHttpClient) {
 
-    private val system = "Eres un asistente de adherencia a la medicación. Responde en español, en un máximo de 3 frases cortas. " +
-        "Interpreta los conteos y sugiere hábitos generales (por ejemplo, ligar el recordatorio a una rutina). " +
-        "No menciones dosis, cantidades, ni cambios de tratamiento, y no uses las palabras suspender, dejar, aumentar ni disminuir. " +
-        "Si hay olvidos, sugiere consultar al profesional de salud."
+    private val system = """Eres un asistente de adherencia a la medicación. Responde SOLO en JSON válido con dos campos: "resumen" (máximo 3 frases) y "recomendaciones" (array de máximo 2 strings).
+Tono según adherencia: 80%+ reconocimiento positivo; 50-79% ánimo y una sugerencia; <50% comprensivo, sugerir consulta con profesional de salud.
+Solo JSON. Solo cambios de horario de recordatorios, no cambios de dosis ni suspensión. No menciones olvidos si omitidas=0. Usa el idioma solicitado. Temperature 0.3."""
 
     suspend fun generateAdvice(anonData: String, apiKey: String, primaryModel: String, fallbackModel: String): Result<GeminiResponse> =
         withContext(Dispatchers.IO) {

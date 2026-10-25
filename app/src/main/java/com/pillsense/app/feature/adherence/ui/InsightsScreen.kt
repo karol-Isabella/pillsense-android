@@ -23,12 +23,15 @@ import com.pillsense.app.core.model.AdherenceAdvice
 import com.pillsense.app.feature.adherence.domain.calculateWeekCounts
 import java.time.*
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun InsightsScreen(
     intakes: List<Intake>,
     medications: List<Medication>,
     email: String = "",
+    language: String = "es",
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
     LaunchedEffect(email) {
@@ -69,7 +72,7 @@ fun InsightsScreen(
                         Box(Modifier.height(96.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.secondary.copy(alpha = .1f)), contentAlignment = Alignment.BottomCenter) {
                             Box(Modifier.fillMaxWidth().fillMaxHeight((value ?: 0) / 100f).background(if (offset == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary))
                         }
-                        Text(day.format(DateTimeFormatter.ofPattern("EE")).take(2), style = MaterialTheme.typography.labelSmall)
+                        Text(day.dayOfWeek.getDisplayName(TextStyle.SHORT, java.util.Locale(language)), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
@@ -123,8 +126,8 @@ fun InsightsScreen(
                 PsBadge(stringResource(R.string.advice_badge))
             } }
         }
-        item { Text("Esta app no sustituye a un profesional de salud.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }
-        item { PsSectionHeader("Por medicamento") }
+        item { Text(stringResource(R.string.insights_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }
+        item { PsSectionHeader(stringResource(R.string.insights_per_medication)) }
         medications.filter { med -> recent.any { it.medicationId == med.id } }.forEach { med ->
             item(key = med.id) { val value = Schedule.adherence(recent.filter { it.medicationId == med.id }, now) ?: 0
                 PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

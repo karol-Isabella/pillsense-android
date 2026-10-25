@@ -289,6 +289,8 @@
     <!-- Insights Screen - Additional -->
     <string name="insights_per_medication">By medication</string>
     <string name="insights_disclaimer">This app does not replace professional medical advice.</string>
+    <string name="insights_ai_label">AI</string>
+    <string name="insights_local_rules_label">Local rules</string>
 
     <!-- Recommendations -->
     <string name="rec_apply">Apply</string>

@@ -81,6 +81,7 @@ fun TodayScreen(
     onInsightsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onDoseStatusChange: (doseId: String, status: DoseStatus) -> Unit = { _, _ -> },
+    language: String = "es",
     modifier: Modifier = Modifier,
 ) {
     val isDarkTheme = dark
@@ -119,7 +120,7 @@ fun TodayScreen(
                 ) {
                     Column {
                         Text(
-                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM", java.util.Locale.getDefault())),
+                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM", java.util.Locale(language))),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
