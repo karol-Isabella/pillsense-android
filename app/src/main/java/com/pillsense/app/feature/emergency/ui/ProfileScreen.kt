@@ -19,10 +19,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import com.pillsense.app.R
+import com.pillsense.app.BuildConfig
 import com.pillsense.app.core.database.*
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.util.permissions.AppPermission
 import com.pillsense.app.core.util.permissions.PermissionManager
+import com.pillsense.app.feature.debug.DebugDataButtons
 
 @Composable
 fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<EmergencyContact>, dark: Boolean,
@@ -228,6 +230,14 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     }
                 })
             } }
+        }
+        if (BuildConfig.DEBUG) {
+            item { PsSectionHeader("Debug")
+                DebugDataButtons(
+                    onDataGenerated = {},
+                    onDataCleared = {}
+                )
+            }
         }
         item { PsButton(onLogout, stringResource(R.string.profile_logout), Modifier.fillMaxWidth(), style = PsButtonStyle.Destructive)
             Text(stringResource(R.string.profile_logout_note), Modifier.padding(top = 12.dp), style = MaterialTheme.typography.bodySmall) }
