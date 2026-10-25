@@ -62,6 +62,7 @@ class InsightsViewModel @Inject constructor(
                 val hasConsent = consentStorage.hasConsent(currentEmail)
                 if (!hasConsent) {
                     android.util.Log.d("PillSenseAI", "sin consentimiento")
+                    _uiState.value = _uiState.value.copy(source = "Reglas locales")
                     return@launch
                 }
                 if (BuildConfig.GEMINI_API_KEY.isBlank()) {
@@ -85,8 +86,7 @@ class InsightsViewModel @Inject constructor(
                 if (daysWithData < 3 || totalDoses < 5) {
                     android.util.Log.d("PillSenseAI", "datos insuficientes: días=$daysWithData, dosis=$totalDoses")
                     _uiState.value = _uiState.value.copy(
-                        source = "Reglas locales",
-                        geminiResponse = null
+                        source = "Reglas locales"
                     )
                     return@launch
                 }
@@ -130,7 +130,8 @@ class InsightsViewModel @Inject constructor(
                 
                 val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
                 if (result.isFailure) {
-                    android.util.Log.w("PillSenseAI", "fallo: ${result.exceptionOrNull()?.message}")
+                    android.util.Log.d("PillSenseAI", "fallo Gemini: ${result.exceptionOrNull()?.message}")
+                    _uiState.value = _uiState.value.copy(source = "Reglas locales")
                     return@launch
                 }
                 
@@ -143,7 +144,7 @@ class InsightsViewModel @Inject constructor(
                         val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language)
                         
                         if (!validated.isValid) {
-                            android.util.Log.w("PillSenseAI", "validador rechazó respuesta, usando respaldo local")
+                            android.util.Log.d("PillSenseAI", "validador rechazó: adherencePct=$adherencePct, omitidas=$omitidas")
                             _uiState.value = _uiState.value.copy(
                                 source = "Reglas locales"
                             )
@@ -160,8 +161,10 @@ class InsightsViewModel @Inject constructor(
                         
                         val medicationLabels = medications.associate { it.id to "Medicamento ${medications.indexOf(it) + 1}" }.values.toSet()
                         
-                        val cleanPatterns = emptyList<String>()
-                        val cleanRecs = emptyList<GeminiRecommendation>()
+                        val cleanPatterns = listOf<String>(validated.resumen)
+                        val cleanRecs: List<GeminiRecommendation> = validated.recomendaciones.mapIndexed { index, rec ->
+                            GeminiRecommendation(type = "recommendation", medicationLabel = "Rec. ${index + 1}", reason = rec)
+                        }
                         
                         val cleanedResponse = response.copy(
                             patterns = cleanPatterns,
