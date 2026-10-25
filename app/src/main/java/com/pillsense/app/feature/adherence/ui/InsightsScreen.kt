@@ -21,6 +21,7 @@ import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.model.Schedule
 import com.pillsense.app.core.model.AdherenceAdvice
 import com.pillsense.app.feature.adherence.domain.calculateWeekCounts
+import com.pillsense.app.core.util.DateLocaleHelper
 import java.time.*
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -72,7 +73,7 @@ fun InsightsScreen(
                         Box(Modifier.height(96.dp).fillMaxWidth().clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.secondary.copy(alpha = .1f)), contentAlignment = Alignment.BottomCenter) {
                             Box(Modifier.fillMaxWidth().fillMaxHeight((value ?: 0) / 100f).background(if (offset == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary))
                         }
-                        Text(day.dayOfWeek.getDisplayName(TextStyle.SHORT, java.util.Locale(language)), style = MaterialTheme.typography.labelSmall)
+                        Text(DateLocaleHelper.getShortDayName(language, day.dayOfWeek), style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }

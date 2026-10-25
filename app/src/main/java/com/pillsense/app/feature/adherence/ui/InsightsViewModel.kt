@@ -6,7 +6,8 @@ import com.pillsense.app.BuildConfig
 import com.pillsense.app.feature.adherence.data.ConsentStorage
 import com.pillsense.app.feature.adherence.data.GeminiClient
 import com.pillsense.app.feature.adherence.data.GeminiResponse
-import com.pillsense.app.feature.adherence.domain.validateGeminiResponse
+import com.pillsense.app.feature.adherence.data.GeminiRecommendation
+import com.pillsense.app.feature.adherence.data.GeminiResponseValidator
 import com.pillsense.app.feature.adherence.domain.AnonymousAdherence
 import com.pillsense.app.core.database.Intake as DbIntake
 import com.pillsense.app.core.database.Medication
@@ -51,7 +52,7 @@ class InsightsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
-    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>) {
+    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String = "es") {
         viewModelScope.launch {
             if (!loadMutex.tryLock()) {
                 android.util.Log.w("PillSenseAI", "Llamada simultánea bloqueada")
@@ -91,7 +92,7 @@ class InsightsViewModel @Inject constructor(
                 }
                 
                 val anonLabel = try {
-                    AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, "es")
+                    AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, language)
                 } catch (e: Exception) {
                     android.util.Log.w("PillSenseAI", "error buildAnonymousStats: ${e.javaClass.simpleName}")
                     return@launch
@@ -136,6 +137,19 @@ class InsightsViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val response = result.getOrNull()
                     if (response != null && response.summary.isNotBlank()) {
+                        // Validar respuesta antes de procesar
+                        val adherencePct = (intakes.count { it.status == "TAKEN" } * 100) / intakes.size
+                        val omitidas = intakes.count { it.status == "SKIPPED" }
+                        val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, "es")
+                        
+                        if (!validated.isValid) {
+                            android.util.Log.w("PillSenseAI", "validador rechazó respuesta, usando respaldo local")
+                            _uiState.value = _uiState.value.copy(
+                                source = "Reglas locales"
+                            )
+                            return@launch
+                        }
+                        
                         if (AnonymousAdherence.containsForbiddenKeyword(response.summary)) {
                             android.util.Log.w("PillSenseAI", "respuesta bloqueada por seguridad, usando respaldo local")
                             _uiState.value = _uiState.value.copy(
@@ -145,10 +159,9 @@ class InsightsViewModel @Inject constructor(
                         }
                         
                         val medicationLabels = medications.associate { it.id to "Medicamento ${medications.indexOf(it) + 1}" }.values.toSet()
-                        val validated = validateGeminiResponse(response, medicationLabels)
                         
-                        val cleanPatterns = validated.patterns.filterNot { AnonymousAdherence.containsForbiddenKeyword(it) }
-                        val cleanRecs = validated.recommendations.filterNot { AnonymousAdherence.containsForbiddenKeyword(it.reason) }
+                        val cleanPatterns = emptyList<String>()
+                        val cleanRecs = emptyList<GeminiRecommendation>()
                         
                         val cleanedResponse = response.copy(
                             patterns = cleanPatterns,

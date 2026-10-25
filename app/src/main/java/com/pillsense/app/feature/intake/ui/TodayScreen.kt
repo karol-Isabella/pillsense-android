@@ -120,7 +120,7 @@ fun TodayScreen(
                 ) {
                     Column {
                         Text(
-                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM", java.util.Locale(language))),
+                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(if (language == "en") "EEEE, MMMM d" else "EEEE, d MMMM", java.util.Locale.forLanguageTag(language))),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
