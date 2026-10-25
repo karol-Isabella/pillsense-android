@@ -52,7 +52,7 @@ class InsightsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
-    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String = "es") {
+    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String) {
         viewModelScope.launch {
             if (!loadMutex.tryLock()) {
                 android.util.Log.w("PillSenseAI", "Llamada simultánea bloqueada")
@@ -140,7 +140,7 @@ class InsightsViewModel @Inject constructor(
                         // Validar respuesta antes de procesar
                         val adherencePct = (intakes.count { it.status == "TAKEN" } * 100) / intakes.size
                         val omitidas = intakes.count { it.status == "SKIPPED" }
-                        val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, "es")
+                        val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language)
                         
                         if (!validated.isValid) {
                             android.util.Log.w("PillSenseAI", "validador rechazó respuesta, usando respaldo local")

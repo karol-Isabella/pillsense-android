@@ -19,14 +19,13 @@ import java.time.*
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>, language: String = "es") {
+fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>, language: String) {
     var filter by rememberSaveable { mutableIntStateOf(0) }
     val now = System.currentTimeMillis()
     val history = intakes.filter { it.scheduledAt <= now || it.actedAt != null }
     val states = listOf(null, "TAKEN", "POSTPONED", "SKIPPED")
     val visible = history.filter { states[filter] == null || it.status == states[filter] }
     val names = medications.associateBy { it.id }
-    val appLocale = if (language == "en") java.util.Locale.ENGLISH else java.util.Locale("es")
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { Text(stringResource(R.string.history_heading), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(R.string.history_title), style = MaterialTheme.typography.displayMedium) }
@@ -47,14 +46,14 @@ fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>, language
         if (visible.isEmpty()) item { PsCard(Modifier.fillMaxWidth()) { Text(stringResource(R.string.history_empty), Modifier.padding(24.dp)) } }
         val grouped = visible.groupBy { Instant.ofEpochMilli(it.scheduledAt).atZone(ZoneId.systemDefault()).toLocalDate() }
         grouped.forEach { (day, entries) ->
-            item(key = day.toString()) { Text(day.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", java.util.Locale.forLanguageTag(language))), style = MaterialTheme.typography.labelLarge) }
+            item(key = day.toString()) { Text(day.format(DateTimeFormatter.ofPattern(if (language == "en") "EEEE, MMMM d" else "EEEE, d MMMM", java.util.Locale.forLanguageTag(language))), style = MaterialTheme.typography.labelLarge) }
             items(entries, key = { it.id }) { intake ->
                 val med = names[intake.medicationId]
                 PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(med?.name ?: stringResource(R.string.confirm_fallback), style = MaterialTheme.typography.titleMedium)
                     Text("${med?.dose.orEmpty()} · ${Instant.ofEpochMilli(intake.scheduledAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.forLanguageTag(language)))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     PsBadge(when (intake.status) { "TAKEN" -> stringResource(R.string.status_taken); "POSTPONED" -> stringResource(R.string.status_postponed); "SKIPPED" -> stringResource(R.string.status_skipped); else -> stringResource(R.string.notification_taken) })
-                    intake.actedAt?.let { Text("${stringResource(R.string.history_entry_label)} ${Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, hh:mm a", java.util.Locale.forLanguageTag(language)))}", style = MaterialTheme.typography.bodySmall) }
+                    intake.actedAt?.let { Text("${stringResource(R.string.history_entry_label)} ${Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(if (language == "en") "MMM d, hh:mm a" else "d MMM, hh:mm a", java.util.Locale.forLanguageTag(language)))}", style = MaterialTheme.typography.bodySmall) }
                 } }
             }
         }

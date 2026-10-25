@@ -81,7 +81,7 @@ fun TodayScreen(
     onInsightsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onDoseStatusChange: (doseId: String, status: DoseStatus) -> Unit = { _, _ -> },
-    language: String = "es",
+    language: String,
     modifier: Modifier = Modifier,
 ) {
     val isDarkTheme = dark
@@ -516,7 +516,7 @@ fun TodayScreen(
 @Composable
 private fun TodayScreenPreview() {
     PillSenseTheme {
-        TodayScreen()
+        TodayScreen(language = "es")
     }
 }
 
@@ -524,6 +524,6 @@ private fun TodayScreenPreview() {
 @Composable
 private fun TodayScreenDarkPreview() {
     PillSenseTheme(darkTheme = true) {
-        TodayScreen()
+        TodayScreen(language = "es")
     }
 }

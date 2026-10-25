@@ -184,10 +184,10 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                     weeklyAverage = Schedule.adherence(recent, now) ?: 0, dark = dark, onThemeChange = viewModel::toggleTheme,
                                     onScanClick = { nav.navigate("scan") }, onInsightsClick = { nav.navigate("insights") },
                                     onProfileClick = { nav.navigate("profile") { popUpTo("today") { saveState = true }; launchSingleTop = true; restoreState = true } },
-                                    onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, showBottomBar = false)
+                                    onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, language = language, showBottomBar = false)
                             }
-                            composable("history") { HistoryScreen(health.intakes, health.medications) }
-                            composable("insights") { InsightsScreen(health.intakes, health.medications, user.orEmpty()) }
+                            composable("history") { HistoryScreen(health.intakes, health.medications, language = language) }
+                            composable("insights") { InsightsScreen(health.intakes, health.medications, user.orEmpty(), language = language) }
                             composable("profile") { ProfileScreen(user.orEmpty(), health.medications, health.contacts, dark,
                                 viewModel::toggleTheme, { viewModel.logout(); nav.popBackStack("today", false) }, viewModel::archive,
                                 viewModel::saveContact, viewModel::removeContact, { openPermissionsSettings() }, ready, viewModel.getUserName(),
