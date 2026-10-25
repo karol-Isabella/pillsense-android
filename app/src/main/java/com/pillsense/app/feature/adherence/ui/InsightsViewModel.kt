@@ -26,7 +26,8 @@ data class InsightsUiState(
     val geminiResponse: GeminiResponse? = null,
     val isAiEnabled: Boolean = false,
     val source: String = "Reglas locales",
-    val lastAdviceDate: String? = null
+    val lastAdviceDate: String? = null,
+    val isLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -52,8 +53,9 @@ class InsightsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
-    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String) {
+    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String, allIntakesCount: Int = 0) {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
             if (!loadMutex.tryLock()) {
                 android.util.Log.w("PillSenseAI", "Llamada simultánea bloqueada")
                 return@launch
@@ -72,7 +74,7 @@ class InsightsViewModel @Inject constructor(
                 
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
-                val totalDoses = intakes.size
+                val totalDoses = if (allIntakesCount > 0) allIntakesCount else intakes.size
                 
                 // Nivel 0: Sin tomas
                 if (totalDoses == 0) {
@@ -306,6 +308,7 @@ class InsightsViewModel @Inject constructor(
                 android.util.Log.w("PillSenseAI", "error: ${e.javaClass.simpleName}")
             } finally {
                 loadMutex.unlock()
+                _uiState.value = _uiState.value.copy(isLoading = false)
             }
         }
     }

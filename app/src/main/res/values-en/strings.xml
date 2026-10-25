@@ -159,6 +159,8 @@
     <string name="insights_last_7_days">LAST 7 DAYS</string>
     <string name="insights_my_progress">My progress</string>
     <string name="insights_ai_title">AI Analysis</string>
+    <string name="insights_loading_ai">Loading analysis...</string>
+    <string name="insights_local_rules_badge">Local rules</string>
     <string name="insights_recommendations_label">Recommendations</string>
     <string name="insights_local_habits">Small habits, more consistency</string>
     <string name="insights_weekly_adherence">Weekly adherence</string>

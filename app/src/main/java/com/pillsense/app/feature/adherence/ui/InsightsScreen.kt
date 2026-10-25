@@ -47,7 +47,7 @@ fun InsightsScreen(
     val uiState = viewModel.uiState.collectAsState().value
     
     LaunchedEffect(email) {
-        viewModel.loadGeminiAdvice(intakes, medications, language)
+        viewModel.loadGeminiAdvice(intakes, medications, language, allIntakesCount = intakes.size)
     }
     
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -78,11 +78,17 @@ fun InsightsScreen(
                 }
             }
         } } }
-        if (uiState.geminiResponse != null) {
+        if (uiState.isLoading) {
+            item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(modifier = Modifier.size(40.dp))
+                Spacer(Modifier.height(12.dp))
+                Text(stringResource(R.string.insights_loading_ai), style = MaterialTheme.typography.bodySmall)
+            } } }
+        } else if (uiState.geminiResponse != null) {
             item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    PsBadge("IA")
+                    PsBadge(if (uiState.source == "IA") "IA" else stringResource(R.string.insights_local_rules_badge))
                 }
                 Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
                 if (uiState.geminiResponse.recommendations.isNotEmpty()) {
@@ -92,8 +98,7 @@ fun InsightsScreen(
                         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("•", style = MaterialTheme.typography.bodySmall)
                             Column {
-                                Text("${rec.type} (${rec.medicationLabel})", style = MaterialTheme.typography.bodySmall)
-                                Text(rec.reason, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(rec.reason, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
