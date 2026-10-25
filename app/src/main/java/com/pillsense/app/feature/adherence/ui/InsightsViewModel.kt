@@ -75,10 +75,11 @@ class InsightsViewModel @Inject constructor(
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
                 val totalDoses = intakes.size
+                val takenDoses = intakes.count { it.status == "TAKEN" }
                 
                 // Nivel 0: Sin tomas en la ventana
                 if (totalDoses == 0) {
-                    android.util.Log.d("PillSenseAI", "Nivel 0: sin tomas registradas en ventana")
+                    android.util.Log.d("PillSenseAI", "Nivel 0: $totalDoses programadas, $takenDoses tomadas en ventana")
                     _uiState.value = _uiState.value.copy(
                         geminiResponse = GeminiResponse(
                             summary = if (language == "es") "¡Bienvenido! Comienza a registrar tus medicamentos para recibir seguimiento." 
@@ -93,7 +94,7 @@ class InsightsViewModel @Inject constructor(
                 
                 // Nivel 1: 1 a 4 dosis (inicial)
                 if (totalDoses in 1..4) {
-                    android.util.Log.d("PillSenseAI", "Nivel 1: $totalDoses dosis programadas (inicial)")
+                    android.util.Log.d("PillSenseAI", "Nivel 1: $totalDoses programadas, $takenDoses tomadas en ventana (inicial)")
                     
                     // Llamar a Gemini con "nivel": "inicial"
                     val anonLabel = try {
@@ -205,7 +206,7 @@ class InsightsViewModel @Inject constructor(
                 }
                 
                 // Nivel 2: 5+ dosis (comportamiento completo)
-                android.util.Log.d("PillSenseAI", "Nivel 2: $totalDoses dosis programadas (completo)")
+                android.util.Log.d("PillSenseAI", "Nivel 2: $totalDoses programadas, $takenDoses tomadas en ventana (completo)")
                 
                 val anonLabel = try {
                     AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, language)
