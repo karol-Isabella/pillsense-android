@@ -169,6 +169,10 @@
     <!-- Consent Dialog -->
     <string name="consent_ai_title">Análisis personalizado con IA</string>
     <string name="consent_ai_message">¿Permitir que la IA analice tu adherencia y dé recomendaciones personalizadas?</string>
+    <string name="consent_dialog_title">Análisis con IA</string>
+    <string name="consent_dialog_message">Enviaremos solo estadísticas anónimas (sin nombres, correos ni fechas exactas). No incluiremos información personal ni detalles de medicamentos. ¿Aceptas usar IA para mejorar tus recomendaciones?</string>
+    <string name="consent_accept">Aceptar</string>
+    <string name="consent_later">Ahora no</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Perfil</string>
@@ -207,6 +211,28 @@
     <string name="profile_ai_analysis">Análisis con IA</string>
     <string name="profile_privacy_notice">Tus datos se cifran en el dispositivo. Solo se envían datos anónimos agregados a la IA.</string>
     <string name="profile_ai_recommendations">Recomendaciones con IA</string>
+    <string name="profile_dark_mode">Modo oscuro</string>
+    <string name="profile_language_label">Idioma</string>
+    <string name="profile_language_spanish">Español</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_no_active_treatments">Aún no tienes tratamientos activos.</string>
+    <string name="profile_account_local">Cuenta local · datos cifrados</string>
+    <string name="profile_appearance_header">Apariencia</string>
+    <string name="profile_notify_contacts">Avisar a mis contactos</string>
+    <string name="profile_contact_consent">Esta persona está de acuerdo en recibir estos avisos</string>
+    <string name="profile_reminders_header">Recordatorios</string>
+    <string name="profile_reminders_enabled">Notificaciones y alarmas exactas habilitadas</string>
+    <string name="profile_reminders_disabled">Revisa los permisos para recibir recordatorios puntuales.</string>
+    <string name="profile_reminders_note">Los avisos son locales y funcionan sin internet. Android puede retrasarlos si faltan permisos; forzar el cierre de la app los interrumpe hasta volver a abrirla.</string>
+    <string name="profile_check_permissions">Revisar permisos</string>
+    <string name="profile_privacy_header">Privacidad</string>
+    <string name="profile_privacy_title">Todo empieza en tu teléfono</string>
+    <string name="profile_privacy_desc">Tus datos se guardan cifrados en tu teléfono. El análisis con IA es opcional y solo envía estadísticas anónimas.</string>
+    <string name="profile_ai_header">Análisis con IA</string>
+    <string name="profile_ai_only_anon">Solo estadísticas anónimas</string>
+    <string name="profile_logout_note">Al cerrar sesión se pausan tus avisos. Se reactivan cuando vuelves a entrar.</string>
+    <string name="profile_remove_contact_text">Eliminar</string>
+    <string name="profile_contacts_header">Contactos</string>
 
     <!-- Medication Data -->
     <string name="med_form_tablet">Tableta</string>
@@ -259,4 +285,77 @@
     <string name="advice_some_incomplete_plural">Tienes %1$d tomas sin completar. Revisa el historial; si no sabes qué hacer con una dosis olvidada, consulta al profesional que indicó el tratamiento.</string>
     <string name="advice_all_completed">Has registrado todas las tomas que ya correspondían. Mantén la constancia y registra cada toma cuando la realices.</string>
     <string name="advice_badge">Basado en tus registros</string>
+
+    <!-- Insights Screen - Additional -->
+    <string name="insights_per_medication">Por medicamento</string>
+    <string name="insights_disclaimer">Esta app no sustituye a un profesional de salud.</string>
+
+    <!-- Recommendations -->
+    <string name="rec_apply">Aplicar</string>
+    <string name="rec_apply_changes">Aplicar cambios</string>
+    <string name="rec_apply_desc">Se desplazarán los recordatorios según la recomendación. Puedes deshacer después.</string>
+    <string name="rec_confirm">Confirmar</string>
+    <string name="rec_cancel">Cancelar</string>
+
+    <!-- Today Screen -->
+    <string name="today_no_active">Tu tratamiento empieza aquí</string>
+    <string name="today_no_active_desc">Escanea una receta o añade tu primer medicamento.</string>
+    <string name="today_add_medication">Añadir medicamento</string>
+
+    <!-- Login Screen - Additional -->
+    <string name="login_too_many_attempts">Demasiados intentos. Intenta de nuevo en %1$d segundos.</string>
+    <string name="login_local_account">Cuenta local: tus datos permanecen en este teléfono.</string>
+
+    <!-- Alerts and Dialogs -->
+    <string name="alert_finish_treatment">Finalizar tratamiento</string>
+    <string name="alert_finish_treatment_desc">Se detendrán los recordatorios de %1$s. El historial se conservará.</string>
+    <string name="alert_remove_contact">Eliminar contacto</string>
+    <string name="alert_remove_contact_desc">¿Eliminar a %1$s de tus contactos?</string>
+    <string name="alert_permission_denied">Permiso rechazado</string>
+    <string name="alert_understood">Entendido</string>
+    <string name="alert_finish">Finalizar</string>
+    <string name="alert_remove">Eliminar</string>
+
+    <!-- AI Consent Dialog -->
+    <string name="consent_ai_analysis_title">Análisis con IA</string>
+    <string name="consent_ai_data_sent">Se enviarán al análisis de IA:</string>
+    <string name="consent_ai_data_anon">• Conteos anónimos de tomas (tomadas, pospuestas, omitidas)</string>
+    <string name="consent_ai_data_adherence">• Porcentaje de adherencia por período</string>
+    <string name="consent_ai_data_not_sent">NO se enviarán:</string>
+    <string name="consent_ai_no_med_names">• Nombres de medicamentos reales</string>
+    <string name="consent_ai_no_doses">• Dosis, instrucciones o frecuencias</string>
+    <string name="consent_ai_no_contact">• Tu correo electrónico o contactos</string>
+    <string name="consent_ai_no_dates">• Fechas exactas</string>
+    <string name="consent_ai_accept">Aceptar</string>
+    <string name="consent_ai_later">Ahora no</string>
+
+    <!-- Dose Dialog -->
+    <string name="dose_action_taken">Tomada</string>
+    <string name="dose_action_postpone">Posponer 15 min</string>
+    <string name="dose_action_skip">Omitida</string>
+
+    <!-- Additional UI Strings -->
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_confirm">Confirmar</string>
+    <string name="signup_name_label">Nombre</string>
+    <string name="signup_name_placeholder">Tu nombre</string>
+    <string name="history_heading">TU REGISTRO</string>
+    <string name="history_empty_no_doses">Todavía no hay tomas registradas.</string>
+    <string name="history_entry_label">Registro:</string>
+    <string name="scan_button">Escanear</string>
+    <string name="today_cancel">Cancelar</string>
+    <string name="med_interval">Cada %1$d horas</string>
+    <string name="med_duration">%1$d días desde %2$s</string>
+    <string name="med_duration_continuous">Tratamiento continuo</string>
+    <string name="profile_contacts_max">Máximo 2 contactos permitidos</string>
+    <string name="stats_skipped">omitidas</string>
+    <string name="recommendation_type_label">%1$s (%2$s)</string>
+    <!-- ScanScreen -->
+    <string name="scan_suggestion_hint">Son sugerencias del texto leído. Verifica cada campo con la receta; no se infieren dosis ni frecuencias ausentes.</string>
+    <string name="scan_manual_register">Registrar manualmente</string>
+    <string name="scan_photo_selected">Foto seleccionada</string>
+    <string name="notification_pending_dose">Toma pendiente de registrar</string>
+    <string name="notification_medication_time">Hora de tu medicamento</string>
+    <string name="scan_button_label">Escanear</string>
+    <string name="confirm_scanned_instruction">Texto reconocido · confirma cada dato</string>
 </resources>

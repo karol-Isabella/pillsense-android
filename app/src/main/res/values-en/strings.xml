@@ -41,6 +41,7 @@
     <string name="login_password">Password</string>
     <string name="login_show">Show password</string>
     <string name="login_hide">Hide password</string>
+    <string name="login_password_hint">Minimum 8 characters, with letters and numbers</string>
     <string name="login_invalid_email">Enter a valid email address.</string>
     <string name="login_short_password">Password must be at least 8 characters.</string>
     <string name="login_no_errors">No errors</string>
@@ -168,6 +169,10 @@
     <!-- Consent Dialog -->
     <string name="consent_ai_title">Personalized AI analysis</string>
     <string name="consent_ai_message">Allow AI to analyze your adherence and provide personalized recommendations?</string>
+    <string name="consent_dialog_title">AI Analysis</string>
+    <string name="consent_dialog_message">We\'ll send only anonymous statistics (no names, emails, or exact dates). We won\'t include personal information or medication details. Do you accept using AI to improve your recommendations?</string>
+    <string name="consent_accept">Accept</string>
+    <string name="consent_later">Not now</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Profile</string>
@@ -206,6 +211,28 @@
     <string name="profile_ai_analysis">AI Analysis</string>
     <string name="profile_privacy_notice">Your data is encrypted on your device. Only anonymous aggregated data is sent to AI.</string>
     <string name="profile_ai_recommendations">AI Recommendations</string>
+    <string name="profile_dark_mode">Dark mode</string>
+    <string name="profile_language_label">Language</string>
+    <string name="profile_language_spanish">Español</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_no_active_treatments">You don\'t have any active treatments yet.</string>
+    <string name="profile_account_local">Local account · encrypted data</string>
+    <string name="profile_appearance_header">Appearance</string>
+    <string name="profile_notify_contacts">Notify my contacts</string>
+    <string name="profile_contact_consent">This person agrees to receive these notifications</string>
+    <string name="profile_reminders_header">Reminders</string>
+    <string name="profile_reminders_enabled">Exact notifications and alarms enabled</string>
+    <string name="profile_reminders_disabled">Check permissions to receive timely reminders.</string>
+    <string name="profile_reminders_note">Alerts are local and work without internet. Android may delay them if permissions are missing; force-closing the app interrupts them until you open it again.</string>
+    <string name="profile_check_permissions">Check permissions</string>
+    <string name="profile_privacy_header">Privacy</string>
+    <string name="profile_privacy_title">It all starts on your phone</string>
+    <string name="profile_privacy_desc">Your data is encrypted on your phone. AI analysis is optional and only sends anonymous statistics.</string>
+    <string name="profile_ai_header">AI Analysis</string>
+    <string name="profile_ai_only_anon">Only anonymous statistics</string>
+    <string name="profile_logout_note">When you sign out, your reminders pause. They resume when you sign back in.</string>
+    <string name="profile_remove_contact_text">Remove</string>
+    <string name="profile_contacts_header">Contacts</string>
 
     <!-- Medication Data -->
     <string name="med_form_tablet">Tablet</string>
@@ -258,4 +285,77 @@
     <string name="advice_some_incomplete_plural">You have %1$d incomplete doses. Check your history; if you\'re unsure about a missed dose, consult the doctor who prescribed your treatment.</string>
     <string name="advice_all_completed">You\'ve logged all doses due so far. Stay consistent and log each dose when you take it.</string>
     <string name="advice_badge">Based on your records</string>
+
+    <!-- Insights Screen - Additional -->
+    <string name="insights_per_medication">By medication</string>
+    <string name="insights_disclaimer">This app does not replace professional medical advice.</string>
+
+    <!-- Recommendations -->
+    <string name="rec_apply">Apply</string>
+    <string name="rec_apply_changes">Apply changes</string>
+    <string name="rec_apply_desc">Reminders will be shifted according to the recommendation. You can undo later.</string>
+    <string name="rec_confirm">Confirm</string>
+    <string name="rec_cancel">Cancel</string>
+
+    <!-- Today Screen -->
+    <string name="today_no_active">Your treatment starts here</string>
+    <string name="today_no_active_desc">Scan a prescription or add your first medication.</string>
+    <string name="today_add_medication">Add medication</string>
+
+    <!-- Login Screen - Additional -->
+    <string name="login_too_many_attempts">Too many attempts. Try again in %1$d seconds.</string>
+    <string name="login_local_account">Local account: your data stays on this phone.</string>
+
+    <!-- Alerts and Dialogs -->
+    <string name="alert_finish_treatment">Finish treatment</string>
+    <string name="alert_finish_treatment_desc">Reminders for %1$s will stop. History will be kept.</string>
+    <string name="alert_remove_contact">Remove contact</string>
+    <string name="alert_remove_contact_desc">Remove %1$s from your contacts?</string>
+    <string name="alert_permission_denied">Permission denied</string>
+    <string name="alert_understood">Understood</string>
+    <string name="alert_finish">Finish</string>
+    <string name="alert_remove">Remove</string>
+
+    <!-- AI Consent Dialog -->
+    <string name="consent_ai_analysis_title">AI Analysis</string>
+    <string name="consent_ai_data_sent">The following will be sent for AI analysis:</string>
+    <string name="consent_ai_data_anon">• Anonymous counts of doses (taken, snoozed, skipped)</string>
+    <string name="consent_ai_data_adherence">• Adherence percentage by period</string>
+    <string name="consent_ai_data_not_sent">Will NOT be sent:</string>
+    <string name="consent_ai_no_med_names">• Real medication names</string>
+    <string name="consent_ai_no_doses">• Doses, instructions, or frequencies</string>
+    <string name="consent_ai_no_contact">• Your email or contacts</string>
+    <string name="consent_ai_no_dates">• Exact dates</string>
+    <string name="consent_ai_accept">Accept</string>
+    <string name="consent_ai_later">Not now</string>
+
+    <!-- Dose Dialog -->
+    <string name="dose_action_taken">Taken</string>
+    <string name="dose_action_postpone">Snooze 15 min</string>
+    <string name="dose_action_skip">Skipped</string>
+
+    <!-- Additional UI Strings -->
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="signup_name_label">Name</string>
+    <string name="signup_name_placeholder">Your name</string>
+    <string name="history_heading">YOUR RECORD</string>
+    <string name="history_empty_no_doses">No doses recorded yet.</string>
+    <string name="history_entry_label">Record:</string>
+    <string name="scan_button">Scan</string>
+    <string name="today_cancel">Cancel</string>
+    <string name="med_interval">Every %1$d hours</string>
+    <string name="med_duration">%1$d days from %2$s</string>
+    <string name="med_duration_continuous">Continuous treatment</string>
+    <string name="profile_contacts_max">Maximum 2 contacts allowed</string>
+    <string name="stats_skipped">skipped</string>
+    <string name="recommendation_type_label">%1$s (%2$s)</string>
+    <!-- ScanScreen -->
+    <string name="scan_suggestion_hint">These are suggestions from the text read. Verify each field against your prescription; doses and frequencies are not inferred if missing.</string>
+    <string name="scan_manual_register">Register manually</string>
+    <string name="scan_photo_selected">Selected photo</string>
+    <string name="notification_pending_dose">Pending dose to record</string>
+    <string name="notification_medication_time">Time for your medication</string>
+    <string name="scan_button_label">Scan</string>
+    <string name="confirm_scanned_instruction">Text recognized · confirm each detail</string>
 </resources>

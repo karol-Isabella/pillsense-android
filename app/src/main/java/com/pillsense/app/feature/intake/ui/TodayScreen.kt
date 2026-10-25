@@ -93,7 +93,7 @@ fun TodayScreen(
                 listOf(DoseStatus.TAKEN to "Tomada", DoseStatus.POSTPONED to "Posponer 15 min", DoseStatus.SKIPPED to "Omitida").forEach { (status, label) ->
                     TextButton(onClick = { onDoseStatusChange(selected.id, status); selectedDose = null }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(label) }
                 }
-            } }, confirmButton = {}, dismissButton = { TextButton(onClick = { selectedDose = null }) { Text("Cancelar") } })
+            } }, confirmButton = {}, dismissButton = { TextButton(onClick = { selectedDose = null }) { Text(stringResource(R.string.dialog_cancel)) } })
     }
     val nextDose = doses.firstOrNull { it.status == DoseStatus.PENDING || it.status == DoseStatus.POSTPONED }
     val percent = if (todayProgress.value.second > 0) {
@@ -299,10 +299,10 @@ fun TodayScreen(
             // Dose list
             if (doses.isEmpty()) item {
                 PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp)) {
-                    Text("Tu tratamiento empieza aquí", style = MaterialTheme.typography.titleLarge)
-                    Text("Escanea una receta o añade tu primer medicamento.")
+                    Text(stringResource(R.string.today_no_active), style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.today_no_active_desc))
                     Spacer(Modifier.height(12.dp))
-                    PsButton(onScanClick, "Añadir medicamento", Modifier.fillMaxWidth())
+                    PsButton(onScanClick, stringResource(R.string.today_add_medication), Modifier.fillMaxWidth())
                 } }
             }
             items(doses, key = { it.id }) { dose ->
@@ -475,7 +475,7 @@ fun TodayScreen(
                             )
                         }
                     },
-                    label = "Escanear"
+                    label = stringResource(R.string.scan_button_label)
                 ),
                 PsBottomBarItem(
                     icon = {

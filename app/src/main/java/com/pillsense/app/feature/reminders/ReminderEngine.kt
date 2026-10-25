@@ -114,12 +114,12 @@ class ReminderEngine @Inject constructor(
             .format(java.time.format.DateTimeFormatter.ofPattern("d MMM, hh:mm a"))
         val late = System.currentTimeMillis() - intake.scheduledAt > TimeUnit.MINUTES.toMillis(15)
         val notification = NotificationCompat.Builder(context, "doses")
-            .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) "Toma pendiente de registrar" else "Hora de tu medicamento")
+            .setSmallIcon(R.drawable.ic_lucide_pill).setContentTitle(if (late) context.getString(R.string.notification_pending_dose) else context.getString(R.string.notification_medication_time))
             .setContentText("${med.name} · ${med.dose} · $scheduledLabel")
             .setStyle(NotificationCompat.BigTextStyle().bigText("${med.name} · ${med.dose}\n$scheduledLabel\n${med.instructions}"))
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open)
             .setPriority(NotificationCompat.PRIORITY_HIGH).setAutoCancel(false).setOngoing(true)
-        listOf("TAKEN" to "Tomada", "POSTPONED" to "Posponer 15 min", "SKIPPED" to "Omitir").forEach { (status, label) ->
+        listOf("TAKEN" to context.getString(R.string.status_taken), "POSTPONED" to context.getString(R.string.notification_postpone), "SKIPPED" to context.getString(R.string.status_skipped)).forEach { (status, label) ->
             val intent = Intent(context, ReminderReceiver::class.java).setAction("com.pillsense.ACTION")
                 .setData(Uri.parse("pillsense://intake/${Uri.encode(intake.id)}/$status"))
                 .putExtra("id", intake.id).putExtra("status", status)

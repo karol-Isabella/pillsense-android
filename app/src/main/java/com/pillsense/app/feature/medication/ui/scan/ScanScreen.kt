@@ -62,8 +62,8 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = onClose, enabled = !state.busy) { Text("Cancelar") }
-            Text("Escanear medicamento", style = MaterialTheme.typography.titleMedium)
+            TextButton(onClick = onClose, enabled = !state.busy) { Text(stringResource(R.string.dialog_cancel)) }
+            Text(stringResource(R.string.today_scan), style = MaterialTheme.typography.titleMedium)
         }
         PsCard(Modifier.fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().heightIn(min = 230.dp).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -85,28 +85,28 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
             }
         }
         
-        Text("La lectura se realiza en tu teléfono, sin claves ni internet. Revisa cada dato con la receta antes de guardar.",
+        Text(stringResource(R.string.confirm_verify),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         cameraError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         if (state.result != null) {
             PsCard { Column(Modifier.padding(20.dp)) {
-                Text(state.result!!.name.ifBlank { "Texto reconocido" }, style = MaterialTheme.typography.headlineSmall)
+                Text(state.result!!.name.ifBlank { stringResource(R.string.scan_photo_hint) }, style = MaterialTheme.typography.headlineSmall)
                 Text(state.result!!.dose)
-                Text("Verifica los datos y completa los campos que no aparecen en la foto.")
+                Text(stringResource(R.string.confirm_verify))
                 if (state.result!!.originalText.isNotBlank()) {
                     Spacer(Modifier.height(12.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(painterResource(R.drawable.ic_lucide_lightbulb), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
-                        Text("Son sugerencias del texto leído. Verifica cada campo con la receta; no se infieren dosis ni frecuencias ausentes.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.scan_suggestion_hint), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
                     }
                 }
             } }
-            PsButton({ onScanComplete(state.result!!) }, "Revisar datos", Modifier.fillMaxWidth())
+            PsButton({ onScanComplete(state.result!!) }, stringResource(R.string.confirm_title), Modifier.fillMaxWidth())
         }
         PsButton({ cameraError = null; if (PermissionManager.isGranted(context, AppPermission.CAMERA)) takePhoto()
-            else PermissionManager.requestPermission(permission, AppPermission.CAMERA) }, "Tomar foto", Modifier.fillMaxWidth(), enabled = !state.busy)
-        PsButton({ gallery.launch("image/*") }, "Seleccionar de la galería", Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Secondary)
-        PsButton(onManual, "Registrar manualmente", Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Text)
+            else PermissionManager.requestPermission(permission, AppPermission.CAMERA) }, stringResource(R.string.scan_capture), Modifier.fillMaxWidth(), enabled = !state.busy)
+        PsButton({ gallery.launch("image/*") }, stringResource(R.string.scan_gallery), Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Secondary)
+        PsButton(onManual, stringResource(R.string.scan_manual_register), Modifier.fillMaxWidth(), enabled = !state.busy, style = PsButtonStyle.Text)
     }
 }
 
@@ -171,7 +171,7 @@ fun ThumbnailImage(selectedUri: String?) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(painterResource(R.drawable.ic_lucide_images), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(64.dp))
             Spacer(Modifier.height(20.dp))
-            Text("Foto seleccionada", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.scan_photo_selected), style = MaterialTheme.typography.bodyLarge)
         }
     } else {
         CircularProgressIndicator()

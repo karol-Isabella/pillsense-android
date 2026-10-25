@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.PsCard
 import com.pillsense.app.core.designsystem.PsBadge
 
@@ -26,7 +28,7 @@ fun RecommendationCard(
                 PsBadge(source)
                 if (hasAction) {
                     Button(onClick = { showConfirm = true }, modifier = Modifier.weight(1f)) {
-                        Text("Aplicar")
+                        Text(stringResource(R.string.rec_apply))
                     }
                 }
             }
@@ -36,16 +38,16 @@ fun RecommendationCard(
     if (showConfirm) {
         AlertDialog(
             onDismissRequest = { showConfirm = false },
-            title = { Text("Aplicar cambios") },
-            text = { Text("Se desplazarán los recordatorios según la recomendación. Puedes deshacer después.") },
+            title = { Text(stringResource(R.string.rec_apply_changes)) },
+            text = { Text(stringResource(R.string.rec_apply_desc)) },
             confirmButton = {
                 Button(onClick = { onApply(30); showConfirm = false }) {
-                    Text("Confirmar")
+                    Text(stringResource(R.string.rec_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showConfirm = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.rec_cancel))
                 }
             }
         )

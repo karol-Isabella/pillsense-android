@@ -274,8 +274,8 @@ fun LoginScreen(
                         name = it.take(40)
                         if (nameError != null) nameError = null
                     },
-                    label = "Nombre",
-                    placeholder = "Tu nombre",
+                    label = stringResource(R.string.signup_name_label),
+                    placeholder = stringResource(R.string.signup_name_placeholder),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -330,9 +330,9 @@ fun LoginScreen(
 
         authError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         if (isLocked) {
-            Text("Demasiados intentos. Intenta de nuevo en $secondsRemaining segundos.", color = MaterialTheme.colorScheme.error)
+            Text(stringResource(R.string.login_too_many_attempts, secondsRemaining), color = MaterialTheme.colorScheme.error)
         }
-        Text("Cuenta local: tus datos permanecen en este teléfono.", style = MaterialTheme.typography.bodySmall)
+        Text(stringResource(R.string.login_local_account), style = MaterialTheme.typography.bodySmall)
         Spacer(Modifier.height(12.dp))
         PsButton(
             onClick = onSubmit,

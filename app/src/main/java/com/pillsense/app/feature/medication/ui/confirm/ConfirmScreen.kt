@@ -235,7 +235,7 @@ fun ConfirmScreen(
                     if (scannedMed != null) {
                         Spacer(modifier = Modifier.height(8.dp))
                         PsBadge(
-                            text = "Texto reconocido · confirma cada dato",
+                            text = stringResource(R.string.confirm_scanned_instruction),
                             backgroundColor = Color(0xFF5856D6).copy(alpha = 0.1f),
                             textColor = Color(0xFF5856D6)
                         )
