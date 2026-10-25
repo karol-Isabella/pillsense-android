@@ -56,4 +56,18 @@ class GeminiResponseValidatorTest {
         val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
         assertFalse(result.isValid)
     }
+    
+    @Test
+    fun acceptsTextWithNumbersWithoutPercent() {
+        val json = """{"resumen": "En los últimos 7 días has ido bien.", "recomendaciones": []}"""
+        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es")
+        assertTrue(result.isValid)
+    }
+    
+    @Test
+    fun rejectIfPercentageWithSymbol() {
+        val json = """{"resumen": "Tienes 45% de adherencia.", "recomendaciones": []}"""
+        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es")
+        assertFalse(result.isValid)
+    }
 }

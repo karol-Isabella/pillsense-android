@@ -16,7 +16,7 @@ object GeminiResponseValidator {
                 if (resumen.contains("olvid", ignoreCase = true) || recs.any { it.contains("olvid", ignoreCase = true) }) {
                     return ValidatedResponse(false)
                 }
-                val percentMatch = "\\b(\\d+)%".toRegex()
+                val percentMatch = "\\d+\\s*%".toRegex()
                 if (percentMatch.find(resumen) != null) {
                     return ValidatedResponse(false)
                 }
@@ -29,9 +29,9 @@ object GeminiResponseValidator {
                 return ValidatedResponse(false)
             }
             
-            // Descartar si cita un porcentaje distinto
-            val percentMatch = "\\b(\\d+)%".toRegex()
-            val percentInResponse = percentMatch.find(resumen)?.groups?.get(1)?.value?.toIntOrNull()
+            // Descartar si cita un porcentaje (CON %) distinto
+            val percentMatch = "\\d+\\s*%".toRegex()
+            val percentInResponse = percentMatch.find(resumen)?.value?.replace(Regex("\\D"), "")?.toIntOrNull()
             if (percentInResponse != null && percentInResponse != adherencePct) {
                 return ValidatedResponse(false)
             }

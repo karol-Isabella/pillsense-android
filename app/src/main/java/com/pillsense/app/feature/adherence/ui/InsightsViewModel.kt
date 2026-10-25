@@ -53,7 +53,7 @@ class InsightsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
-    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String, allIntakesCount: Int = 0) {
+    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             if (!loadMutex.tryLock()) {
@@ -74,11 +74,11 @@ class InsightsViewModel @Inject constructor(
                 
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
-                val totalDoses = if (allIntakesCount > 0) allIntakesCount else intakes.size
+                val totalDoses = intakes.size
                 
-                // Nivel 0: Sin tomas
+                // Nivel 0: Sin tomas en la ventana
                 if (totalDoses == 0) {
-                    android.util.Log.d("PillSenseAI", "Nivel 0: sin tomas registradas")
+                    android.util.Log.d("PillSenseAI", "Nivel 0: sin tomas registradas en ventana")
                     _uiState.value = _uiState.value.copy(
                         geminiResponse = GeminiResponse(
                             summary = if (language == "es") "¡Bienvenido! Comienza a registrar tus medicamentos para recibir seguimiento." 
@@ -93,7 +93,7 @@ class InsightsViewModel @Inject constructor(
                 
                 // Nivel 1: 1 a 4 dosis (inicial)
                 if (totalDoses in 1..4) {
-                    android.util.Log.d("PillSenseAI", "Nivel 1: $totalDoses dosis (inicial)")
+                    android.util.Log.d("PillSenseAI", "Nivel 1: $totalDoses dosis programadas (inicial)")
                     
                     // Llamar a Gemini con "nivel": "inicial"
                     val anonLabel = try {
@@ -205,7 +205,7 @@ class InsightsViewModel @Inject constructor(
                 }
                 
                 // Nivel 2: 5+ dosis (comportamiento completo)
-                android.util.Log.d("PillSenseAI", "Nivel 2: $totalDoses dosis (completo)")
+                android.util.Log.d("PillSenseAI", "Nivel 2: $totalDoses dosis programadas (completo)")
                 
                 val anonLabel = try {
                     AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, language)
@@ -247,7 +247,15 @@ class InsightsViewModel @Inject constructor(
                 val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
                 if (result.isFailure) {
                     android.util.Log.d("PillSenseAI", "fallo Gemini: ${result.exceptionOrNull()?.message}")
-                    _uiState.value = _uiState.value.copy(source = "Reglas locales")
+                    _uiState.value = _uiState.value.copy(
+                        geminiResponse = GeminiResponse(
+                            summary = if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." 
+                                     else "Check your medication history and stay consistent.",
+                            patterns = emptyList(),
+                            recommendations = emptyList()
+                        ),
+                        source = "Reglas locales"
+                    )
                     return@launch
                 }
                 
@@ -262,6 +270,12 @@ class InsightsViewModel @Inject constructor(
                         if (!validated.isValid) {
                             android.util.Log.d("PillSenseAI", "validador rechazó: adherencePct=$adherencePct, omitidas=$omitidas")
                             _uiState.value = _uiState.value.copy(
+                                geminiResponse = GeminiResponse(
+                                    summary = if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." 
+                                             else "Check your medication history and stay consistent.",
+                                    patterns = emptyList(),
+                                    recommendations = emptyList()
+                                ),
                                 source = "Reglas locales"
                             )
                             return@launch
@@ -270,7 +284,13 @@ class InsightsViewModel @Inject constructor(
                         if (AnonymousAdherence.containsForbiddenKeyword(response.summary)) {
                             android.util.Log.w("PillSenseAI", "respuesta bloqueada por seguridad, usando respaldo local")
                             _uiState.value = _uiState.value.copy(
-                                source = "Reglas locales (respuesta de IA bloqueada por seguridad)"
+                                geminiResponse = GeminiResponse(
+                                    summary = if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." 
+                                             else "Check your medication history and stay consistent.",
+                                    patterns = emptyList(),
+                                    recommendations = emptyList()
+                                ),
+                                source = "Reglas locales"
                             )
                             return@launch
                         }
