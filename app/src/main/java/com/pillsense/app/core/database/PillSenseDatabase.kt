@@ -69,10 +69,6 @@ interface PillSenseDao {
     suspend fun getAiCache(owner: String): AiCache?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveAiCache(cache: AiCache)
-    @Query("DELETE FROM medications WHERE owner = :owner")
-    suspend fun deleteByOwner(owner: String)
-    @Query("DELETE FROM intakes WHERE owner = :owner")
-    suspend fun deleteIntakesByOwner(owner: String)
 }
 @Database(entities = [Medication::class, Intake::class, EmergencyContact::class, AiCache::class], version = 3, exportSchema = true)
 abstract class PillSenseDatabase : RoomDatabase() { abstract fun dao(): PillSenseDao }

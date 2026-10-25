@@ -72,24 +72,138 @@ class InsightsViewModel @Inject constructor(
                 
                 val now = System.currentTimeMillis()
                 val zone = ZoneId.systemDefault()
-                
-                // Umbral de datos mínimos: 3+ días con tomas, 5+ dosis totales
-                val today = LocalDate.now()
-                var daysWithData = 0
-                (0..6).forEach { offset ->
-                    val dayStart = today.minusDays(offset.toLong()).atStartOfDay(zone).toInstant().toEpochMilli()
-                    val dayEnd = today.minusDays(offset.toLong()).plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
-                    if (intakes.any { it.scheduledAt in dayStart until dayEnd }) daysWithData++
-                }
-                
                 val totalDoses = intakes.size
-                if (daysWithData < 3 || totalDoses < 5) {
-                    android.util.Log.d("PillSenseAI", "datos insuficientes: días=$daysWithData, dosis=$totalDoses")
+                
+                // Nivel 0: Sin tomas
+                if (totalDoses == 0) {
+                    android.util.Log.d("PillSenseAI", "Nivel 0: sin tomas registradas")
                     _uiState.value = _uiState.value.copy(
+                        geminiResponse = GeminiResponse(
+                            summary = if (language == "es") "¡Bienvenido! Comienza a registrar tus medicamentos para recibir seguimiento." 
+                                     else "Welcome! Start recording your medications to receive tracking.",
+                            patterns = emptyList(),
+                            recommendations = emptyList()
+                        ),
                         source = "Reglas locales"
                     )
                     return@launch
                 }
+                
+                // Nivel 1: 1 a 4 dosis (inicial)
+                if (totalDoses in 1..4) {
+                    android.util.Log.d("PillSenseAI", "Nivel 1: $totalDoses dosis (inicial)")
+                    
+                    // Llamar a Gemini con "nivel": "inicial"
+                    val anonLabel = try {
+                        AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, language, levelTag = "inicial")
+                    } catch (e: Exception) {
+                        android.util.Log.w("PillSenseAI", "error buildAnonymousStats: ${e.javaClass.simpleName}")
+                        return@launch
+                    }
+                    
+                    if (anonLabel.isBlank()) {
+                        android.util.Log.d("PillSenseAI", "sin datos de tomas")
+                        return@launch
+                    }
+                    
+                    if (BuildConfig.DEBUG) {
+                        android.util.Log.d("PillSenseAI", "Payload JSON: $anonLabel")
+                    }
+
+                    val dataHash = anonLabel.hashCode().toString()
+                    
+                    // Validar caché (< 1 hora)
+                    val cache = database.dao().getAiCache(currentEmail)
+                    if (cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000) {
+                        android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel inicial)")
+                        _uiState.value = _uiState.value.copy(
+                            geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
+                            source = "IA (caché)"
+                        )
+                        return@launch
+                    }
+                    
+                    // Throttle: no hacer llamada si hace menos de 5 minutos
+                    if ((now - lastLoadTime) < 300000) {
+                        android.util.Log.w("PillSenseAI", "Menos de 5 min desde última llamada")
+                        return@launch
+                    }
+                    
+                    lastLoadTime = now
+                    
+                    val result = geminiClient.generateAdvice(anonLabel, BuildConfig.GEMINI_API_KEY, BuildConfig.GEMINI_MODEL, BuildConfig.GEMINI_MODEL_FALLBACK)
+                    if (result.isFailure) {
+                        android.util.Log.d("PillSenseAI", "fallo Gemini: ${result.exceptionOrNull()?.message}")
+                        _uiState.value = _uiState.value.copy(
+                            geminiResponse = GeminiResponse(
+                                summary = if (language == "es") "¡Felicitaciones! Cumpliste con tu medicación. Sigue así." 
+                                         else "Congratulations! You completed your medication. Keep it up.",
+                                patterns = emptyList(),
+                                recommendations = emptyList()
+                            ),
+                            source = "Reglas locales"
+                        )
+                        return@launch
+                    }
+                    
+                    if (result.isSuccess) {
+                        val response = result.getOrNull()
+                        if (response != null && response.summary.isNotBlank()) {
+                            // Validar respuesta
+                            val adherencePct = (intakes.count { it.status == "TAKEN" } * 100) / intakes.size
+                            val omitidas = intakes.count { it.status == "SKIPPED" }
+                            val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language, levelTag = "inicial")
+                            
+                            if (!validated.isValid) {
+                                android.util.Log.d("PillSenseAI", "validador rechazó nivel inicial")
+                                _uiState.value = _uiState.value.copy(
+                                    geminiResponse = GeminiResponse(
+                                        summary = if (language == "es") "¡Felicitaciones! Cumpliste con tu medicación. Sigue así." 
+                                                 else "Congratulations! You completed your medication. Keep it up.",
+                                        patterns = emptyList(),
+                                        recommendations = emptyList()
+                                    ),
+                                    source = "Reglas locales"
+                                )
+                                return@launch
+                            }
+                            
+                            if (AnonymousAdherence.containsForbiddenKeyword(response.summary)) {
+                                android.util.Log.w("PillSenseAI", "respuesta bloqueada nivel inicial")
+                                _uiState.value = _uiState.value.copy(
+                                    geminiResponse = GeminiResponse(
+                                        summary = if (language == "es") "¡Felicitaciones! Cumpliste con tu medicación. Sigue así." 
+                                                 else "Congratulations! You completed your medication. Keep it up.",
+                                        patterns = emptyList(),
+                                        recommendations = emptyList()
+                                    ),
+                                    source = "Reglas locales"
+                                )
+                                return@launch
+                            }
+                            
+                            _uiState.value = _uiState.value.copy(
+                                geminiResponse = response.copy(patterns = emptyList(), recommendations = emptyList()),
+                                source = "IA"
+                            )
+                            
+                            database.dao().saveAiCache(AiCache(
+                                owner = currentEmail,
+                                summary = response.summary,
+                                dataHash = dataHash,
+                                cachedAt = now
+                            ))
+                            
+                            consentStorage.setLastAdviceText(response.summary)
+                            consentStorage.setLastAdviceDate(LocalDate.now().toString())
+                            android.util.Log.d("PillSenseAI", "consejo nivel inicial generado")
+                        }
+                    }
+                    return@launch
+                }
+                
+                // Nivel 2: 5+ dosis (comportamiento completo)
+                android.util.Log.d("PillSenseAI", "Nivel 2: $totalDoses dosis (completo)")
                 
                 val anonLabel = try {
                     AnonymousAdherence.buildAnonymousStats(intakes, medications, zone, language)
@@ -98,7 +212,7 @@ class InsightsViewModel @Inject constructor(
                     return@launch
                 }
                 
-                if (intakes.isEmpty() || anonLabel.isBlank()) {
+                if (anonLabel.isBlank()) {
                     android.util.Log.d("PillSenseAI", "sin datos de tomas")
                     return@launch
                 }
@@ -109,10 +223,10 @@ class InsightsViewModel @Inject constructor(
 
                 val dataHash = anonLabel.hashCode().toString()
                 
-                // Validar caché válida (< 1 hora y mismo hash de datos)
+                // Validar caché válida
                 val cache = database.dao().getAiCache(currentEmail)
                 if (cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000) {
-                    android.util.Log.w("PillSenseAI", "Usando caché guardada")
+                    android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel 2)")
                     _uiState.value = _uiState.value.copy(
                         geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
                         source = "IA (caché)"
@@ -120,7 +234,7 @@ class InsightsViewModel @Inject constructor(
                     return@launch
                 }
                 
-                // Throttle: no hacer llamada si hace menos de 5 minutos desde la última
+                // Throttle: no hacer llamada si hace menos de 5 minutos
                 if ((now - lastLoadTime) < 300000) {
                     android.util.Log.w("PillSenseAI", "Menos de 5 min desde última llamada")
                     return@launch
@@ -185,7 +299,7 @@ class InsightsViewModel @Inject constructor(
                         
                         consentStorage.setLastAdviceText(cleanedResponse.summary)
                         consentStorage.setLastAdviceDate(LocalDate.now().toString())
-                        android.util.Log.d("PillSenseAI", "consejo generado exitosamente")
+                        android.util.Log.d("PillSenseAI", "consejo nivel 2 generado exitosamente")
                     }
                 }
             } catch (e: Exception) {

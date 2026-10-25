@@ -33,4 +33,27 @@ class GeminiResponseValidatorTest {
         val result = GeminiResponseValidator.validate(json, adherencePct = 85, omitidas = 1, language = "es")
         assertTrue(result.isValid)
     }
+    
+    @Test
+    fun initialLevelAcceptsEncouragement() {
+        val json = """{"resumen": "Felicitaciones, cumpliste tu primera dosis. Sigue así.", "recomendaciones": []}"""
+        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+        assertTrue(result.isValid)
+        assertEquals("Felicitaciones, cumpliste tu primera dosis. Sigue así.", result.resumen)
+        assertTrue(result.recomendaciones.isEmpty())
+    }
+    
+    @Test
+    fun initialLevelRejectsIfMentionsOlvidos() {
+        val json = """{"resumen": "Felicitaciones, pero olvidaste una dosis.", "recomendaciones": []}"""
+        val result = GeminiResponseValidator.validate(json, adherencePct = 50, omitidas = 1, language = "es", levelTag = "inicial")
+        assertFalse(result.isValid)
+    }
+    
+    @Test
+    fun initialLevelRejectsIfMentionsPercentage() {
+        val json = """{"resumen": "Felicitaciones, tienes 100% de adherencia.", "recomendaciones": []}"""
+        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+        assertFalse(result.isValid)
+    }
 }

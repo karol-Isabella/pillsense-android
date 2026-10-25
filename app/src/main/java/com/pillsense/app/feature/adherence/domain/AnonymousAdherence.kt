@@ -21,7 +21,8 @@ object AnonymousAdherence {
         intakes: List<DbIntake>,
         medications: List<Medication>,
         zone: ZoneId = ZoneId.systemDefault(),
-        language: String = "es"
+        language: String = "es",
+        levelTag: String? = null
     ): String {
         val today = LocalDate.now()
         val taken = intakes.count { it.status == "TAKEN" }
@@ -51,6 +52,9 @@ object AnonymousAdherence {
             put("retraso_promedio_min", 0)
             put("patrones", JsonArray(emptyList()))
             put("idioma", language)
+            if (levelTag != null) {
+                put("nivel", levelTag)
+            }
             put("medicamentos", Json.encodeToJsonElement(medLabels))
         }.toString()
     }
