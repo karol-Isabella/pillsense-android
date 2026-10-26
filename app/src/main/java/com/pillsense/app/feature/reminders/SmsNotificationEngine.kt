@@ -27,6 +27,7 @@ class SmsNotificationEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: HealthRepository,
     private val session: SessionStore,
+    private val smsStorage: com.pillsense.app.feature.emergency.data.SmsNotificationStorage,
 ) {
     private val alarm get() = context.getSystemService(AlarmManager::class.java)
     private val sharedPrefs: SharedPreferences
@@ -88,9 +89,7 @@ class SmsNotificationEngine @Inject constructor(
         }
         
         // Check if SMS notifications are enabled for this account
-        val smsStorage = context.getSharedPreferences("sms-notifications", Context.MODE_PRIVATE)
-        val normalizedEmail = owner.lowercase().trim()
-        val smsEnabled = smsStorage.getBoolean("enabled_$normalizedEmail", false)
+        val smsEnabled = smsStorage.isSmsNotificationEnabled(owner)
         Log.d("PillSenseSMS", "SMS toggle active: $smsEnabled")
         if (!smsEnabled) {
             Timber.tag("PillSenseSMS").d("interruptor apagado")
