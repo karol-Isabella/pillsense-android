@@ -9,6 +9,7 @@ data class Medication(
     val form: String, val intervalHours: Int, val firstTime: String, val instructions: String,
     val startDate: String, val durationDays: Int?, val createdAt: Long = System.currentTimeMillis(),
     val active: Boolean = true, val unitsRemaining: Int? = null, val unitsPerDose: Int = 1,
+    val lastStockAlertAt: Long? = null,
 )
 @Entity(tableName = "intakes", indices = [Index("owner"), Index("medicationId")])
 data class Intake(
@@ -69,6 +70,12 @@ interface PillSenseDao {
     suspend fun getAiCache(owner: String): AiCache?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveAiCache(cache: AiCache)
+    @Query("UPDATE medications SET unitsRemaining = unitsRemaining - :units, lastStockAlertAt = NULL WHERE id = :id")
+    suspend fun decrementStock(id: String, units: Int)
+    @Query("UPDATE medications SET unitsRemaining = :units, lastStockAlertAt = NULL WHERE id = :id")
+    suspend fun updateStock(id: String, units: Int)
+    @Query("UPDATE medications SET lastStockAlertAt = :time WHERE id = :id")
+    suspend fun markStockAlerted(id: String, time: Long)
 }
-@Database(entities = [Medication::class, Intake::class, EmergencyContact::class, AiCache::class], version = 3, exportSchema = true)
+@Database(entities = [Medication::class, Intake::class, EmergencyContact::class, AiCache::class], version = 4, exportSchema = true)
 abstract class PillSenseDatabase : RoomDatabase() { abstract fun dao(): PillSenseDao }

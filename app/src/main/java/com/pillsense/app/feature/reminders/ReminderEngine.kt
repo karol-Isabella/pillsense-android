@@ -95,8 +95,29 @@ class ReminderEngine @Inject constructor(
         val until = if (status == "POSTPONED") now + TimeUnit.MINUTES.toMillis(15) else null
         if (repository.dao.act(id, owner, status, now, until) > 0) {
             manager.cancel(id.hashCode())
-            // Cancel SMS alarm
             smsEngine.cancelSmsAlarm(id)
+            // Decrement stock if TAKEN
+            if (status == "TAKEN") {
+                val med = repository.dao.medication(intake.medicationId)
+                if (med != null && med.unitsRemaining != null && med.unitsRemaining!! > 0) {
+                    repository.dao.decrementStock(intake.medicationId, med.unitsPerDose)
+                    // Check low stock (5 or less) and alert once per medication
+                    val updatedMed = repository.dao.medication(intake.medicationId)
+                    if (updatedMed != null && updatedMed.unitsRemaining != null && updatedMed.unitsRemaining!! in 1..5 && updatedMed.lastStockAlertAt == null) {
+                        val lang = "es" // TODO: get from preferences
+                        val msg = if (lang == "en") "You have few units of ${med.name} left. Consider buying more." else "Te quedan pocas unidades de ${med.name}. Considera comprar más."
+                        manager.createNotificationChannel(NotificationChannel("stock", "Stock bajo", NotificationManager.IMPORTANCE_LOW))
+                        val notif = NotificationCompat.Builder(context, "stock")
+                            .setSmallIcon(R.drawable.ic_lucide_bell_ring)
+                            .setContentTitle(if (lang == "en") "Low stock" else "Stock bajo")
+                            .setContentText(msg)
+                            .setAutoCancel(true)
+                            .build()
+                        manager.notify(intake.medicationId.hashCode() + 1000, notif)
+                        repository.dao.markStockAlerted(intake.medicationId, now)
+                    }
+                }
+            }
             schedule(owner)
         }
     }

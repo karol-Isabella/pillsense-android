@@ -107,12 +107,19 @@ fun ConfirmScreen(
     )
 
     val forms = listOf(
-        stringResource(R.string.med_form_capsule),
-        stringResource(R.string.med_form_tablet),
-        stringResource(R.string.med_form_syrup),
-        stringResource(R.string.med_form_drops),
-        stringResource(R.string.med_form_injection),
+        stringResource(R.string.confirm_form_pill),
+        stringResource(R.string.confirm_form_syrup),
+        stringResource(R.string.confirm_form_drops),
+        stringResource(R.string.confirm_form_other),
     )
+    
+    val unitsLabel = when(form) {
+        stringResource(R.string.confirm_form_pill) -> stringResource(R.string.confirm_units_per_dose)
+        stringResource(R.string.confirm_form_syrup) -> "Cucharadas"
+        stringResource(R.string.confirm_form_drops) -> "Gotas"
+        else -> stringResource(R.string.confirm_units_per_dose)
+    }
+    val showUnitsRemaining = unitsRemaining.isNotBlank()
 
     val interval = listOf(24, 12, 8, 6).getOrElse(frequencies.indexOf(frequency)) { 24 }
     val startTime24: String = runCatching {
@@ -311,6 +318,7 @@ fun ConfirmScreen(
                             value = dose,
                             onValueChange = { dose = it },
                             label = doseLabel,
+                            placeholder = stringResource(R.string.confirm_dose_placeholder),
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -329,19 +337,23 @@ fun ConfirmScreen(
                             value = unitsRemaining,
                             onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
                             label = unitsRemainingLabel,
+                            placeholder = stringResource(R.string.confirm_units_placeholder),
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        PsTextField(
-                            value = unitsPerDose,
-                            onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
-                            label = unitsPerDoseLabel,
-                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        if (form != stringResource(R.string.confirm_form_syrup)) {
+                            PsTextField(
+                                value = unitsPerDose,
+                                onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
+                                label = unitsLabel,
+                                placeholder = stringResource(R.string.confirm_units_placeholder),
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
@@ -414,6 +426,7 @@ fun ConfirmScreen(
                             value = duration,
                             onValueChange = { duration = it },
                             label = durationDaysLabel,
+                            placeholder = stringResource(R.string.confirm_duration_placeholder),
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -423,6 +436,7 @@ fun ConfirmScreen(
                             value = instructions,
                             onValueChange = { instructions = it },
                             label = instructionsLabel,
+                            placeholder = stringResource(R.string.confirm_instructions_placeholder),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

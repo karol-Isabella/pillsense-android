@@ -16,4 +16,10 @@ object Migrations {
             database.execSQL("CREATE TABLE IF NOT EXISTS `ai_cache` (`owner` TEXT NOT NULL, `summary` TEXT NOT NULL, `dataHash` TEXT NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`owner`))")
         }
     }
+    
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE medications ADD COLUMN lastStockAlertAt INTEGER")
+        }
+    }
 }
