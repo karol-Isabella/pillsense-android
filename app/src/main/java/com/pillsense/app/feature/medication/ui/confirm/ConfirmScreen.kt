@@ -29,6 +29,7 @@ import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.feature.medication.ui.scan.ScannedMedication
 import com.pillsense.app.core.model.Schedule
+import com.pillsense.app.core.util.TimeFormatHelper
 
 data class ConfirmMedicationData(
     val name: String,
@@ -51,6 +52,7 @@ fun ConfirmScreen(
     onSave: (ConfirmMedicationData) -> Unit = {},
     modifier: Modifier = Modifier,
     saving: Boolean = false,
+    language: String = "es",
 ) {
     // Pre-evaluate string resources at Composable scope
     val cancelText = stringResource(R.string.confirm_cancel)
@@ -469,7 +471,7 @@ fun ConfirmScreen(
                         ) {
                             times.forEach { time ->
                                 PsBadge(
-                                    text = time,
+                                    text = TimeFormatHelper.format12Hour(time, language),
                                     backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                                     textColor = MaterialTheme.colorScheme.primary
                                 )

@@ -201,7 +201,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                             }, onClose = { nav.popBackStack() }, onManual = { hasScan = false; nav.navigate("confirm") }) }
                             composable("confirm") { ConfirmScreen(
                                 scannedMed = if (hasScan) ScannedMedication(scannedName, scannedDose, scannedForm, scannedFrequency, scannedDuration, scannedInstructions, scannedOriginal) else null,
-                                onCancel = { nav.popBackStack() }, onSave = { pendingSave = it; permissions() }, saving = busy,
+                                onCancel = { nav.popBackStack() }, onSave = { pendingSave = it; permissions() }, saving = busy, language = language,
                             ) }
                         }
                         if (route != "scan" && route != "confirm") {

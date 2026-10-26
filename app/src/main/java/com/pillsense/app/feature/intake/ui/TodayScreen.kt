@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
+import com.pillsense.app.core.util.TimeFormatHelper
 
 data class DoseItem(
     val id: String,
@@ -256,7 +257,7 @@ fun TodayScreen(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
-                                text = stringResource(R.string.today_at, nextDose.time),
+                                text = stringResource(R.string.today_at, TimeFormatHelper.format12Hour(nextDose.time, language)),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
@@ -361,7 +362,7 @@ fun TodayScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "${dose.time} · ${dose.dose}",
+                            text = "${TimeFormatHelper.format12Hour(dose.time, language)} · ${dose.dose}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

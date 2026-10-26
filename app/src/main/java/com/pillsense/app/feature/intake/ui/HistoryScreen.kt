@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import com.pillsense.app.R
 import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.util.DateLocaleHelper
+import com.pillsense.app.core.util.TimeFormatHelper
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -51,7 +52,7 @@ fun HistoryScreen(intakes: List<Intake>, medications: List<Medication>, language
                 val med = names[intake.medicationId]
                 PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(med?.name ?: stringResource(R.string.confirm_fallback), style = MaterialTheme.typography.titleMedium)
-                    Text("${med?.dose.orEmpty()} · ${Instant.ofEpochMilli(intake.scheduledAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.forLanguageTag(language)))}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${med?.dose.orEmpty()} · ${TimeFormatHelper.format12Hour(Instant.ofEpochMilli(intake.scheduledAt).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm")), language)}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     PsBadge(when (intake.status) { "TAKEN" -> stringResource(R.string.status_taken); "POSTPONED" -> stringResource(R.string.status_postponed); "SKIPPED" -> stringResource(R.string.status_skipped); else -> stringResource(R.string.notification_taken) })
                     intake.actedAt?.let { Text("${stringResource(R.string.history_entry_label)} ${Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(if (language == "en") "MMM d, hh:mm a" else "d MMM, hh:mm a", java.util.Locale.forLanguageTag(language)))}", style = MaterialTheme.typography.bodySmall) }
                 } }
