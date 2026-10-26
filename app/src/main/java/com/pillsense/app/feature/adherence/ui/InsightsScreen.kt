@@ -85,7 +85,17 @@ fun InsightsScreen(
                 Text(stringResource(R.string.insights_loading_ai), style = MaterialTheme.typography.bodySmall)
             } } }
         } else if (uiState.geminiResponse != null) {
-            item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Seguro: no mostrar JSON crudo
+            if (uiState.geminiResponse.summary.trim().startsWith("{") || uiState.geminiResponse.summary.contains("\"resumen\"")) {
+                item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                        PsBadge(stringResource(R.string.insights_local_rules_badge))
+                    }
+                    Text(if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." else "Check your medication history and stay consistent.", style = MaterialTheme.typography.bodyMedium)
+                } } }
+            } else {
+                item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                     PsBadge(if (uiState.source == "IA") "IA" else stringResource(R.string.insights_local_rules_badge))
@@ -104,6 +114,7 @@ fun InsightsScreen(
                     }
                 }
             } } }
+            }
         }
         item { PsSectionHeader(stringResource(R.string.insights_recommendations_label))
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

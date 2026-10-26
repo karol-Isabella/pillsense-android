@@ -210,13 +210,17 @@ class InsightsViewModel @Inject constructor(
                             }
                             
                             _uiState.value = _uiState.value.copy(
-                                geminiResponse = response.copy(patterns = emptyList(), recommendations = emptyList()),
+                                geminiResponse = GeminiResponse(
+                                    summary = parsed.resumen,
+                                    patterns = emptyList(),
+                                    recommendations = emptyList()
+                                ),
                                 source = "IA"
                             )
                             
                             database.dao().saveAiCache(AiCache(
                                 owner = currentEmail,
-                                summary = response.summary,
+                                summary = parsed.resumen,
                                 dataHash = dataHash,
                                 cachedAt = now
                             ))
@@ -344,16 +348,13 @@ class InsightsViewModel @Inject constructor(
                             return@launch
                         }
                         
-                        val medicationLabels = medications.associate { it.id to "Medicamento ${medications.indexOf(it) + 1}" }.values.toSet()
                         
-                        val cleanPatterns = listOf<String>(validated.resumen)
-                        val cleanRecs: List<GeminiRecommendation> = validated.recomendaciones.mapIndexed { index, rec ->
-                            GeminiRecommendation(type = "recommendation", medicationLabel = "Rec. ${index + 1}", reason = rec)
-                        }
-                        
-                        val cleanedResponse = response.copy(
-                            patterns = cleanPatterns,
-                            recommendations = cleanRecs
+                        val cleanedResponse = GeminiResponse(
+                            summary = parsed.resumen,
+                            patterns = emptyList(),
+                            recommendations = parsed.recomendaciones.mapIndexed { index, rec ->
+                                GeminiRecommendation(type = "recommendation", medicationLabel = "Rec. ${index + 1}", reason = rec)
+                            }
                         )
                         
                         _uiState.value = _uiState.value.copy(
@@ -363,7 +364,7 @@ class InsightsViewModel @Inject constructor(
                         
                         database.dao().saveAiCache(AiCache(
                             owner = currentEmail,
-                            summary = cleanedResponse.summary,
+                            summary = parsed.resumen,
                             dataHash = dataHash,
                             cachedAt = now
                         ))

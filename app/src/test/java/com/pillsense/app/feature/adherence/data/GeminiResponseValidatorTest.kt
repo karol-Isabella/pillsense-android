@@ -74,6 +74,8 @@ class GeminiResponseValidatorTest {
         assertNotNull(parsed)
         assertEquals("Vas bien.", parsed?.resumen)
         assertEquals(listOf("Sigue así"), parsed?.recomendaciones)
+        assertFalse(parsed!!.resumen.contains("{"))
+        assertFalse(parsed.resumen.contains("\"resumen\""))
     }
     
     @Test
