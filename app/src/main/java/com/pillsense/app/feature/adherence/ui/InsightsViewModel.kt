@@ -123,7 +123,7 @@ class InsightsViewModel @Inject constructor(
                             android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel inicial)")
                             _uiState.value = _uiState.value.copy(
                                 geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
-                                source = "IA (caché)"
+                                source = "IA"
                             )
                             return@launch
                         }
@@ -262,7 +262,7 @@ class InsightsViewModel @Inject constructor(
                         android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel 2)")
                         _uiState.value = _uiState.value.copy(
                             geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
-                            source = "IA (caché)"
+                            source = "IA"
                         )
                         return@launch
                     }
