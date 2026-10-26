@@ -174,7 +174,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 val doses = health.intakes.filter { Instant.ofEpochMilli(it.scheduledAt).atZone(zone).toLocalDate() == today }
                                     .sortedBy { it.postponedUntil ?: it.scheduledAt }.mapNotNull { intake ->
                                         val med = names[intake.medicationId] ?: return@mapNotNull null
-                                        DoseItem(intake.id, Instant.ofEpochMilli(intake.postponedUntil ?: intake.scheduledAt).atZone(zone).format(DateTimeFormatter.ofPattern("hh:mm a")),
+                                        DoseItem(intake.id, Instant.ofEpochMilli(intake.postponedUntil ?: intake.scheduledAt).atZone(zone).format(DateTimeFormatter.ofPattern("HH:mm")),
                                             med.name, med.dose, med.instructions, DoseStatus.valueOf(intake.status), intake.scheduledAt <= now)
                                     }
                                 val recent = health.intakes.filter { it.scheduledAt >= today.minusDays(6).atStartOfDay(zone).toInstant().toEpochMilli() }
