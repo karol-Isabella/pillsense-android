@@ -115,15 +115,18 @@ class InsightsViewModel @Inject constructor(
 
                     val dataHash = anonLabel.hashCode().toString()
                     
-                    // Validar caché (< 1 hora)
+                    // Validar caché (< 1 hora) - ignorar si contiene JSON crudo
                     val cache = database.dao().getAiCache(currentEmail)
                     if (cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000) {
-                        android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel inicial)")
-                        _uiState.value = _uiState.value.copy(
-                            geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
-                            source = "IA (caché)"
-                        )
-                        return@launch
+                        // Ignorar caché si parece JSON (comienza con {)
+                        if (!cache.summary.trim().startsWith("{")) {
+                            android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel inicial)")
+                            _uiState.value = _uiState.value.copy(
+                                geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
+                                source = "IA (caché)"
+                            )
+                            return@launch
+                        }
                     }
                     
                     // Throttle: no hacer llamada si hace menos de 5 minutos
@@ -152,14 +155,32 @@ class InsightsViewModel @Inject constructor(
                     if (result.isSuccess) {
                         val response = result.getOrNull()
                         if (response != null && response.summary.isNotBlank()) {
-                            // Validar respuesta
+                            // Parsear respuesta JSON
+                            val parsed = GeminiResponseValidator.parseGeminiResponse(response.summary)
+                            if (parsed == null) {
+                                if (BuildConfig.DEBUG) {
+                                    android.util.Log.d("PillSenseAI", "parseo falló en nivel inicial, JSON crudo: ${response.summary.take(200)}")
+                                }
+                                _uiState.value = _uiState.value.copy(
+                                    geminiResponse = GeminiResponse(
+                                        summary = if (language == "es") "¡Felicitaciones! Cumpliste con tu medicación. Sigue así." 
+                                                 else "Congratulations! You completed your medication. Keep it up.",
+                                        patterns = emptyList(),
+                                        recommendations = emptyList()
+                                    ),
+                                    source = "Reglas locales"
+                                )
+                                return@launch
+                            }
+                            
+                            // Validar respuesta parseada
                             val adherencePct = (intakes.count { it.status == "TAKEN" } * 100) / intakes.size
                             val omitidas = intakes.count { it.status == "SKIPPED" }
-                            val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language, levelTag = "inicial")
+                            val validated = GeminiResponseValidator.validate(parsed.resumen, parsed.recomendaciones, adherencePct, omitidas, language, levelTag = "inicial")
                             
                             if (!validated.isValid) {
                                 if (BuildConfig.DEBUG) {
-                                    val textPreview = response.summary.take(200)
+                                    val textPreview = parsed.resumen.take(200)
                                     android.util.Log.d("PillSenseAI", "validador rechazó inicial: ${validated.rejectionReason} | Text: $textPreview")
                                 }
                                 _uiState.value = _uiState.value.copy(
@@ -229,15 +250,18 @@ class InsightsViewModel @Inject constructor(
 
                 val dataHash = anonLabel.hashCode().toString()
                 
-                // Validar caché válida
+                // Validar caché válida - ignorar si contiene JSON crudo
                 val cache = database.dao().getAiCache(currentEmail)
                 if (cache != null && cache.dataHash == dataHash && (now - cache.cachedAt) < 3600000) {
-                    android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel 2)")
-                    _uiState.value = _uiState.value.copy(
-                        geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
-                        source = "IA (caché)"
-                    )
-                    return@launch
+                    // Ignorar caché si parece JSON (comienza con {)
+                    if (!cache.summary.trim().startsWith("{")) {
+                        android.util.Log.w("PillSenseAI", "Usando caché guardada (nivel 2)")
+                        _uiState.value = _uiState.value.copy(
+                            geminiResponse = GeminiResponse(cache.summary, emptyList(), emptyList()),
+                            source = "IA (caché)"
+                        )
+                        return@launch
+                    }
                 }
                 
                 // Throttle: no hacer llamada si hace menos de 5 minutos
@@ -266,10 +290,28 @@ class InsightsViewModel @Inject constructor(
                 if (result.isSuccess) {
                     val response = result.getOrNull()
                     if (response != null && response.summary.isNotBlank()) {
-                        // Validar respuesta antes de procesar
+                        // Parsear respuesta JSON
+                        val parsed = GeminiResponseValidator.parseGeminiResponse(response.summary)
+                        if (parsed == null) {
+                            if (BuildConfig.DEBUG) {
+                                android.util.Log.d("PillSenseAI", "parseo falló en nivel 2, JSON crudo: ${response.summary.take(200)}")
+                            }
+                            _uiState.value = _uiState.value.copy(
+                                geminiResponse = GeminiResponse(
+                                    summary = if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." 
+                                             else "Check your medication history and stay consistent.",
+                                    patterns = emptyList(),
+                                    recommendations = emptyList()
+                                ),
+                                source = "Reglas locales"
+                            )
+                            return@launch
+                        }
+                        
+                        // Validar respuesta parseada
                         val adherencePct = (intakes.count { it.status == "TAKEN" } * 100) / intakes.size
                         val omitidas = intakes.count { it.status == "SKIPPED" }
-                        val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language)
+                        val validated = GeminiResponseValidator.validate(parsed.resumen, parsed.recomendaciones, adherencePct, omitidas, language)
                         
                         if (!validated.isValid) {
                             if (BuildConfig.DEBUG) {

@@ -7,37 +7,32 @@ class GeminiResponseValidatorTest {
     
     @Test
     fun validResponsePassesValidation() {
-        val json = """{"resumen": "Vas bien.", "recomendaciones": ["Sigue así"]}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 85, omitidas = 1, language = "es")
+        val result = GeminiResponseValidator.validate("Vas bien.", emptyList(), adherencePct = 85, omitidas = 1, language = "es")
         assertTrue(result.isValid)
         assertEquals("Vas bien.", result.resumen)
     }
     
     @Test
     fun rejectIfOmitidasZeroButMentionsOlvidos() {
-        val json = """{"resumen": "Olvidaste una toma.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 90, omitidas = 0, language = "es")
+        val result = GeminiResponseValidator.validate("Olvidaste una toma.", emptyList(), adherencePct = 90, omitidas = 0, language = "es")
         assertFalse(result.isValid)
     }
     
     @Test
     fun rejectIfPercentageMismatch() {
-        val json = """{"resumen": "Tienes 75% de adherencia.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 85, omitidas = 2, language = "es")
+        val result = GeminiResponseValidator.validate("Tienes 75% de adherencia.", emptyList(), adherencePct = 85, omitidas = 2, language = "es")
         assertFalse(result.isValid)
     }
     
     @Test
     fun acceptCorrectPercentage() {
-        val json = """{"resumen": "Con tu 85% vas por buen camino.", "recomendaciones": ["Continúa"]}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 85, omitidas = 1, language = "es")
+        val result = GeminiResponseValidator.validate("Con tu 85% vas por buen camino.", listOf("Continúa"), adherencePct = 85, omitidas = 1, language = "es")
         assertTrue(result.isValid)
     }
     
     @Test
     fun initialLevelAcceptsEncouragement() {
-        val json = """{"resumen": "Felicitaciones, cumpliste tu primera dosis. Sigue así.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+        val result = GeminiResponseValidator.validate("Felicitaciones, cumpliste tu primera dosis. Sigue así.", emptyList(), adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
         assertTrue(result.isValid)
         assertEquals("Felicitaciones, cumpliste tu primera dosis. Sigue así.", result.resumen)
         assertTrue(result.recomendaciones.isEmpty())
@@ -45,29 +40,48 @@ class GeminiResponseValidatorTest {
     
     @Test
     fun initialLevelRejectsIfMentionsOlvidos() {
-        val json = """{"resumen": "Felicitaciones, pero olvidaste una dosis.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 50, omitidas = 1, language = "es", levelTag = "inicial")
+        val result = GeminiResponseValidator.validate("Felicitaciones, pero olvidaste una dosis.", emptyList(), adherencePct = 50, omitidas = 1, language = "es", levelTag = "inicial")
         assertFalse(result.isValid)
     }
     
     @Test
     fun initialLevelRejectsIfMentionsPercentage() {
-        val json = """{"resumen": "Felicitaciones, tienes 100% de adherencia.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+        val result = GeminiResponseValidator.validate("Felicitaciones, tienes 100% de adherencia.", emptyList(), adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
         assertFalse(result.isValid)
     }
     
     @Test
     fun acceptsTextWithNumbersWithoutPercent() {
-        val json = """{"resumen": "En los últimos 7 días has ido bien.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es")
+        val result = GeminiResponseValidator.validate("En los últimos 7 días has ido bien.", emptyList(), adherencePct = 100, omitidas = 0, language = "es")
         assertTrue(result.isValid)
     }
     
     @Test
     fun rejectIfPercentageWithSymbol() {
-        val json = """{"resumen": "Tienes 45% de adherencia.", "recomendaciones": []}"""
-        val result = GeminiResponseValidator.validate(json, adherencePct = 100, omitidas = 0, language = "es")
+        val result = GeminiResponseValidator.validate("Tienes 45% de adherencia.", emptyList(), adherencePct = 100, omitidas = 0, language = "es")
         assertFalse(result.isValid)
+    }
+    
+    @Test
+    fun parseJsonClean() {
+        val parsed = GeminiResponseValidator.parseGeminiResponse("""{"resumen": "Vas bien.", "recomendaciones": ["Sigue así"]}""")
+        assertNotNull(parsed)
+        assertEquals("Vas bien.", parsed?.resumen)
+        assertEquals(listOf("Sigue así"), parsed?.recomendaciones)
+    }
+    
+    @Test
+    fun parseJsonWithFences() {
+        val parsed = GeminiResponseValidator.parseGeminiResponse("""```json
+{"resumen": "Vas bien.", "recomendaciones": ["Sigue así"]}
+```""")
+        assertNotNull(parsed)
+        assertEquals("Vas bien.", parsed?.resumen)
+    }
+    
+    @Test
+    fun parseInvalidJsonReturnsNull() {
+        val parsed = GeminiResponseValidator.parseGeminiResponse("""not valid json""")
+        assertNull(parsed)
     }
 }
