@@ -158,9 +158,13 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     }
                     val smsSwitchEnabled = smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS)
                     Switch(checked = smsSwitchEnabled, onCheckedChange = { checked ->
-                        if (checked && !isSmsNotificationEnabled) {
-                            showSmsConsentDialog = true
-                        } else if (!checked) {
+                        if (checked) {
+                            if (PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
+                                showSmsConsentDialog = true
+                            } else {
+                                PermissionManager.requestPermission(smsPermissionLauncher, AppPermission.SEND_SMS)
+                            }
+                        } else {
                             onSmsNotificationChange(false)
                             smsEnabled = false
                         }
@@ -169,16 +173,15 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                 Text(stringResource(R.string.profile_sms_notify_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             } }
         }
-        if (smsEnabled && PermissionManager.isGranted(context, AppPermission.SEND_SMS)) {
-            items(contacts, key = { it.id }) { contact ->
-                PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
-                    Text(contact.name, style = MaterialTheme.typography.titleMedium)
-                    Text("${contact.relation} · ${contact.phone}", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Row {
-                        TextButton(onClick = { removing = contact }) { Text(stringResource(R.string.profile_remove_contact_text), color = MaterialTheme.colorScheme.error) }
-                    }
-                } }
-            }
+        items(contacts, key = { it.id }) { contact ->
+            PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp)) {
+                Text(contact.name, style = MaterialTheme.typography.titleMedium)
+                Text("${contact.relation} · ${contact.phone}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row {
+                    TextButton(onClick = { removing = contact }) { Text(stringResource(R.string.profile_remove_contact_text), color = MaterialTheme.colorScheme.error) }
+                }
+            } }
+        }
             item {
                 if (adding) PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     PsTextField(name, { name = it }, label = stringResource(R.string.profile_name_label), modifier = Modifier.fillMaxWidth())
@@ -199,7 +202,6 @@ fun ProfileScreen(email: String, medications: List<Medication>, contacts: List<E
                     }
                 }
             }
-        }
         item { PsSectionHeader(stringResource(R.string.profile_reminders_header))
             PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(if (remindersReady) stringResource(R.string.profile_reminders_enabled) else stringResource(R.string.profile_reminders_disabled))
