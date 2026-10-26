@@ -158,7 +158,10 @@ class InsightsViewModel @Inject constructor(
                             val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language, levelTag = "inicial")
                             
                             if (!validated.isValid) {
-                                android.util.Log.d("PillSenseAI", "validador rechazó nivel inicial")
+                                if (BuildConfig.DEBUG) {
+                                    val textPreview = response.summary.take(200)
+                                    android.util.Log.d("PillSenseAI", "validador rechazó inicial: ${validated.rejectionReason} | Text: $textPreview")
+                                }
                                 _uiState.value = _uiState.value.copy(
                                     geminiResponse = GeminiResponse(
                                         summary = if (language == "es") "¡Felicitaciones! Cumpliste con tu medicación. Sigue así." 
@@ -269,7 +272,10 @@ class InsightsViewModel @Inject constructor(
                         val validated = GeminiResponseValidator.validate(response.summary, adherencePct, omitidas, language)
                         
                         if (!validated.isValid) {
-                            android.util.Log.d("PillSenseAI", "validador rechazó: adherencePct=$adherencePct, omitidas=$omitidas")
+                            if (BuildConfig.DEBUG) {
+                                val textPreview = response.summary.take(200)
+                                android.util.Log.d("PillSenseAI", "validador rechazó nivel 2: ${validated.rejectionReason} | Text: $textPreview")
+                            }
                             _uiState.value = _uiState.value.copy(
                                 geminiResponse = GeminiResponse(
                                     summary = if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." 
