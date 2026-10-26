@@ -106,6 +106,7 @@
     <string name="confirm_med_section">Medication</string>
     <string name="confirm_name">Name</string>
     <string name="confirm_dose">Dose</string>
+    <string name="confirm_dose_placeholder">Ex: 200 mg</string>
     <string name="confirm_form">Form</string>
     <string name="confirm_schedule_section">Schedule</string>
     <string name="confirm_frequency">Frequency</string>
@@ -125,6 +126,7 @@
     <string name="confirm_invalid_duration">Duration must be a number between 1 and 3650 days.</string>
     <string name="confirm_select_frequency">Select and confirm the frequency from your prescription.</string>
     <string name="confirm_instructions">Instructions</string>
+    <string name="confirm_instructions_placeholder">Optional</string>
     <string name="confirm_will_schedule">%1$d daily reminders will be scheduled</string>
     <string name="confirm_offline_note">They work offline and even when the app is closed.</string>
     <string name="confirm_save_schedule">Save and schedule</string>
@@ -134,6 +136,13 @@
     <string name="confirm_no_instructions">No instructions</string>
     <string name="confirm_hide_text">Hide read text</string>
     <string name="confirm_period">Period</string>
+    <string name="confirm_form_pill">Pill/Capsule</string>
+    <string name="confirm_form_syrup">Syrup</string>
+    <string name="confirm_form_drops">Drops</string>
+    <string name="confirm_form_other">Other</string>
+    <string name="confirm_units_placeholder">Optional</string>
+    <string name="confirm_duration_placeholder">Optional, blank = continuous</string>
+    <string name="stock_low_alert">You have few units of %1$s left. Consider buying more.</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Dose log</string>

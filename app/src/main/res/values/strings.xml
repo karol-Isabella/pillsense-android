@@ -106,6 +106,7 @@
     <string name="confirm_med_section">Medicamento</string>
     <string name="confirm_name">Nombre</string>
     <string name="confirm_dose">Dosis</string>
+    <string name="confirm_dose_placeholder">Ej: 200 mg</string>
     <string name="confirm_form">Presentación</string>
     <string name="confirm_schedule_section">Horario</string>
     <string name="confirm_frequency">Frecuencia</string>
@@ -125,6 +126,7 @@
     <string name="confirm_invalid_duration">La duración debe ser un número entre 1 y 3650 días.</string>
     <string name="confirm_select_frequency">Selecciona y confirma la frecuencia indicada en tu receta.</string>
     <string name="confirm_instructions">Indicaciones</string>
+    <string name="confirm_instructions_placeholder">Opcional</string>
     <string name="confirm_will_schedule">Se programarán %1$d recordatorios diarios</string>
     <string name="confirm_offline_note">Funcionan sin conexión y aunque la app esté cerrada.</string>
     <string name="confirm_save_schedule">Guardar y programar</string>
@@ -134,6 +136,13 @@
     <string name="confirm_no_instructions">Sin indicaciones</string>
     <string name="confirm_hide_text">Ocultar texto leído</string>
     <string name="confirm_period">Período</string>
+    <string name="confirm_form_pill">Pastilla/Cápsula</string>
+    <string name="confirm_form_syrup">Jarabe</string>
+    <string name="confirm_form_drops">Gotas</string>
+    <string name="confirm_form_other">Otro</string>
+    <string name="confirm_units_placeholder">Opcional</string>
+    <string name="confirm_duration_placeholder">Opcional, vacío = continuo</string>
+    <string name="stock_low_alert">Te quedan pocas unidades de %1$s. Considera comprar más.</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Registro de tomas</string>
