@@ -45,8 +45,14 @@ class GeminiResponseValidatorTest {
     }
     
     @Test
-    fun initialLevelRejectsIfMentionsPercentage() {
-        val result = GeminiResponseValidator.validate("Felicitaciones, tienes 100% de adherencia.", emptyList(), adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+    fun initialLevelAllowsMatchingPercentage() {
+        val result = GeminiResponseValidator.validate("Felicitaciones, adherencia perfecta del 100%.", emptyList(), adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
+        assertTrue(result.isValid)
+    }
+    
+    @Test
+    fun initialLevelRejectsIfMentionsPercentageMismatch() {
+        val result = GeminiResponseValidator.validate("Felicitaciones, tienes 45% de adherencia.", emptyList(), adherencePct = 100, omitidas = 0, language = "es", levelTag = "inicial")
         assertFalse(result.isValid)
     }
     

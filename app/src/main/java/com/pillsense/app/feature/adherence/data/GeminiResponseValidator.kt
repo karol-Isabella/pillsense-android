@@ -26,14 +26,16 @@ object GeminiResponseValidator {
     
     fun validate(resumen: String, recomendaciones: List<String>, adherencePct: Int, omitidas: Int, language: String, levelTag: String? = null): ValidatedResponse {
         return try {
-            // Nivel inicial: no debe mencionar olvidos ni porcentajes
+            // Nivel inicial: no debe mencionar olvidos
             if (levelTag == "inicial") {
                 if (resumen.contains("olvid", ignoreCase = true) || recomendaciones.any { it.contains("olvid", ignoreCase = true) }) {
                     return ValidatedResponse(false, rejectionReason = "mentions_olvidos_on_inicial")
                 }
+                // Permitir porcentaje si coincide con adherencePct, rechazar si es distinto
                 val percentMatch = "\\d+\\s*%".toRegex()
-                if (percentMatch.find(resumen) != null) {
-                    return ValidatedResponse(false, rejectionReason = "mentions_percentage_on_inicial")
+                val percentInResponse = percentMatch.find(resumen)?.value?.replace(Regex("\\D"), "")?.toIntOrNull()
+                if (percentInResponse != null && percentInResponse != adherencePct) {
+                    return ValidatedResponse(false, rejectionReason = "percentage_mismatch: got $percentInResponse, expected $adherencePct")
                 }
                 return ValidatedResponse(true, resumen, emptyList())
             }
