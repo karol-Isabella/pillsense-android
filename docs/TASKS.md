@@ -1,229 +1,102 @@
 # PillSense - Tareas Completadas
 
-## Fase 1: Autenticación UI y Validación (COMPLETADA)
+## Fase 1: Autenticación y Validación ✓
 
-### Step 1: Reorder Login Form with Eye Icon ✓
-- **Commit**: `18d2467`
-- **Cambios**: Reordenado formulario, eye icon en password, iconos M3
-- **Estado**: Compila
+- Autenticación segura (email/password, hashing PBKDF2)
+- Validación detallada de inputs
+- Lockout de 30 segundos tras 5 intentos fallidos
+- 52+ unit tests pasando
 
-### Step 2: Detailed Validation Rules ✓
-- **Commit**: `f7cb248`
-- **Cambios**: Email regex, password 8-64 car, username 3-20 car, errores específicos
-- **Estado**: 9 tests pasan
+**Última actualización**: `6ee62e0`
 
-### Step 3: Input Limits and Error Display ✓
-- **Commit**: `6988073`
-- **Cambios**: maxLength, contador caracteres, validación onChange
-- **Estado**: Compila, validaciones en UI
+## Fase 2: Internacionalización (i18n) ✓
 
-### Step 4: 30-Second Lockout ✓
-- **Commit**: `6ee62e0`
-- **Cambios**: 5 intentos fallidos = lockout 30 seg, timer en botón
-- **Estado**: Tests pasan
+- Strings en español (es) e inglés (en) en res/values/
+- Selector de idioma en Perfil con live switch
+- DateLocaleHelper para formato de fechas por idioma
+- TimeFormatHelper para formato 12h (a. m./p. m. en español, AM/PM en inglés)
 
-### Step 5-9: Validación, Cards, Warnings, Password Signup ✓
-- **Commits**: `847def6` a `0eba07e`
-- **Cambios**: 52 tests, colores grises para warnings, password signup 8-32 car
-- **Estado**: Compila
+**Última actualización**: `2d9b4dd` (restore ai label from cache)
 
-## Fase 2: Adherencia y IA (Gemini) - RF-008 y RF-009
+## Fase 3: Gestión de Medicamentos ✓
 
-### Parte A: Datos Visuales
+- Agregar, editar, eliminar medicamentos
+- Formulario de confirmación con placeholders claros
+- Selector de forma (pastilla/cápsula, jarabe, gotas, otro)
+- Unidades por toma según forma
+- Stock con notificación (≤5 unidades, una sola vez por caja)
+- OCR con ML Kit (foto no sale del dispositivo)
+- Validación de datos con TimeFormatHelper
 
-1. Conteos Semanales (Tomadas/Omitidas/Pendientes) ✓
-   - **Commit**: `ba558a7`
-   - **Función**: `calculateWeekCounts()` sin Android, puro dominio
-   - **Tests**: 2 tests unitarios
+**Última actualización**: `39a5782` (medication form placeholders and low stock alert)
 
-2. Barras por Día (Tomadas vs Omitidas) ✓
-   - **Commit**: `a28bb08`
-   - **Cambios**: `DayBars.kt` con dos colores (primario/error)
-   - **Estado**: Compila
+## Fase 4: Recordatorios y Tomas ✓
 
-3. Medicamento: Porcentaje + "N Omitidas" ✓
-   - **Commit**: `fdd5690`
-   - **Cambios**: `MedicationStats.kt` con count
-   - **Estado**: Compila
+- Programación de recordatorios con AlarmManager y WorkManager
+- Notificaciones exactas (si hay permiso)
+- Registro de ingesta: tomada, pospuesta (15 min), omitida
+- Historial completo con filtros
+- Stock se decrementa al marcar como tomada
 
-4. Avatar Usuario con Ícono de Persona ✓
-   - **Commit**: `e670557`
-   - **Cambios**: `UserAvatar.kt` con Icons.Filled.Person si no hay nombre
-   - **Estado**: Compila
+**Estado**: Implementado en ReminderEngine, funcionando sin conexión
 
-### Parte B: Conexión Gemini
+## Fase 5: Adherencia e IA ✓
 
-5. ViewModel para InsightsScreen ✓
-   - **Commit**: `0b2d388`
-   - **Cambios**: `InsightsViewModel.kt`, referencias a ConsentStorage, GeminiClient
-   - **Pendiente**: Integración completa de flujo
-   - **Estado**: Compila
+- Cálculo de adherencia semanal (%)
+- Análisis con IA (Gemini): tres niveles (welcome, inicial, completo)
+- Consentimiento e interruptor en Perfil
+- Caché de respuestas IA (1 hora)
+- Validación de respuestas Gemini (no permite mención de fármacos, dosis)
+- Respaldo local ("Reglas locales") si Gemini no responde o rechaza
 
-6. BuildConfig: GEMINI_API_KEY y GEMINI_MODEL ✓
-   - **Commit**: `874ef15`
-   - **Cambios**: `buildConfigField` desde `local.properties`, default `gemini-3.8-flash`
-   - **Nota**: local.properties no rastreado en git
-   - **Estado**: Compila
+**Última actualización**: `e1afe2d` (read sms toggle from same storage)
 
-7. Interruptor IA en Perfil ✓
-   - **Commit**: `9e1508e`
-   - **Cambios**: Sección "Análisis con IA" en ProfileScreen con Switch desactivado
-   - **Estado**: Compila
+## Fase 6: Contactos de Emergencia ✓
 
-8. Botón Aplicar con Confirmación ✓
-   - **Commit**: `162b364`
-   - **Cambios**: `RecommendationCard.kt` con AlertDialog, "Aplicar" muestra cambios exactos
-   - **Estado**: Compila
+- Agregar/eliminar contactos con validación de teléfono
+- Máximo 2 contactos
+- SMS automático a los 30 minutos si no se confirma toma
+- Interruptor con diálogo de consentimiento
+- Lista de contactos visible siempre
 
-9. Tests Gemini ✓
-   - **Commit**: `0445e63`
-   - **Tests**: 4 placeholders para 503/retry, malformado, timeout
-   - **Total**: 77 tests, 0 fallidos
-   - **Estado**: Compila
+**Última actualización**: `8bda39d` (sms toggle handler and always show contacts)
 
-10. Datos de Prueba en src/debug ✓
-    - **Commit**: `1290502`
-    - **Cambios**: `TestDataProvider` interfaz en src/main, `DebugTestDataProviderImpl` en src/debug
-    - **Verificación**: `./gradlew.bat compileReleaseKotlin` sin código debug
-    - **Estado**: Release compila sin DebugDataProvider
+## Base de Datos ✓
 
-### Parte C: Notificaciones y Limpieza
+- Room Database (v4) con SQLCipher
+- Entidades: Medication, Intake, EmergencyContact, AiCache
+- Migraciones: v1→v2→v3→v4
+- DAOs con queries optimizadas
 
-11. Sonido de Alarma (2 minutos)
-    - **Motivo hoy suena indefinidamente**: No hay `.setTimeoutAfter()` en NotificationCompat
-    - **Solución pendiente**: Agregar 2 * 60 * 1000 ms timeout
-    - **Estado**: Identificado, sin código actual
+**Última actualización**: `39a5782` (migrations 1-4 registradas)
 
-12. Errores Reales en Rojo (Scanner) ✓
-    - **Estado**: Ya implementado (cameraError en rojo, hint gris)
-    - **Verificación**: ScanScreen.kt línea 88
+## Tests ✓
 
-13. README en Español sin Emojis ✓
-    - **Commit**: `c741ee2`
-    - **Contenido**: Configuración Gemini, limitaciones, mejoras futuras, privacidad
-    - **Nota**: Clave de API en local.properties (ignorado), servidor intermedio como mejora
-    - **Estado**: Compila
+- Unit tests: 117+ pasando
+- TimeFormatHelperTest: 8 tests (12h format español/inglés)
+- Validación de formatos de entrada
+- Sin fallos
 
-## Resumen General
+## Compilación ✓
 
-- **Total Commits Fase 2**: 14 (pasos 1-10, 12-13)
-- **Total Tests**: 77 passed, 0 failed
-- **Compilación**: Debug y Release OK
-- **Pendiente Completar**: Integración Gemini al flujo (ViewModel + pantalla conectando ConsentStorage + GeminiClient)
-- **Listo para Celular**: Código base, datos de prueba aislados, tests pasando
+```bash
+./gradlew assembleDebug  # SUCCESS in ~10-30s
+./gradlew testDebugUnitTest  # 117+ tests passing
+```
 
-### Step 4: 30-Second Lockout After 5 Failed Attempts ✓
-- **Commit**: `6ee62e0`
-- **Cambios**:
-  - Contador de intentos fallidos.
-  - Lockout de 30 segundos después de 5 intentos.
-  - Timer visible en botón login (cuenta atrás).
-  - Reinicio de contador después de login exitoso.
-- **Verificación**: Unit tests para lockout pasan, UI responde correctamente
+## Pendiente / No Implementado
 
-### Step 5: Comprehensive Validation Unit Tests ✓
-- **Commit**: `847def6`
-- **Cambios**:
-  - 40+ unit tests para validación (email, password, username, lockout).
-  - Tests para cada regla de validación.
-  - Tests para lockout timer y reset.
-  - Todos tests pasan: `./gradlew testDebugUnitTest`
-- **Verificación**: 52/52 tests pasan
-
-### Step 6: Remove Card Background + Fix Colors ✓
-- **Commit**: `7dcb1a6` (reminder card), `1c3ada2` (scan & week cards)
-- **Cambios**:
-  - Removido background color de reminder card.
-  - Removido background de scan y week cards.
-  - Sincronización con estilo visual del resto de tarjetas.
-- **Verificación**: UI looks consistent across app
-
-### Step 7: Red Warnings → OnSurfaceVariant with Info Icon ✓
-- **Commit**: `8813515`
-- **Cambios**:
-  - Cambio de color rojo a `onSurfaceVariant` (gris).
-  - Agregado icono de info (info_circle) antes del texto.
-  - Aplicado en login validation errors y reminders.
-  - Mantiene jerarquía visual sin dramatizar errores informativos.
-- **Verificación**: Compila, unit tests pasan (52/52)
-
-### Step 8: Password Hint + Specific Error Messages (ADJUSTMENT 1) ✓
-- **Commit**: `61047e4`
-- **Cambios**:
-  - Agregado hint visible en signup: "Mínimo 8 caracteres, con letras y números".
-  - Max 32 caracteres en signup (vs. 64 en login para compatibilidad con cuentas antiguas).
-  - Errores específicos por regla:
-    - "Contraseña muy corta (mín. 8)"
-    - "Debe contener letras (a-z, A-Z)"
-    - "Debe contener números (0-9)"
-  - 7 unit tests nuevos para cada caso.
-- **Verificación**: 52/52 tests pasan, compila sin errores
-
-### Step 9: Remove Red Scanner Suggestion Text (ADJUSTMENT 2) ✓
-- **Commit**: `0eba07e`
-- **Cambios**:
-  - Removida línea 89 `state.error` (rojo duplicado) en ScanScreen.
-  - Mantiene hint gray en card: "Bombilla con sugerencia gris".
-  - Solo error rojo de cámara (cameraError) permanece si aplica.
-- **Verificación**: Compila, visualmente limpio
-
----
-
-## Fase 2: Próximas Funcionalidades (PENDIENTE)
-
-### Escaneo de Medicamentos
-- [ ] Implementar ML Kit barcode scanning
-- [ ] Integración con base de datos de medicamentos
-- [ ] Tests de escaneo y parsing
-
-### Recordatorios y Notificaciones
-- [ ] WorkManager para programación de recordatorios
-- [ ] Notificaciones push en horarios configurados
-- [ ] Tests de WorkManager
-
-### Gestión de Medicamentos
-- [ ] CRUD completo (agregar, editar, eliminar)
-- [ ] Historial de ingesta
-- [ ] Tests de persistencia
-
-### Seguimiento de Adherencia
-- [ ] Cálculo de porcentaje de cumplimiento
-- [ ] Gráficos y visualización
-- [ ] Tests de cálculos
-
-### Botón de Emergencia
-- [ ] Integración con servicios de emergencia
-- [ ] Configuración de contactos
-- [ ] Tests de contacto
-
----
-
-## Pruebas
-
-### Unit Tests
-- **Total**: 52 tests
-- **Pasando**: 52 ✓
-- **Fallando**: 0 ✓
-- **Comando**: `./gradlew testDebugUnitTest`
-
-### UI Tests
-- **Estado**: Listos para device testing
-- **Comando**: `./gradlew connectedAndroidTest`
-
----
-
-## Compilación
-
-- **Estado**: ✓ Compila sin errores
-- **Comando**: `./gradlew build`
-- **Variante**: debugUnitTest
-
----
+- [ ] Integración con servidor en la nube para SMS (actualmente usa SmsManager del dispositivo)
+- [ ] Push notifications desde servidor (actualmente solo local WorkManager)
+- [ ] Sincronización en la nube (datos siempre locales cifrados)
+- [ ] Deep links y share
+- [ ] Tests de integración (actualmente solo unit tests)
+- [ ] Documentación API Swagger
 
 ## Notas
 
-1. Todos los cambios en English (código, commits).
-2. Strings en Spanish (res/values/strings.xml).
-3. Sin git pushes (usuario maneja versionamiento).
-4. Listo para pruebas en dispositivo.
-
+- Código en inglés, strings en español/inglés, comentarios en español
+- Stack: Kotlin, Compose, Room, Hilt, Coroutines, ML Kit OCR, Gemini IA
+- Arquitectura: MVVM + Clean (core/feature/navigation)
+- Persistencia: SQLCipher + EncryptedSharedPreferences
+- Permisos: POST_NOTIFICATIONS, SEND_SMS, SCHEDULE_EXACT_ALARM, CAMERA, READ_EXTERNAL_STORAGE
