@@ -115,6 +115,8 @@
     <string name="confirm_duration">Duration</string>
     <string name="confirm_units_remaining">Units in box (optional)</string>
     <string name="confirm_units_per_dose">Units per dose</string>
+    <string name="confirm_units_spoons">Tablespoons per dose</string>
+    <string name="confirm_units_drops">Drops per dose</string>
     <string name="confirm_duration_days">Duration in days (blank = ongoing)</string>
     <string name="confirm_detected">Detected</string>
     <string name="confirm_name_label">Name</string>

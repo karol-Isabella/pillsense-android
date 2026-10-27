@@ -115,6 +115,8 @@
     <string name="confirm_duration">Duración</string>
     <string name="confirm_units_remaining">Unidades en la caja (opcional)</string>
     <string name="confirm_units_per_dose">Unidades por toma</string>
+    <string name="confirm_units_spoons">Cucharadas por toma</string>
+    <string name="confirm_units_drops">Gotas por toma</string>
     <string name="confirm_duration_days">Duración en días (vacío = continuo)</string>
     <string name="confirm_detected">Detectado</string>
     <string name="confirm_name_label">Nombre</string>

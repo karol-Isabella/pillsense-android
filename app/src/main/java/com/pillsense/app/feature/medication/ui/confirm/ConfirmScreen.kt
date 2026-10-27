@@ -125,12 +125,28 @@ fun ConfirmScreen(
         stringResource(R.string.confirm_form_other),
     )
     
-    val unitsLabel = when(form) {
-        stringResource(R.string.confirm_form_pill) -> stringResource(R.string.confirm_units_per_dose)
-        stringResource(R.string.confirm_form_syrup) -> "Cucharadas"
-        stringResource(R.string.confirm_form_drops) -> "Gotas"
+    // Valores internos para comparación (no traducidos)
+    val FORM_PILL = "pill"
+    val FORM_SYRUP = "syrup"
+    val FORM_DROPS = "drops"
+    val FORM_OTHER = "other"
+    
+    val formInternalMap = mapOf(
+        stringResource(R.string.confirm_form_pill) to FORM_PILL,
+        stringResource(R.string.confirm_form_syrup) to FORM_SYRUP,
+        stringResource(R.string.confirm_form_drops) to FORM_DROPS,
+        stringResource(R.string.confirm_form_other) to FORM_OTHER,
+    )
+    
+    fun getInternalForm(displayForm: String): String = formInternalMap[displayForm] ?: FORM_PILL
+    
+    val unitsLabel = when(getInternalForm(form)) {
+        FORM_SYRUP -> stringResource(R.string.confirm_units_spoons)
+        FORM_DROPS -> stringResource(R.string.confirm_units_drops)
         else -> stringResource(R.string.confirm_units_per_dose)
     }
+    
+    val isSyrup = getInternalForm(form) == FORM_SYRUP
     val showUnitsRemaining = unitsRemaining.isNotBlank()
 
     val interval = listOf(24, 12, 8, 6).getOrElse(frequencies.indexOf(frequency)) { 24 }
@@ -194,7 +210,7 @@ fun ConfirmScreen(
                                 times = times,
                                 instructions = instructions.trim(),
                                 intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
-                                unitsRemaining = unitsRemaining.toIntOrNull(),
+                                unitsRemaining = if (isSyrup) null else unitsRemaining.toIntOrNull(),
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
@@ -345,18 +361,20 @@ fun ConfirmScreen(
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        PsTextField(
-                            value = unitsRemaining,
-                            onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
-                            label = unitsRemainingLabel,
-                            placeholder = stringResource(R.string.confirm_units_placeholder),
-                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        if (!isSyrup) {
+                            PsTextField(
+                                value = unitsRemaining,
+                                onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
+                                label = unitsRemainingLabel,
+                                placeholder = stringResource(R.string.confirm_units_placeholder),
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
                         
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        if (form != stringResource(R.string.confirm_form_syrup)) {
+                        if (!isSyrup) {
                             PsTextField(
                                 value = unitsPerDose,
                                 onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
@@ -534,7 +552,7 @@ fun ConfirmScreen(
                                 times = times,
                                 instructions = instructions.trim(),
                                 intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
-                                unitsRemaining = unitsRemaining.toIntOrNull(),
+                                unitsRemaining = if (isSyrup) null else unitsRemaining.toIntOrNull(),
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
