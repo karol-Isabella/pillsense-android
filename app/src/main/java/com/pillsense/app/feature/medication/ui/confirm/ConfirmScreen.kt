@@ -89,7 +89,19 @@ fun ConfirmScreen(
 
     var name by rememberSaveable { mutableStateOf(scannedMed?.name ?: "") }
     var dose by rememberSaveable { mutableStateOf(scannedMed?.dose ?: "") }
-    var form by rememberSaveable { mutableStateOf(scannedMed?.form ?: defaultFormText) }
+    
+    // Detectar y preseleccionar forma si OCR la detectó
+    val detectedForm = scannedMed?.form?.let { detected ->
+        val detected_lower = detected.lowercase()
+        when {
+            detected_lower.contains("jarabe") -> stringResource(R.string.confirm_form_syrup)
+            detected_lower.contains("gota") -> stringResource(R.string.confirm_form_drops)
+            detected_lower.contains("pastilla") || detected_lower.contains("tableta") || detected_lower.contains("cápsula") -> stringResource(R.string.confirm_form_pill)
+            else -> stringResource(R.string.med_form_capsule)
+        }
+    } ?: stringResource(R.string.med_form_capsule)
+    
+    var form by rememberSaveable { mutableStateOf(detectedForm) }
     var frequency by rememberSaveable { mutableStateOf(scannedMed?.frequency ?: defaultFrequencyText) }
     var duration by rememberSaveable { mutableStateOf(scannedMed?.duration ?: "") }
     var startTime by rememberSaveable { mutableStateOf("08:00") }

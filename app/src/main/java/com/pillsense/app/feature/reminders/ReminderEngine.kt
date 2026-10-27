@@ -104,16 +104,17 @@ class ReminderEngine @Inject constructor(
                     // Check low stock (5 or less) and alert once per medication
                     val updatedMed = repository.dao.medication(intake.medicationId)
                     if (updatedMed != null && updatedMed.unitsRemaining != null && updatedMed.unitsRemaining!! in 1..5 && updatedMed.lastStockAlertAt == null) {
-                        val lang = "es" // TODO: get from preferences
-                        val msg = if (lang == "en") "You have few units of ${med.name} left. Consider buying more." else "Te quedan pocas unidades de ${med.name}. Considera comprar más."
-                        manager.createNotificationChannel(NotificationChannel("stock", "Stock bajo", NotificationManager.IMPORTANCE_LOW))
-                        val notif = NotificationCompat.Builder(context, "stock")
-                            .setSmallIcon(R.drawable.ic_lucide_bell_ring)
-                            .setContentTitle(if (lang == "en") "Low stock" else "Stock bajo")
-                            .setContentText(msg)
-                            .setAutoCancel(true)
-                            .build()
-                        manager.notify(intake.medicationId.hashCode() + 1000, notif)
+                        if (PermissionManager.isGranted(context, AppPermission.NOTIFICATIONS)) {
+                            manager.createNotificationChannel(NotificationChannel("stock", context.getString(R.string.stock_low_title), NotificationManager.IMPORTANCE_LOW))
+                            val msg = context.getString(R.string.stock_low_alert, updatedMed.name)
+                            val notif = NotificationCompat.Builder(context, "stock")
+                                .setSmallIcon(R.drawable.ic_lucide_bell_ring)
+                                .setContentTitle(context.getString(R.string.stock_low_title))
+                                .setContentText(msg)
+                                .setAutoCancel(true)
+                                .build()
+                            manager.notify(intake.medicationId.hashCode() + 1000, notif)
+                        }
                         repository.dao.markStockAlerted(intake.medicationId, now)
                     }
                 }

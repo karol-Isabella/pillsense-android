@@ -142,6 +142,7 @@
     <string name="confirm_form_other">Other</string>
     <string name="confirm_units_placeholder">Optional</string>
     <string name="confirm_duration_placeholder">Optional, blank = continuous</string>
+    <string name="stock_low_title">Low stock</string>
     <string name="stock_low_alert">You have few units of %1$s left. Consider buying more.</string>
 
     <!-- History Screen -->
