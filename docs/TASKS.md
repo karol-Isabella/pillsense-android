@@ -22,13 +22,15 @@
 
 - Agregar, editar, eliminar medicamentos
 - Formulario de confirmación con placeholders claros
-- Selector de forma (pastilla/cápsula, jarabe, gotas, otro)
-- Unidades por toma según forma
+- Selector de forma (pastilla/cápsula, jarabe, gotas, otro) con predetección por OCR
+- Unidades por toma según forma (cucharadas para jarabe, gotas para gotas, unidades para pastilla)
+- Campo "unidades por caja" oculto para jarabe, con unitsRemaining=null al guardar
+- Lógica de formulario usa valores internos (pill/syrup/drops/other), no strings traducidos
 - Stock con notificación (≤5 unidades, una sola vez por caja)
 - OCR con ML Kit (foto no sale del dispositivo)
 - Validación de datos con TimeFormatHelper
 
-**Última actualización**: `39a5782` (medication form placeholders and low stock alert)
+**Última actualización**: `ebb6c6e` (hide units per box for syrup, use internal form values for logic)
 
 ## Fase 4: Recordatorios y Tomas ✓
 
