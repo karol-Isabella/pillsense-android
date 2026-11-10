@@ -33,6 +33,7 @@ import com.pillsense.app.core.designsystem.*
 import com.pillsense.app.core.model.Schedule
 import com.pillsense.app.core.util.permissions.*
 import com.pillsense.app.feature.auth.ui.LoginScreen
+import com.pillsense.app.feature.auth.ui.WelcomeScreen
 import com.pillsense.app.feature.intake.ui.*
 import com.pillsense.app.feature.medication.ui.confirm.*
 import com.pillsense.app.feature.medication.ui.scan.*
@@ -87,6 +88,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
     var scannedInstructions by rememberSaveable { mutableStateOf("") }
     var scannedOriginal by rememberSaveable { mutableStateOf("") }
     var hasScan by rememberSaveable { mutableStateOf(false) }
+    var showLogin by rememberSaveable { mutableStateOf(false) }
     var pendingSave by remember { mutableStateOf<ConfirmMedicationData?>(null) }
     var navUser by rememberSaveable { mutableStateOf(user) }
     LaunchedEffect(user) {
@@ -143,8 +145,13 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
         PillSenseTheme(darkTheme = dark) {
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 if (user == null) {
-                    LoginScreen(onLoginSuccess = viewModel::authenticate, busy = busy, authError = error,
-                        dark = dark, onThemeChange = viewModel::toggleTheme, language = language, onLanguageChange = viewModel::toggleLanguage)
+                    if (showLogin) {
+                        LoginScreen(onLoginSuccess = viewModel::authenticate, busy = busy, authError = error,
+                            dark = dark, onThemeChange = viewModel::toggleTheme, language = language, onLanguageChange = viewModel::toggleLanguage)
+                    } else {
+                        WelcomeScreen(dark = dark, language = language, onThemeChange = viewModel::toggleTheme,
+                            onLanguageChange = viewModel::toggleLanguage, onStart = { showLogin = true }, onLogin = { showLogin = true })
+                    }
                 } else {
                     val tabs = listOf("today", "history", "scan", "insights", "profile")
                     Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {

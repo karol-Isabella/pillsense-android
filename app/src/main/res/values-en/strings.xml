@@ -37,6 +37,14 @@
 
     <!-- Login Screen -->
     <string name="login_tagline">Your treatment, on time. Scan, remember and improve every day.</string>
+    <string name="welcome_brand">PILLSENSE</string>
+    <string name="welcome_title">Your health, in control</string>
+    <string name="welcome_subtitle">PillSense turns your treatment into a simple, clear, and safe routine.</string>
+    <string name="welcome_scan">Scan your medications</string>
+    <string name="welcome_reminders">Get reminders on time</string>
+    <string name="welcome_progress">Improve your adherence every day</string>
+    <string name="welcome_start">Get started</string>
+    <string name="welcome_login">Already have an account? Sign in</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_email_label">Email address</string>

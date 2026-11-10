@@ -37,6 +37,14 @@
 
     <!-- Login Screen -->
     <string name="login_tagline">Tu tratamiento, a tiempo. Escanea, recuerda y mejora cada día.</string>
+    <string name="welcome_brand">PILLSENSE</string>
+    <string name="welcome_title">Tu salud, bajo control</string>
+    <string name="welcome_subtitle">PillSense convierte tu tratamiento en una rutina simple, clara y segura.</string>
+    <string name="welcome_scan">Escanea tus medicamentos</string>
+    <string name="welcome_reminders">Recibe recordatorios a tiempo</string>
+    <string name="welcome_progress">Mejora tu adherencia cada día</string>
+    <string name="welcome_start">Comenzar</string>
+    <string name="welcome_login">¿Ya tienes cuenta? Inicia sesión</string>
     <string name="login_email">Correo electrónico</string>
     <string name="login_password">Contraseña</string>
     <string name="login_email_label">Correo electrónico</string>
