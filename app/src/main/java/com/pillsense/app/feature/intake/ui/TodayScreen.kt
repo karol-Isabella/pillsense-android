@@ -2,12 +2,16 @@ package com.pillsense.app.feature.intake.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.Canvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
@@ -20,10 +24,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,27 +56,8 @@ enum class DoseStatus { PENDING, TAKEN, POSTPONED, SKIPPED }
 
 @Composable
 fun getTimeBasedGreeting(userName: String): String {
-    val hour = java.time.LocalTime.now().hour
-    return when {
-        hour in 5..11 -> {
-            if (userName.isNotBlank()) 
-                stringResource(R.string.today_good_morning, userName)
-            else
-                stringResource(R.string.today_good_morning_no_name)
-        }
-        hour in 12..18 -> {
-            if (userName.isNotBlank()) 
-                stringResource(R.string.today_good_afternoon, userName)
-            else
-                stringResource(R.string.today_good_afternoon_no_name)
-        }
-        else -> {
-            if (userName.isNotBlank()) 
-                stringResource(R.string.today_good_evening, userName)
-            else
-                stringResource(R.string.today_good_evening_no_name)
-        }
-    }
+    return if (userName.isNotBlank()) stringResource(R.string.today_hello, userName)
+    else stringResource(R.string.today_hello_no_name)
 }
 
 @Composable
@@ -79,6 +70,7 @@ fun TodayScreen(
     onHistoryClick: () -> Unit = {},
     showBottomBar: Boolean = true,
     onScanClick: () -> Unit = {},
+    onAddMedicationClick: () -> Unit = onScanClick,
     onInsightsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onDoseStatusChange: (doseId: String, status: DoseStatus) -> Unit = { _, _ -> },
@@ -88,6 +80,18 @@ fun TodayScreen(
     val isDarkTheme = dark
     val todayProgress = remember(doses) { mutableStateOf(doses.count { it.status == DoseStatus.TAKEN } to doses.size) }
     var selectedDose by remember { mutableStateOf<DoseItem?>(null) }
+    var doseNotReady by remember { mutableStateOf(false) }
+    val markInteraction = remember { MutableInteractionSource() }
+    var markPressed by remember { mutableStateOf(false) }
+    LaunchedEffect(markInteraction) {
+        markInteraction.interactions.collect { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> markPressed = true
+                is PressInteraction.Release, is PressInteraction.Cancel -> markPressed = false
+            }
+        }
+    }
+    val markScale by animateFloatAsState(if (markPressed) .96f else 1f, label = "dose_mark_press")
     selectedDose?.let { selected ->
         AlertDialog(onDismissRequest = { selectedDose = null }, title = { Text(selected.medName) },
             text = { Column {
@@ -110,7 +114,7 @@ fun TodayScreen(
         // Header
         LazyColumn(
             modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
         ) {
             item {
                 // Greeting
@@ -119,22 +123,24 @@ fun TodayScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text(
-                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(if (language == "en") "EEEE, MMMM d" else "EEEE, d MMMM", java.util.Locale.forLanguageTag(language))),
+                            text = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern(if (language == "en") "EEEE, MMMM d" else "EEEE, d MMMM", java.util.Locale.forLanguageTag(language))).uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = getTimeBasedGreeting(userName),
-                            style = MaterialTheme.typography.displayMedium
+                            style = MaterialTheme.typography.displayLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         IconButton(
                             onClick = onThemeChange,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(40.dp)
                         ) {
                             Icon(
                                 painter = painterResource(
@@ -148,9 +154,9 @@ fun TodayScreen(
 
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
+                                .size(40.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
+                                .background(Brush.linearGradient(listOf(PrimaryLight, SecondaryLight)))
                                 .clickable { onProfileClick() },
                             contentAlignment = Alignment.Center
                         ) {
@@ -188,40 +194,29 @@ fun TodayScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.today_daily_progress),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = stringResource(R.string.today_doses_of, todayProgress.value.first, todayProgress.value.second),
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .size(60.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "$percent%",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Canvas(Modifier.size(80.dp)) {
+                                        val stroke = 8.dp.toPx()
+                                        drawArc(Color(0xFFDFF5E8), -90f, 360f, false,
+                                            style = Stroke(stroke, cap = StrokeCap.Round), size = Size(size.width, size.height))
+                                        drawArc(Color(0xFF30B98B), -90f, percent * 3.6f, false,
+                                            style = Stroke(stroke, cap = StrokeCap.Round), size = Size(size.width, size.height))
+                                    }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("$percent%", style = MaterialTheme.typography.titleLarge)
+                                        Text("hoy", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                                Column {
+                                    Text(stringResource(R.string.today_daily_progress), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(stringResource(R.string.today_doses_of, todayProgress.value.first, todayProgress.value.second), style = MaterialTheme.typography.titleLarge)
+                                    Spacer(Modifier.height(6.dp))
+                                    PsBadge(text = stringResource(R.string.today_offline), backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f), textColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        PsBadge(
-                            text = stringResource(R.string.today_offline),
-                            backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f),
-                            textColor = MaterialTheme.colorScheme.onSurface
-                        )
                     }
                 }
             }
@@ -229,6 +224,7 @@ fun TodayScreen(
             // Next dose card
             if (nextDose != null) {
                 item {
+                    Text(stringResource(R.string.today_next_dose), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 2.dp, bottom = 8.dp))
                     PsCard(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -236,30 +232,10 @@ fun TodayScreen(
                         backgroundColor = MaterialTheme.colorScheme.primary
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.today_next_dose),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White
-                                )
-                                Text(
-                                    text = if (nextDose.canAct) "Gestionar toma" else "Programada",
-                                    modifier = Modifier.clickable(enabled = nextDose.canAct) { selectedDose = nextDose },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.7f)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
                             Text(
-                                text = stringResource(R.string.today_at, TimeFormatHelper.format12Hour(nextDose.time, language)),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.9f)
+                                text = stringResource(R.string.today_at, TimeFormatHelper.format12Hour(nextDose.time, language)).uppercase(),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.8f)
                             )
 
                             Text(
@@ -270,20 +246,25 @@ fun TodayScreen(
 
                             Text(
                                 text = "${nextDose.dose} · ${nextDose.instructions}",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            PsButton(
-                                onClick = { onDoseStatusChange(nextDose.id, DoseStatus.TAKEN) },
-                                text = stringResource(R.string.today_mark_taken),
-                                enabled = nextDose.canAct,
-                                style = PsButtonStyle.Primary,
-                                modifier = Modifier.fillMaxWidth(),
-                                height = 48
-                            )
+                            Row(Modifier.fillMaxWidth().height(44.dp).scale(markScale).clip(PillSenseShape.large)
+                                .background(Color.White).clickable(interactionSource = markInteraction, indication = null) {
+                                    if (nextDose.canAct) { doseNotReady = false; onDoseStatusChange(nextDose.id, DoseStatus.TAKEN) }
+                                    else doseNotReady = true
+                                },
+                                horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                Icon(painterResource(R.drawable.ic_lucide_check), null, Modifier.size(18.dp), tint = PrimaryLight)
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.today_mark_taken), color = PrimaryLight, style = MaterialTheme.typography.titleMedium)
+                            }
+                            AnimatedVisibility(doseNotReady, enter = fadeIn()) {
+                                Text(stringResource(R.string.today_dose_not_ready), Modifier.fillMaxWidth().padding(top = 10.dp), color = Color.White, style = MaterialTheme.typography.bodySmall)
+                            }
                         }
                     }
                 }
@@ -385,7 +366,7 @@ fun TodayScreen(
                     PsCard(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable(onClick = onScanClick)
+                            .clickable(onClick = onAddMedicationClick)
                     ) {
                         Column(
                             modifier = Modifier
@@ -394,14 +375,14 @@ fun TodayScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_lucide_scan_line),
+                                painter = painterResource(R.drawable.ic_lucide_pill),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = stringResource(R.string.today_scan),
+                                text = stringResource(R.string.today_add_medication),
                                 style = MaterialTheme.typography.labelMedium,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )

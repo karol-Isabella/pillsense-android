@@ -1,15 +1,25 @@
 package com.pillsense.app.feature.adherence.ui
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
@@ -35,6 +45,19 @@ fun InsightsScreen(
     language: String,
     viewModel: InsightsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    var hasInternet by remember { mutableStateOf(context.hasValidatedInternet()) }
+    DisposableEffect(context) {
+        val connectivity = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            }
+            override fun onLost(network: Network) { hasInternet = context.hasValidatedInternet() }
+        }
+        connectivity.registerDefaultNetworkCallback(callback)
+        onDispose { runCatching { connectivity.unregisterNetworkCallback(callback) } }
+    }
     LaunchedEffect(email) {
         viewModel.setUserEmail(email)
     }
@@ -50,9 +73,9 @@ fun InsightsScreen(
         viewModel.loadGeminiAdvice(recent, medications, language)
     }
     
-    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         item { Text(stringResource(R.string.insights_last_7_days), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(stringResource(R.string.insights_my_progress), style = MaterialTheme.typography.displayMedium) }
+            Text(stringResource(R.string.insights_my_progress), style = MaterialTheme.typography.displayLarge) }
         item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 Box(Modifier.size(110.dp), contentAlignment = Alignment.Center) {
@@ -90,7 +113,6 @@ fun InsightsScreen(
                 item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                        PsBadge(stringResource(R.string.insights_local_rules_badge))
                     }
                     Text(if (language == "es") "Consulta tu historial de medicamentos y mantén la consistencia." else "Check your medication history and stay consistent.", style = MaterialTheme.typography.bodyMedium)
                 } } }
@@ -98,9 +120,9 @@ fun InsightsScreen(
                 item { PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.insights_ai_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-                    PsBadge(if (uiState.source == "IA") "IA" else stringResource(R.string.insights_local_rules_badge))
+                    if (uiState.source == "IA" && hasInternet) PsBadge("IA")
                 }
-                Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
+                    Text(uiState.geminiResponse.summary, style = MaterialTheme.typography.bodyMedium)
                 if (uiState.geminiResponse.recommendations.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
                     Text(stringResource(R.string.insights_recommendations_label), style = MaterialTheme.typography.labelMedium)
@@ -108,7 +130,7 @@ fun InsightsScreen(
                         Row(Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("•", style = MaterialTheme.typography.bodySmall)
                             Column {
-                                Text(rec.reason, style = MaterialTheme.typography.bodySmall)
+                            Text(rec.reason, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
@@ -139,19 +161,36 @@ fun InsightsScreen(
                     }
                     is com.pillsense.app.core.model.AdviceResult.AllCompleted -> stringResource(R.string.advice_all_completed)
                 }
-                Text(adviceText)
+                Text(adviceText, style = MaterialTheme.typography.bodyMedium)
                 PsBadge(stringResource(R.string.advice_badge))
             } }
         }
-        item { Text(stringResource(R.string.insights_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 8.dp)) }
         item { PsSectionHeader(stringResource(R.string.insights_per_medication)) }
-        medications.filter { med -> recent.any { it.medicationId == med.id } }.forEach { med ->
-            item(key = med.id) { val value = Schedule.adherence(recent.filter { it.medicationId == med.id }, now) ?: 0
-                PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("${med.name} · $value%", style = MaterialTheme.typography.titleMedium)
-                    LinearProgressIndicator(progress = { value / 100f }, modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.tertiary)
-                } }
+        item {
+            val medsWithData = medications.filter { med -> recent.any { it.medicationId == med.id } }
+            if (medsWithData.isNotEmpty()) PsCard(Modifier.fillMaxWidth()) {
+                Column {
+                    medsWithData.forEachIndexed { index, med ->
+                        val value = Schedule.adherence(recent.filter { it.medicationId == med.id }, now) ?: 0
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                Text(med.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                                Text("$value%", style = MaterialTheme.typography.labelLarge, color = if (value >= 80) SuccessStrongLight else WarningStrongLight)
+                            }
+                            LinearProgressIndicator(progress = { value / 100f }, modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(50)), color = if (value >= 80) MaterialTheme.colorScheme.tertiary else WarningLight, trackColor = MaterialTheme.colorScheme.surfaceVariant)
+                        }
+                        if (index < medsWithData.lastIndex) HorizontalDivider(Modifier.padding(horizontal = 14.dp), thickness = .5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = .15f))
+                    }
+                }
             }
         }
     }
+}
+
+private fun Context.hasValidatedInternet(): Boolean {
+    val connectivity = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivity.activeNetwork ?: return false
+    val capabilities = connectivity.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }

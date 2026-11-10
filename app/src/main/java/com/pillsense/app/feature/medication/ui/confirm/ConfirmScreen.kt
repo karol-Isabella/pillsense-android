@@ -2,9 +2,6 @@
 
 package com.pillsense.app.feature.medication.ui.confirm
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -80,7 +78,6 @@ fun ConfirmScreen(
     val nameLabelText = stringResource(R.string.confirm_name_label)
     val doseLabelText = stringResource(R.string.confirm_dose_label)
     val formLabelText = stringResource(R.string.confirm_form_label)
-    val fullTextLabel = stringResource(R.string.confirm_full_text)
     val reviewCheckText = stringResource(R.string.confirm_review_check)
     val invalidTimeText = stringResource(R.string.confirm_invalid_time)
     val invalidDurationText = stringResource(R.string.confirm_invalid_duration)
@@ -107,9 +104,9 @@ fun ConfirmScreen(
     var startTime by rememberSaveable { mutableStateOf("08:00") }
     var amPm by rememberSaveable { mutableStateOf("AM") }
     var instructions by rememberSaveable { mutableStateOf(scannedMed?.instructions.orEmpty()) }
-    var showFullText by rememberSaveable { mutableStateOf(false) }
     var unitsRemaining by rememberSaveable { mutableStateOf("") }
     var unitsPerDose by rememberSaveable { mutableStateOf("1") }
+    var otherPresentation by rememberSaveable { mutableStateOf("") }
 
     val frequencies = listOf(
         stringResource(R.string.freq_once_daily),
@@ -146,8 +143,10 @@ fun ConfirmScreen(
         else -> stringResource(R.string.confirm_units_per_dose)
     }
     
-    val isSyrup = getInternalForm(form) == FORM_SYRUP
-    val showUnitsRemaining = unitsRemaining.isNotBlank()
+    val selectedForm = getInternalForm(form)
+    val isPill = selectedForm == FORM_PILL
+    val isLiquid = selectedForm == FORM_SYRUP || selectedForm == FORM_DROPS
+    val isOther = selectedForm == FORM_OTHER
 
     val interval = listOf(24, 12, 8, 6).getOrElse(frequencies.indexOf(frequency)) { 24 }
     val startTime24: String = runCatching {
@@ -166,16 +165,17 @@ fun ConfirmScreen(
         }
         String.format("%02d:%02d", adjustedHour, min)
     }.getOrDefault(startTime)
-    val times = runCatching { Schedule.times(startTime24, interval, unitsRemaining.toIntOrNull()) }.getOrDefault(emptyList())
+    val times = runCatching { Schedule.times(startTime24, interval, if (isPill) unitsRemaining.toIntOrNull() else null) }.getOrDefault(emptyList())
     val durationDays = duration.toIntOrNull()
     var reviewed by rememberSaveable { mutableStateOf(false) }
     val isValid = name.isNotBlank() && dose.isNotBlank() && form.isNotBlank() && frequency in frequencies && times.isNotEmpty() &&
+        (!isPill || (unitsPerDose.toIntOrNull() ?: 0) > 0) &&
         (duration.isBlank() || (durationDays != null && durationDays in 1..3650)) && !saving && (scannedMed == null || reviewed)
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(if (MaterialTheme.colorScheme.background == Color.Black) Color(0xFF0B1726) else Color(0xFFEAF3FF))
     ) {
         // Header
         Row(
@@ -205,12 +205,12 @@ fun ConfirmScreen(
                             ConfirmMedicationData(
                                 name = name.trim(),
                                 dose = dose.trim(),
-                                form = form,
+                                form = if (isOther && otherPresentation.isNotBlank()) otherPresentation.trim() else form,
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
                                 intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
-                                unitsRemaining = if (isSyrup) null else unitsRemaining.toIntOrNull(),
+                                unitsRemaining = if (isPill) unitsRemaining.toIntOrNull() else null,
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
@@ -241,7 +241,7 @@ fun ConfirmScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -281,7 +281,7 @@ fun ConfirmScreen(
             }
 
             if (scannedMed != null) item {
-                PsCard(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
+                PsCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
                     Column(Modifier.padding(16.dp)) {
                         // Summary of scanned data
                         Text(detectedText, style = MaterialTheme.typography.titleMedium)
@@ -297,22 +297,7 @@ fun ConfirmScreen(
                             Text("$formLabelText: ${scannedMed.form}", style = MaterialTheme.typography.bodySmall)
                         }
                         
-                        Spacer(modifier = Modifier.height(12.dp))
-                        
-                        // Button to show full OCR text
-                        TextButton(onClick = { showFullText = !showFullText }) {
-                            Text(if (showFullText) stringResource(R.string.confirm_hide_text) else fullTextLabel)
-                        }
-                        
-                        // Full OCR text (hidden by default)
-                        AnimatedVisibility(visible = showFullText, enter = fadeIn(), exit = androidx.compose.animation.fadeOut()) {
-                            Column {
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(fullTextLabel, style = MaterialTheme.typography.labelSmall)
-                                Text(scannedMed.originalText.take(4000), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                        
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(checked = reviewed, onCheckedChange = { reviewed = it })
                             Text(reviewCheckText, style = MaterialTheme.typography.bodySmall)
@@ -329,7 +314,7 @@ fun ConfirmScreen(
                 PsCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -337,7 +322,9 @@ fun ConfirmScreen(
                             value = name,
                             onValueChange = { name = it },
                             label = nameLabel,
-                            modifier = Modifier.fillMaxWidth()
+                            placeholder = stringResource(R.string.confirm_name_placeholder),
+                            modifier = Modifier.fillMaxWidth(),
+                            required = true
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -347,7 +334,8 @@ fun ConfirmScreen(
                             onValueChange = { dose = it },
                             label = doseLabel,
                             placeholder = stringResource(R.string.confirm_dose_placeholder),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            required = true
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -356,17 +344,17 @@ fun ConfirmScreen(
                             label = formLabel,
                             value = form,
                             options = forms,
-                            onValueChange = { form = it }
+                            onValueChange = { form = it },
+                            required = true
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        if (!isSyrup) {
+                        if (isPill) {
                             PsTextField(
                                 value = unitsRemaining,
                                 onValueChange = { unitsRemaining = it.take(3).filter { c -> c.isDigit() } },
                                 label = unitsRemainingLabel,
-                                placeholder = stringResource(R.string.confirm_units_placeholder),
                                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -374,13 +362,21 @@ fun ConfirmScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         
-                        if (!isSyrup) {
+                        if (isPill || isLiquid) {
                             PsTextField(
                                 value = unitsPerDose,
-                                onValueChange = { unitsPerDose = (it.take(3).filter { c -> c.isDigit() }).ifBlank { "1" } },
+                                onValueChange = { unitsPerDose = it.take(3).filter { c -> c.isDigit() } },
                                 label = unitsLabel,
-                                placeholder = stringResource(R.string.confirm_units_placeholder),
                                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth(),
+                                required = isPill
+                            )
+                        } else if (isOther) {
+                            PsTextField(
+                                value = otherPresentation,
+                                onValueChange = { otherPresentation = it.take(80) },
+                                label = stringResource(R.string.confirm_other_presentation),
+                                placeholder = stringResource(R.string.confirm_other_presentation_placeholder),
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -397,7 +393,7 @@ fun ConfirmScreen(
                 PsCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -406,7 +402,8 @@ fun ConfirmScreen(
                             value = frequency,
                             options = frequencies,
                             onValueChange = { frequency = it },
-                            placeholder = frequencyPlaceholder
+                            placeholder = frequencyPlaceholder,
+                            required = true
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -415,10 +412,12 @@ fun ConfirmScreen(
                             value = startTime,
                             onValueChange = { startTime = it },
                             label = "$firstDoseLabel (HH:mm)",
+                            placeholder = stringResource(R.string.confirm_time_placeholder),
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                                 keyboardType = KeyboardType.Text
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            required = true
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -440,13 +439,17 @@ fun ConfirmScreen(
                                 selected = amPm == "AM",
                                 onClick = { amPm = "AM" },
                                 label = { Text(amText) },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                shape = PillSenseShape.large,
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = AccentLight, selectedLabelColor = AccentForegroundLight)
                             )
                             FilterChip(
                                 selected = amPm == "PM",
                                 onClick = { amPm = "PM" },
                                 label = { Text(pmText) },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                shape = PillSenseShape.large,
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = AccentLight, selectedLabelColor = AccentForegroundLight)
                             )
                         }
 
@@ -456,7 +459,6 @@ fun ConfirmScreen(
                             value = duration,
                             onValueChange = { duration = it },
                             label = durationDaysLabel,
-                            placeholder = stringResource(R.string.confirm_duration_placeholder),
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -466,7 +468,6 @@ fun ConfirmScreen(
                             value = instructions,
                             onValueChange = { instructions = it },
                             label = instructionsLabel,
-                            placeholder = stringResource(R.string.confirm_instructions_placeholder),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -478,7 +479,7 @@ fun ConfirmScreen(
                 PsCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -547,12 +548,12 @@ fun ConfirmScreen(
                             ConfirmMedicationData(
                                 name = name.trim(),
                                 dose = dose.trim(),
-                                form = form,
+                                form = if (isOther && otherPresentation.isNotBlank()) otherPresentation.trim() else form,
                                 frequency = frequency,
                                 times = times,
                                 instructions = instructions.trim(),
                                 intervalHours = interval, firstTime = startTime24, durationDays = durationDays,
-                                unitsRemaining = if (isSyrup) null else unitsRemaining.toIntOrNull(),
+                                unitsRemaining = if (isPill) unitsRemaining.toIntOrNull() else null,
                                 unitsPerDose = unitsPerDose.toIntOrNull() ?: 1
                             )
                         )
@@ -573,17 +574,16 @@ private fun PsDropdownField(
     value: String,
     options: List<String>,
     onValueChange: (String) -> Unit,
-    placeholder: String? = null
+    placeholder: String? = null,
+    required: Boolean = false
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+        Row(Modifier.padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (required) Text(" *", style = MaterialTheme.typography.bodySmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+        }
 
         Box(
             modifier = Modifier
@@ -604,7 +604,7 @@ private fun PsDropdownField(
         ) {
             Text(
                 text = if (value.isNotBlank()) value else (placeholder ?: ""),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = if (value.isNotBlank()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -620,11 +620,19 @@ private fun PsDropdownField(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 0.dp,
+                shadowElevation = 8.dp
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option) },
+                        text = { Text(option, style = MaterialTheme.typography.bodyMedium) },
+                        modifier = Modifier.padding(horizontal = 6.dp).clip(RoundedCornerShape(12.dp))
+                            .background(if (option == value) AccentLight else Color.Transparent),
+                        trailingIcon = if (option == value) {{ Icon(painterResource(R.drawable.ic_lucide_check), null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(17.dp)) }} else null,
+                        colors = MenuDefaults.itemColors(textColor = MaterialTheme.colorScheme.onSurface),
                         onClick = {
                             onValueChange(option)
                             expanded = false

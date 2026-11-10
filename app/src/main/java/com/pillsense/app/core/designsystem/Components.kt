@@ -120,18 +120,17 @@ fun PsTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     singleLine: Boolean = false,
-    trailingIcon: (@Composable () -> Unit)? = null
+    trailingIcon: (@Composable () -> Unit)? = null,
+    required: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (label != null) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            Row(Modifier.padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (required) Text(" *", style = MaterialTheme.typography.bodySmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+            }
         }
 
         Box(
@@ -164,7 +163,7 @@ fun PsTextField(
                     .onFocusChanged { isFocused = it.isFocused },
                 enabled = enabled && !readOnly,
                 readOnly = readOnly,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
                 keyboardOptions = keyboardOptions,
@@ -179,7 +178,7 @@ fun PsTextField(
                             if (value.isEmpty() && !isFocused) {
                                 Text(
                                     text = placeholder,
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
                             }
@@ -215,7 +214,7 @@ fun PsCard(
             ),
         color = backgroundColor,
         shape = PillSenseShape.extraLarge,
-        shadowElevation = 2.dp
+        shadowElevation = 1.dp
     ) {
         content()
     }
@@ -384,15 +383,14 @@ fun PsBottomBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(96.dp),
+            .height(72.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 8.dp, bottom = 16.dp),
+                .padding(top = 2.dp, bottom = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -444,12 +442,13 @@ private fun PsBottomBarItemContent(
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = item.label,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.bodySmall,
             color = if (isSelected)
                 MaterialTheme.colorScheme.primary
             else
                 MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 11.sp,
+            fontSize = 10.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
             maxLines = 1
         )
     }

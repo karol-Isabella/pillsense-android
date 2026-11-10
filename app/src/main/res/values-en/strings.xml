@@ -39,6 +39,10 @@
     <string name="login_tagline">Your treatment, on time. Scan, remember and improve every day.</string>
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
+    <string name="login_email_label">Email address</string>
+    <string name="today_dose_not_ready">You cannot mark this dose yet.</string>
+    <string name="confirm_name_placeholder">Medication name</string>
+    <string name="confirm_time_placeholder">08:00</string>
     <string name="login_show">Show password</string>
     <string name="login_hide">Hide password</string>
     <string name="login_password_hint">Minimum 8 characters, with letters and numbers</string>
@@ -53,6 +57,8 @@
     <!-- Today Screen -->
     <string name="today_date">Wednesday, September 30</string>
     <string name="today_good_morning">Good morning, %1$s</string>
+    <string name="today_hello">Hi, %1$s</string>
+    <string name="today_hello_no_name">Hi</string>
     <string name="today_good_afternoon">Good afternoon, %1$s</string>
     <string name="today_good_evening">Good evening, %1$s</string>
     <string name="today_good_morning_no_name">Good morning</string>
@@ -113,11 +119,11 @@
     <string name="confirm_frequency_placeholder">Select frequency</string>
     <string name="confirm_first_dose">First dose</string>
     <string name="confirm_duration">Duration</string>
-    <string name="confirm_units_remaining">Units in box (optional)</string>
+    <string name="confirm_units_remaining">Units in box</string>
     <string name="confirm_units_per_dose">Units per dose</string>
-    <string name="confirm_units_spoons">Tablespoons per dose</string>
-    <string name="confirm_units_drops">Drops per dose</string>
-    <string name="confirm_duration_days">Duration in days (blank = ongoing)</string>
+    <string name="confirm_units_spoons">Amount</string>
+    <string name="confirm_units_drops">Amount of drops</string>
+    <string name="confirm_duration_days">Duration in days</string>
     <string name="confirm_detected">Detected</string>
     <string name="confirm_name_label">Name</string>
     <string name="confirm_dose_label">Dose</string>
@@ -128,7 +134,9 @@
     <string name="confirm_invalid_duration">Duration must be a number between 1 and 3650 days.</string>
     <string name="confirm_select_frequency">Select and confirm the frequency from your prescription.</string>
     <string name="confirm_instructions">Instructions</string>
-    <string name="confirm_instructions_placeholder">Optional</string>
+    <string name="confirm_instructions_placeholder"></string>
+    <string name="confirm_other_presentation">Custom presentation</string>
+    <string name="confirm_other_presentation_placeholder">Enter the medication presentation</string>
     <string name="confirm_will_schedule">%1$d daily reminders will be scheduled</string>
     <string name="confirm_offline_note">They work offline and even when the app is closed.</string>
     <string name="confirm_save_schedule">Save and schedule</string>
@@ -142,10 +150,10 @@
     <string name="confirm_form_syrup">Syrup</string>
     <string name="confirm_form_drops">Drops</string>
     <string name="confirm_form_other">Other</string>
-    <string name="confirm_units_placeholder">Optional</string>
-    <string name="confirm_duration_placeholder">Optional, blank = continuous</string>
+    <string name="confirm_units_placeholder"></string>
+    <string name="confirm_duration_placeholder"></string>
     <string name="stock_low_title">Low stock</string>
-    <string name="stock_low_alert">You have few units of %1$s left. Consider buying more.</string>
+    <string name="stock_low_alert">You have %1$d units of %2$s left. Get more to avoid interrupting your treatment.</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Dose log</string>
@@ -232,9 +240,11 @@
     <string name="profile_no_active_treatments">You don\'t have any active treatments yet.</string>
     <string name="profile_account_local">Local account · encrypted data</string>
     <string name="profile_appearance_header">Appearance</string>
+    <string name="profile_mode">Mode</string>
     <string name="profile_notify_contacts">Notify my contacts</string>
     <string name="profile_contact_consent">This person agrees to receive these notifications</string>
     <string name="profile_reminders_header">Reminders</string>
+    <string name="profile_reminders_label">Notifications and alarms</string>
     <string name="profile_reminders_enabled">Exact notifications and alarms enabled</string>
     <string name="profile_reminders_disabled">Check permissions to receive timely reminders.</string>
     <string name="profile_reminders_note">Alerts are local and work without internet. Android may delay them if permissions are missing; force-closing the app interrupts them until you open it again.</string>
@@ -246,6 +256,7 @@
     <string name="profile_ai_only_anon">Only anonymous statistics</string>
     <string name="profile_logout_note">When you sign out, your reminders pause. They resume when you sign back in.</string>
     <string name="profile_remove_contact_text">Remove</string>
+    <string name="profile_call_contact">Call %1$s</string>
     <string name="profile_contacts_header">Contacts</string>
 
     <!-- Medication Data -->

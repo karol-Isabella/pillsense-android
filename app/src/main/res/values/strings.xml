@@ -39,6 +39,10 @@
     <string name="login_tagline">Tu tratamiento, a tiempo. Escanea, recuerda y mejora cada día.</string>
     <string name="login_email">Correo electrónico</string>
     <string name="login_password">Contraseña</string>
+    <string name="login_email_label">Correo electrónico</string>
+    <string name="today_dose_not_ready">Aún no puedes marcar esta dosis.</string>
+    <string name="confirm_name_placeholder">Nombre del medicamento</string>
+    <string name="confirm_time_placeholder">08:00</string>
     <string name="login_show">Mostrar contraseña</string>
     <string name="login_hide">Ocultar contraseña</string>
     <string name="login_password_hint">Mínimo 8 caracteres, con letras y números</string>
@@ -53,6 +57,8 @@
     <!-- Today Screen -->
     <string name="today_date">Miércoles, 30 de septiembre</string>
     <string name="today_good_morning">Buenos días, %1$s</string>
+    <string name="today_hello">Hola, %1$s</string>
+    <string name="today_hello_no_name">Hola</string>
     <string name="today_good_afternoon">Buenas tardes, %1$s</string>
     <string name="today_good_evening">Buenas noches, %1$s</string>
     <string name="today_good_morning_no_name">Buenos días</string>
@@ -113,11 +119,11 @@
     <string name="confirm_frequency_placeholder">Selecciona la frecuencia</string>
     <string name="confirm_first_dose">Primera toma</string>
     <string name="confirm_duration">Duración</string>
-    <string name="confirm_units_remaining">Unidades en la caja (opcional)</string>
+    <string name="confirm_units_remaining">Unidades en la caja</string>
     <string name="confirm_units_per_dose">Unidades por toma</string>
-    <string name="confirm_units_spoons">Cucharadas por toma</string>
-    <string name="confirm_units_drops">Gotas por toma</string>
-    <string name="confirm_duration_days">Duración en días (vacío = continuo)</string>
+    <string name="confirm_units_spoons">Cantidad</string>
+    <string name="confirm_units_drops">Cantidad de gotas</string>
+    <string name="confirm_duration_days">Duración en días</string>
     <string name="confirm_detected">Detectado</string>
     <string name="confirm_name_label">Nombre</string>
     <string name="confirm_dose_label">Dosis</string>
@@ -128,7 +134,9 @@
     <string name="confirm_invalid_duration">La duración debe ser un número entre 1 y 3650 días.</string>
     <string name="confirm_select_frequency">Selecciona y confirma la frecuencia indicada en tu receta.</string>
     <string name="confirm_instructions">Indicaciones</string>
-    <string name="confirm_instructions_placeholder">Opcional</string>
+    <string name="confirm_instructions_placeholder"></string>
+    <string name="confirm_other_presentation">Presentación personalizada</string>
+    <string name="confirm_other_presentation_placeholder">Escribe la presentación del medicamento</string>
     <string name="confirm_will_schedule">Se programarán %1$d recordatorios diarios</string>
     <string name="confirm_offline_note">Funcionan sin conexión y aunque la app esté cerrada.</string>
     <string name="confirm_save_schedule">Guardar y programar</string>
@@ -142,10 +150,10 @@
     <string name="confirm_form_syrup">Jarabe</string>
     <string name="confirm_form_drops">Gotas</string>
     <string name="confirm_form_other">Otro</string>
-    <string name="confirm_units_placeholder">Opcional</string>
-    <string name="confirm_duration_placeholder">Opcional, vacío = continuo</string>
+    <string name="confirm_units_placeholder"></string>
+    <string name="confirm_duration_placeholder"></string>
     <string name="stock_low_title">Stock bajo</string>
-    <string name="stock_low_alert">Te quedan pocas unidades de %1$s. Considera comprar más.</string>
+    <string name="stock_low_alert">Te quedan %1$d unidades de %2$s. Ve por más para no interrumpir tu tratamiento.</string>
 
     <!-- History Screen -->
     <string name="history_eyebrow">Registro de tomas</string>
@@ -232,9 +240,11 @@
     <string name="profile_no_active_treatments">Aún no tienes tratamientos activos.</string>
     <string name="profile_account_local">Cuenta local · datos cifrados</string>
     <string name="profile_appearance_header">Apariencia</string>
+    <string name="profile_mode">Modo</string>
     <string name="profile_notify_contacts">Avisar a mis contactos</string>
     <string name="profile_contact_consent">Esta persona está de acuerdo en recibir estos avisos</string>
     <string name="profile_reminders_header">Recordatorios</string>
+    <string name="profile_reminders_label">Notificaciones y alarmas</string>
     <string name="profile_reminders_enabled">Notificaciones y alarmas exactas habilitadas</string>
     <string name="profile_reminders_disabled">Revisa los permisos para recibir recordatorios puntuales.</string>
     <string name="profile_reminders_note">Los avisos son locales y funcionan sin internet. Android puede retrasarlos si faltan permisos; forzar el cierre de la app los interrumpe hasta volver a abrirla.</string>
@@ -246,6 +256,7 @@
     <string name="profile_ai_only_anon">Solo estadísticas anónimas</string>
     <string name="profile_logout_note">Al cerrar sesión se pausan tus avisos. Se reactivan cuando vuelves a entrar.</string>
     <string name="profile_remove_contact_text">Eliminar</string>
+    <string name="profile_call_contact">Llamar a %1$s</string>
     <string name="profile_contacts_header">Contactos</string>
 
     <!-- Medication Data -->
@@ -316,7 +327,7 @@
     <!-- Today Screen -->
     <string name="today_no_active">Tu tratamiento empieza aquí</string>
     <string name="today_no_active_desc">Escanea una receta o añade tu primer medicamento.</string>
-    <string name="today_add_medication">Añadir medicamento</string>
+    <string name="today_add_medication">Agregar medicamento</string>
 
     <!-- Login Screen - Additional -->
     <string name="login_too_many_attempts">Demasiados intentos. Intenta de nuevo en %1$d segundos.</string>

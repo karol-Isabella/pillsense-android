@@ -1,14 +1,17 @@
 package com.pillsense.app.feature.auth.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
@@ -123,17 +126,15 @@ fun LoginScreen(
     val isLocked = lockoutUntil > 0L && System.currentTimeMillis() < lockoutUntil
 
     val primary = MaterialTheme.colorScheme.primary
-    val softShadow = Color.Black.copy(alpha = 0.08f)
-
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             .statusBarsPadding()
             .navigationBarsPadding()
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Barra superior: idioma y tema como botones circulares
@@ -154,12 +155,12 @@ fun LoginScreen(
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(44.dp))
 
         // Logo con degradado y sombra de color
         Box(
             modifier = Modifier
-                .size(88.dp)
+                .size(72.dp)
                 .shadow(
                     elevation = 24.dp,
                     shape = RoundedCornerShape(26.dp),
@@ -175,7 +176,7 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ) {
             Icon(painterResource(R.drawable.ic_lucide_pill), contentDescription = null,
-                tint = Color.White, modifier = Modifier.size(44.dp))
+                tint = Color.White, modifier = Modifier.size(36.dp))
         }
 
         Spacer(Modifier.height(24.dp))
@@ -196,134 +197,32 @@ fun LoginScreen(
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(48.dp))
 
-        PsSegmentedControl(
-            items = listOf(
-                stringResource(R.string.login_sign_in),
-                stringResource(R.string.login_sign_up)
-            ),
-            selectedIndex = if (mode == LoginMode.LOGIN) 0 else 1,
-            onSelectionChange = { mode = if (it == 0) LoginMode.LOGIN else LoginMode.SIGNUP },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(20.dp))
-
-        // Tarjeta blanca con los campos
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = 20.dp,
-                    shape = RoundedCornerShape(24.dp),
-                    ambientColor = softShadow,
-                    spotColor = softShadow
-                )
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            // Login mode: Email, Password
-            if (mode == LoginMode.LOGIN) {
-                PsTextField(
-                    value = email,
-                    onValueChange = {
-                        email = it.take(254)
-                        if (emailError != null) emailError = null
-                    },
-                    label = stringResource(R.string.login_email),
-                    placeholder = "user@example.com",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (emailError != null) {
-                    Text(emailError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-                }
-                PsTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it.take(64)
-                        if (passwordError != null) passwordError = null
-                    },
-                    label = stringResource(R.string.login_password),
-                    placeholder = "••••••••",
-                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(48.dp)) {
-                            Icon(
-                                painter = painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye),
-                                contentDescription = stringResource(if (showPassword) R.string.login_hide else R.string.login_show),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (passwordError != null) {
-                    Text(passwordError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-                }
-            } else {
-                // Signup mode: Name, Email, Password
-                PsTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it.take(40)
-                        if (nameError != null) nameError = null
-                    },
-                    label = stringResource(R.string.signup_name_label),
-                    placeholder = stringResource(R.string.signup_name_placeholder),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (nameError != null) {
-                    Text(nameError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-                }
-                PsTextField(
-                    value = email,
-                    onValueChange = {
-                        email = it.take(254)
-                        if (emailError != null) emailError = null
-                    },
-                    label = stringResource(R.string.login_email),
-                    placeholder = "user@example.com",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (emailError != null) {
-                    Text(emailError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-                }
-                PsTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it.take(32)
-                        if (passwordError != null) passwordError = null
-                    },
-                    label = stringResource(R.string.login_password),
-                    placeholder = "••••••••",
-                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(48.dp)) {
-                            Icon(
-                                painter = painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye),
-                                contentDescription = stringResource(if (showPassword) R.string.login_hide else R.string.login_show),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (passwordError != null) {
-                    Text(passwordError!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
-                } else {
-                    Text(stringResource(R.string.login_password_hint), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+        if (mode == LoginMode.LOGIN) {
+            LoginLabeledField(stringResource(R.string.login_email_label), email, { email = it.take(254); emailError = null }, "user@example.com", KeyboardOptions(keyboardType = KeyboardType.Email))
+            Spacer(Modifier.height(14.dp))
+            LoginLabeledField(stringResource(R.string.login_password), password, { password = it.take(64); passwordError = null }, "••••••••", KeyboardOptions(keyboardType = KeyboardType.Password), if (showPassword) VisualTransformation.None else PasswordVisualTransformation()) {
+                    IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(40.dp)) {
+                        Icon(painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye), stringResource(if (showPassword) R.string.login_hide else R.string.login_show), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    }
             }
+            emailError?.let { Text(it, Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+            passwordError?.let { Text(it, Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+        } else {
+            LoginLabeledField(stringResource(R.string.signup_name_label), name, { name = it.take(40); nameError = null }, stringResource(R.string.signup_name_placeholder), KeyboardOptions(keyboardType = KeyboardType.Text))
+            Spacer(Modifier.height(14.dp))
+            LoginLabeledField(stringResource(R.string.login_email_label), email, { email = it.take(254); emailError = null }, "user@example.com", KeyboardOptions(keyboardType = KeyboardType.Email))
+            Spacer(Modifier.height(14.dp))
+            LoginLabeledField(stringResource(R.string.login_password), password, { password = it.take(32); passwordError = null }, "••••••••", KeyboardOptions(keyboardType = KeyboardType.Password), if (showPassword) VisualTransformation.None else PasswordVisualTransformation()) {
+                    IconButton(onClick = { showPassword = !showPassword }, modifier = Modifier.size(40.dp)) {
+                        Icon(painterResource(if (showPassword) R.drawable.ic_lucide_eye_off else R.drawable.ic_lucide_eye), stringResource(if (showPassword) R.string.login_hide else R.string.login_show), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    }
+            }
+            nameError?.let { Text(it, Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+            emailError?.let { Text(it, Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error) }
+            if (passwordError == null) Text(stringResource(R.string.login_password_hint), Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else Text(passwordError!!, Modifier.fillMaxWidth().padding(start = 4.dp, top = 4.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -332,8 +231,7 @@ fun LoginScreen(
         if (isLocked) {
             Text(stringResource(R.string.login_too_many_attempts, secondsRemaining), color = MaterialTheme.colorScheme.error)
         }
-        Text(stringResource(R.string.login_local_account), style = MaterialTheme.typography.bodySmall)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
         PsButton(
             onClick = onSubmit,
             enabled = isFormValid,
@@ -360,10 +258,32 @@ fun LoginScreen(
 }
 
 @Composable
+private fun LoginLabeledField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardOptions: KeyboardOptions,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(label, Modifier.padding(start = 2.dp, bottom = 7.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(Modifier.fillMaxWidth().height(56.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .58f)).border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = .1f), RoundedCornerShape(16.dp)).padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                if (value.isEmpty()) Text(placeholder, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = .7f))
+                BasicTextField(value = value, onValueChange = onValueChange, modifier = Modifier.fillMaxWidth(), singleLine = true, keyboardOptions = keyboardOptions, visualTransformation = visualTransformation, textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface))
+            }
+            trailing?.invoke()
+        }
+    }
+}
+
+@Composable
 private fun LoginCircleButton(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .size(48.dp)
+            .size(44.dp)
             .shadow(
                 elevation = 8.dp,
                 shape = CircleShape,

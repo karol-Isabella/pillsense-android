@@ -182,7 +182,7 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 val greeting = if (userName.isBlank()) "" else userName
                                 TodayScreen(userName = greeting, doses = doses,
                                     weeklyAverage = Schedule.adherence(recent, now) ?: 0, dark = dark, onThemeChange = viewModel::toggleTheme,
-                                    onScanClick = { nav.navigate("scan") }, onInsightsClick = { nav.navigate("insights") },
+                                    onScanClick = { nav.navigate("scan") }, onAddMedicationClick = { hasScan = false; nav.navigate("confirm") }, onInsightsClick = { nav.navigate("insights") },
                                     onProfileClick = { nav.navigate("profile") { popUpTo("today") { saveState = true }; launchSingleTop = true; restoreState = true } },
                                     onDoseStatusChange = { id, status -> viewModel.act(id, status.name) }, language = language, showBottomBar = false)
                             }
@@ -212,8 +212,13 @@ fun PillSenseNavigation(viewModel: AppViewModel = hiltViewModel()) {
                                 if (index == 2) Box(Modifier.size(48.dp).clip(CircleShape).background(Brush.linearGradient(listOf(PrimaryLight, SecondaryLight))), contentAlignment = Alignment.Center) {
                                     Icon(painterResource(icon), null, Modifier.size(26.dp), tint = Color.White)
                                 } else Icon(painterResource(icon), null, Modifier.size(24.dp))
-                            }, label = labels[index], prominent = index == 2) }, selectedIndex = tabs.indexOf(route).coerceAtLeast(0), onItemSelected = {
-                                nav.navigate(tabs[it]) { popUpTo("today") { saveState = true }; launchSingleTop = true; restoreState = true }
+                            }, label = labels[index], prominent = index == 2) }, selectedIndex = tabs.indexOf(route).coerceAtLeast(0), onItemSelected = { selected ->
+                                val destination = tabs[selected]
+                                if (destination != route) nav.navigate(destination) {
+                                    popUpTo("today") { inclusive = false; saveState = false }
+                                    launchSingleTop = true
+                                    restoreState = false
+                                }
                             })
                         }
                     }

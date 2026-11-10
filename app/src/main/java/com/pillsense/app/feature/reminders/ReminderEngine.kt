@@ -101,12 +101,12 @@ class ReminderEngine @Inject constructor(
                 val med = repository.dao.medication(intake.medicationId)
                 if (med != null && med.unitsRemaining != null && med.unitsRemaining!! > 0) {
                     repository.dao.decrementStock(intake.medicationId, med.unitsPerDose)
-                    // Check low stock (5 or less) and alert once per medication
+                    // Alert once when the remaining stock reaches three units or fewer.
                     val updatedMed = repository.dao.medication(intake.medicationId)
-                    if (updatedMed != null && updatedMed.unitsRemaining != null && updatedMed.unitsRemaining!! in 1..5 && updatedMed.lastStockAlertAt == null) {
+                    if (updatedMed != null && updatedMed.unitsRemaining != null && updatedMed.unitsRemaining!! in 1..3 && updatedMed.lastStockAlertAt == null) {
                         if (PermissionManager.isGranted(context, AppPermission.NOTIFICATIONS)) {
                             manager.createNotificationChannel(NotificationChannel("stock", context.getString(R.string.stock_low_title), NotificationManager.IMPORTANCE_LOW))
-                            val msg = context.getString(R.string.stock_low_alert, updatedMed.name)
+                            val msg = context.getString(R.string.stock_low_alert, updatedMed.unitsRemaining!!, updatedMed.name)
                             val notif = NotificationCompat.Builder(context, "stock")
                                 .setSmallIcon(R.drawable.ic_lucide_bell_ring)
                                 .setContentTitle(context.getString(R.string.stock_low_title))

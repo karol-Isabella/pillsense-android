@@ -70,7 +70,7 @@ interface PillSenseDao {
     suspend fun getAiCache(owner: String): AiCache?
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveAiCache(cache: AiCache)
-    @Query("UPDATE medications SET unitsRemaining = unitsRemaining - :units, lastStockAlertAt = NULL WHERE id = :id")
+    @Query("UPDATE medications SET unitsRemaining = MAX(unitsRemaining - :units, 0) WHERE id = :id")
     suspend fun decrementStock(id: String, units: Int)
     @Query("UPDATE medications SET unitsRemaining = :units, lastStockAlertAt = NULL WHERE id = :id")
     suspend fun updateStock(id: String, units: Int)
