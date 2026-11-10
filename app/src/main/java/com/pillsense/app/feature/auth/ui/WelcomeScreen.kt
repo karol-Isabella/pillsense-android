@@ -180,7 +180,9 @@ private fun WelcomeFeatureCard(icon: Int, text: String, iconBackground: Color, i
     Surface(
         Modifier.fillMaxWidth().height(66.dp),
         shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = .84f),
+        // Keep these cards opaque so the animated background never shows through
+        // the text area as a distracting highlight.
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 1.dp
     ) {
         Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

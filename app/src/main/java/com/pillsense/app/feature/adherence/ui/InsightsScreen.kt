@@ -69,8 +69,8 @@ fun InsightsScreen(
     val weekCounts = calculateWeekCounts(recent, today.minusDays(6), now, zone)
     val uiState = viewModel.uiState.collectAsState().value
     
-    LaunchedEffect(email, recent.size, language) {
-        viewModel.loadGeminiAdvice(recent, medications, language)
+    LaunchedEffect(email, recent.size, language, hasInternet) {
+        viewModel.loadGeminiAdvice(recent, medications, language, allowNetwork = hasInternet)
     }
     
     LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {

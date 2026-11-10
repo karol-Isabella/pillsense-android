@@ -53,13 +53,18 @@ class InsightsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isAiEnabled = consentStorage.hasConsent(email))
     }
 
-    fun loadGeminiAdvice(intakes: List<DbIntake>, medications: List<Medication>, language: String) {
+    fun loadGeminiAdvice(
+        intakes: List<DbIntake>,
+        medications: List<Medication>,
+        language: String,
+        allowNetwork: Boolean = true,
+    ) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
             if (!loadMutex.tryLock()) {
                 android.util.Log.w("PillSenseAI", "Llamada simultánea bloqueada")
                 return@launch
             }
+            _uiState.value = _uiState.value.copy(isLoading = true)
             try {
                 val hasConsent = consentStorage.hasConsent(currentEmail)
                 if (!hasConsent) {
@@ -127,6 +132,13 @@ class InsightsViewModel @Inject constructor(
                             )
                             return@launch
                         }
+                    }
+
+                    // Keep progress usable offline: serve a valid local cache above,
+                    // and leave local recommendations to the screen when there's no cache.
+                    if (!allowNetwork) {
+                        _uiState.value = _uiState.value.copy(source = "Reglas locales")
+                        return@launch
                     }
                     
                     // Throttle: no hacer llamada si hace menos de 5 minutos
@@ -266,6 +278,13 @@ class InsightsViewModel @Inject constructor(
                         )
                         return@launch
                     }
+                }
+
+                // Keep progress usable offline: serve a valid local cache above,
+                // and leave local recommendations to the screen when there's no cache.
+                if (!allowNetwork) {
+                    _uiState.value = _uiState.value.copy(source = "Reglas locales")
+                    return@launch
                 }
                 
                 // Throttle: no hacer llamada si hace menos de 5 minutos
