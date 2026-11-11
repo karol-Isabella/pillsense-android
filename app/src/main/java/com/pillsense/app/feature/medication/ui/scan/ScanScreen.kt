@@ -168,21 +168,83 @@ fun ScanScreen(onScanComplete: (ScannedMedication) -> Unit = {}, onClose: () -> 
                 }
             }
             if (state.result != null && selectedUri != null) {
-                PsCard(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(state.result!!.name.ifBlank { stringResource(R.string.scan_photo_hint) }, style = MaterialTheme.typography.titleMedium)
-                    Text(state.result!!.dose, style = MaterialTheme.typography.bodyMedium)
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                        Icon(painterResource(R.drawable.ic_lucide_lightbulb), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp).padding(top = 2.dp))
-                        Text(stringResource(R.string.confirm_verify), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                ScanGlassCard {
+                    Column(Modifier.padding(horizontal = 18.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(
+                            state.result!!.name.ifBlank { stringResource(R.string.scan_photo_hint) },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color(0xFF1C1C1E),
+                            maxLines = 1
+                        )
+                        Text(state.result!!.dose, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF3A3A3C))
+                        Row(
+                            Modifier.fillMaxWidth().padding(top = 3.dp),
+                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                painterResource(R.drawable.ic_lucide_lightbulb),
+                                contentDescription = null,
+                                tint = Color(0xFF8E8E93),
+                                modifier = Modifier.size(14.dp).padding(top = 2.dp)
+                            )
+                            Text(
+                                stringResource(R.string.confirm_verify),
+                                color = Color(0xFF8E8E93),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
                     }
-                } }
-                PsButton({ onScanComplete(state.result!!) }, stringResource(R.string.confirm_title), Modifier.fillMaxWidth())
-                TextButton(onClick = { selectedUri = null; viewModel.reset() }) { Text(stringResource(R.string.dialog_cancel), color = Color.White) }
-                TextButton(onClick = onManual) { Text(stringResource(R.string.scan_manual_register), color = MaterialTheme.colorScheme.primary) }
+                }
+                PsButton(
+                    { onScanComplete(state.result!!) },
+                    stringResource(R.string.confirm_title),
+                    Modifier.fillMaxWidth(),
+                    height = 52
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { selectedUri = null; viewModel.reset() }) {
+                        Text(stringResource(R.string.dialog_cancel), color = Color.White.copy(alpha = .9f), style = MaterialTheme.typography.labelLarge)
+                    }
+                    TextButton(onClick = onManual) {
+                        Text(stringResource(R.string.scan_manual_register), color = Color(0xFF64D2FF), style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            } else if (selectedUri != null && !state.busy && state.error != null) {
+                ScanGlassCard {
+                    Column(Modifier.padding(horizontal = 18.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(stringResource(R.string.scan_not_recognized_title), style = MaterialTheme.typography.titleSmall, color = Color(0xFF1C1C1E))
+                        Text(state.error.orEmpty(), style = MaterialTheme.typography.bodySmall, color = Color(0xFF636366))
+                    }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    TextButton(onClick = { selectedUri?.let { viewModel.analyze(Uri.parse(it)) } }) {
+                        Text(stringResource(R.string.scan_retry), color = Color.White, style = MaterialTheme.typography.labelMedium)
+                    }
+                    TextButton(onClick = { selectedUri = null; viewModel.reset(); gallery.launch("image/*") }) {
+                        Text(stringResource(R.string.scan_choose_another), color = Color(0xFF64D2FF), style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+                TextButton(onClick = { selectedUri = null; viewModel.reset(); onManual() }) {
+                    Text(stringResource(R.string.scan_manual_register), color = Color(0xFF64D2FF), style = MaterialTheme.typography.labelLarge)
+                }
             }
         }
         LaunchedEffect(Unit) { startCamera() }
     }
+}
+
+@Composable
+private fun ScanGlassCard(content: @Composable () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White.copy(alpha = .94f),
+        contentColor = Color(0xFF1C1C1E),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = .7f)),
+        shadowElevation = 12.dp,
+        content = content
+    )
 }
 
 @Composable
@@ -228,7 +290,7 @@ fun ThumbnailImage(selectedUri: String?, modifier: Modifier = Modifier.size(160.
                     }
                 }
                 bitmap = result
-                loadError = result == null && selectedUri != null
+                loadError = result == null
             } catch (e: Exception) {
                 loadError = true
             }

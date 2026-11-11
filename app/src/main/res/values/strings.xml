@@ -389,6 +389,9 @@
     <string name="scan_suggestion_hint">Son sugerencias del texto leído. Verifica cada campo con la receta; no se infieren dosis ni frecuencias ausentes.</string>
     <string name="scan_manual_register">Registrar manualmente</string>
     <string name="scan_photo_selected">Foto seleccionada</string>
+    <string name="scan_not_recognized_title">No pudimos leer el medicamento</string>
+    <string name="scan_retry">Intentar de nuevo</string>
+    <string name="scan_choose_another">Elegir otra foto</string>
     <string name="notification_pending_dose">Toma pendiente de registrar</string>
     <string name="notification_medication_time">Hora de tu medicamento</string>
     <string name="scan_button_label">Escanear</string>
